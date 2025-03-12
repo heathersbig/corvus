@@ -5,13 +5,22 @@
     <input type="text" id="userInput" placeholder="find the right path...">
     <button onclick="redirectToPage()">Go</button>
     <script>
+        function logAttempt(input) {
+            fetch("https://script.google.com/macros/s/AKfycbxVDb3y0cjdJis4XNohlqulD3GaZCzBUVTBw6_XcC2LtNo8XOhI_waXNiVCMlF2mu1voQ/exec", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ input: input })
+            });
+        }
+    
         function redirectToPage() {
             var input = document.getElementById("userInput").value.trim();
             if (input) {
+                logAttempt(input); // Send input to Google Sheets
                 window.location.href = "https://heathersbig.github.io/corvus/" + encodeURIComponent(input) + ".html";
             }
         }
-    </script>
+    </script>    
     <title>the list</title>
     <style>
         body {
