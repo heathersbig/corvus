@@ -6,7 +6,8 @@
     <button onclick="redirectToPage()">Go</button>
     <script>
         function logAttempt(input) {
-          return fetch("https://script.google.com/macros/s/AKfycbzVEpJIqR7z4r_pG4EbkKwDJ6MTzMCkxFOKq7r_hyVQmNmGDRNJe8H46s6LFgTO3TalBA/exec", {
+          // Use your new deployment ID in the fetch URL
+          return fetch("https://script.google.com/macros/s/AKfycbywzFAKn_VoFiDs-xI6ERr60q9PGGKcbw4CwmDYnLYYQpea8Bb1nxnbzfKNelQtE6VXeA/exec", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ input: input })
@@ -24,12 +25,14 @@
         function redirectToPage() {
           var input = document.getElementById("userInput").value.trim();
           if (input) {
-            // Wait for logAttempt() to finish before redirecting.
+            // Wait for logAttempt() to finish before redirecting
             logAttempt(input).finally(() => {
               let url = "https://heathersbig.github.io/corvus/" + encodeURIComponent(input) + ".html";
               console.log("Redirecting to:", url);
               window.location.href = url;
             });
+          } else {
+            console.warn("No input provided; not redirecting.");
           }
         }
       </script>
