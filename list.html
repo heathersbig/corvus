@@ -6,24 +6,33 @@
     <button onclick="redirectToPage()">Go</button>
     <script>
         function logAttempt(input) {
-          fetch("https://script.google.com/macros/s/AKfycbzVEpJIqR7z4r_pG4EbkKwDJ6MTzMCkxFOKq7r_hyVQmNmGDRNJe8H46s6LFgTO3TalBA/exec", {
+          return fetch("https://script.google.com/macros/s/AKfycbzVEpJIqR7z4r_pG4EbkKwDJ6MTzMCkxFOKq7r_hyVQmNmGDRNJe8H46s6LFgTO3TalBA/exec", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ input: input })
           })
           .then(response => response.text())
-          .then(data => console.log("Logging result:", data))
-          .catch(error => console.error("Error logging attempt:", error));
+          .then(data => {
+            console.log("Logging result:", data);
+            return data;
+          })
+          .catch(error => {
+            console.error("Error logging attempt:", error);
+          });
         }
       
         function redirectToPage() {
           var input = document.getElementById("userInput").value.trim();
           if (input) {
-            logAttempt(input);
-            window.location.href = "https://heathersbig.github.io/corvus/" + encodeURIComponent(input) + ".html";
+            // Wait for logAttempt() to finish before redirecting.
+            logAttempt(input).finally(() => {
+              let url = "https://heathersbig.github.io/corvus/" + encodeURIComponent(input) + ".html";
+              console.log("Redirecting to:", url);
+              window.location.href = url;
+            });
           }
         }
-      </script>  
+      </script>
     <title>the list</title>
     <style>
         body {
