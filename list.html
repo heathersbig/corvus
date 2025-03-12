@@ -6,24 +6,24 @@
     <button onclick="redirectToPage()">Go</button>
     <script>
         function logAttempt(input) {
-            fetch("https://script.google.com/macros/s/AKfycbz1HcFjSHtQhysmW94oGldzSWcUHZvuyDUjUNo1daIuB5sJvvbAIjafBzGdrwpb10s7XQ/exec", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ input: input })
-            })
-            .then(response => response.text())
-            .then(data => console.log("Logging result:", data))
-            .catch(error => console.error("Error logging attempt:", error));
+          fetch("https://script.google.com/macros/s/AKfycbzVEpJIqR7z4r_pG4EbkKwDJ6MTzMCkxFOKq7r_hyVQmNmGDRNJe8H46s6LFgTO3TalBA/exec", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ input: input })
+          })
+          .then(response => response.text())
+          .then(data => console.log("Logging result:", data))
+          .catch(error => console.error("Error logging attempt:", error));
         }
-    
+      
         function redirectToPage() {
-            var input = document.getElementById("userInput").value.trim();
-            if (input) {
-                logAttempt(input); // Send input to Google Sheets
-                window.location.href = "https://heathersbig.github.io/corvus/" + encodeURIComponent(input) + ".html";
-            }
+          var input = document.getElementById("userInput").value.trim();
+          if (input) {
+            logAttempt(input);
+            window.location.href = "https://heathersbig.github.io/corvus/" + encodeURIComponent(input) + ".html";
+          }
         }
-    </script>    
+      </script>  
     <title>the list</title>
     <style>
         body {
