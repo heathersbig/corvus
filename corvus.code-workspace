@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "corvus"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "corvus"
+	}
+}

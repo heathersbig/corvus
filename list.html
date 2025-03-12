@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <h3>pathfinder:</h3>
+    <input type="text" id="userInput" placeholder="find the right path...">
+    <button onclick="redirectToPage()">Go</button>
+    <script>
+        function redirectToPage() {
+            var input = document.getElementById("userInput").value.trim();
+            if (input) {
+                window.location.href = "https://heathersbig.github.io/corvus/" + encodeURIComponent(input) + ".html";
+            }
+        }
+    </script>
     <title>the list</title>
     <style>
         body {
@@ -35,7 +46,7 @@
     <p><a href="boy.html" class="styled-link">BOY</a></p>
     <p class="underlined">SILVER</p>
     <p><a href="gold.html" class="styled-link">GOLD</a></p>
-    <p>A SECRET NEVER TO BE TOLD</p>
+    <p><a href="secret.html" class="styled-link">A SECRET NEVER TO BE TOLD</a></p>
     <p>WISH</p>
     <p>KISS</p>
     <p>A SURPRISE YOU SHOULD BE CAREFUL NOT TO MISS</p>
