@@ -6,11 +6,14 @@
     <button onclick="redirectToPage()">Go</button>
     <script>
         function logAttempt(input) {
-            fetch("https://script.google.com/macros/s/AKfycbxVDb3y0cjdJis4XNohlqulD3GaZCzBUVTBw6_XcC2LtNo8XOhI_waXNiVCMlF2mu1voQ/exec", {
+            fetch("https://script.google.com/macros/s/AKfycbz1HcFjSHtQhysmW94oGldzSWcUHZvuyDUjUNo1daIuB5sJvvbAIjafBzGdrwpb10s7XQ/exec", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ input: input })
-            });
+            })
+            .then(response => response.text())
+            .then(data => console.log("Logging result:", data))
+            .catch(error => console.error("Error logging attempt:", error));
         }
     
         function redirectToPage() {
