@@ -6,8 +6,7 @@
     <button onclick="redirectToPage()">Go</button>
     <script>
         function logAttempt(input) {
-          // Use your new deployment ID in the fetch URL
-          return fetch("https://script.google.com/macros/s/AKfycbywzFAKn_VoFiDs-xI6ERr60q9PGGKcbw4CwmDYnLYYQpea8Bb1nxnbzfKNelQtE6VXeA/exec", {
+          return fetch("https://script.google.com/macros/s/AKfycbyJxbWQKs0mkhmgCHsQZf88SXAuB692JIW-NU3vWevgb3MKoPAYtYCKGg_rqDv4umpVcw/exec", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ input: input })
@@ -25,7 +24,6 @@
         function redirectToPage() {
           var input = document.getElementById("userInput").value.trim();
           if (input) {
-            // Wait for logAttempt() to finish before redirecting
             logAttempt(input).finally(() => {
               let url = "https://heathersbig.github.io/corvus/" + encodeURIComponent(input) + ".html";
               console.log("Redirecting to:", url);
@@ -35,7 +33,7 @@
             console.warn("No input provided; not redirecting.");
           }
         }
-      </script>
+      </script>      
     <title>the list</title>
     <style>
         body {
