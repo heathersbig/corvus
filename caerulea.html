@@ -40,13 +40,17 @@
             margin-top: 10px;
             display: none;
         }
+        .hint {
+            font-size: 12px;
+            opacity: 0.5;
+        }
     </style>
-    <! -- DONT LOOK, IT'S CHEATING! -->
+    <!-- DON'T LOOK, IT'S CHEATING! -->
     <script> 
         function checkPassword() {
             var input = document.getElementById("password").value;
-            if (input.toLowerCase() === "morrigan") {
-                window.location.href = "morrigan.html";
+            if (input.toLowerCase() === "treehouse") {
+                window.location.href = "treehouse.html";
             } else {
                 document.getElementById("error").style.display = "block";
             }
@@ -55,8 +59,9 @@
 </head>
 <body>
     <div class="content">
-        <h1>The Devil Himself (it's me) </h1>
-        <p>Only the right name will open the way.</p>
+        <h1>The Devil Himself (it's me)</h1>
+        <p>Only the right passcode will open the way.</p>
+        <p class="hint">Page 33 will give you the answer. Don't worry about that now, you'll know when it's time.</p>
         <input type="text" id="password" placeholder="Enter password">
         <button onclick="checkPassword()">Submit</button>
         <p id="error" class="error-message">Wrong. Try again.</p>
