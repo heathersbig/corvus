@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>happy birthday</title>
+    <style>
+        body {
+            background-color: black;
+            background-image: url('images/confetti.gif');
+            background-repeat: repeat;
+            text-align: center;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            color: #FF69B4;
+            font-size: 42px;
+            text-shadow: 2px 2px #000;
+        }
+
+        .message {
+            font-family: "Times New Roman", serif;
+            color: #FFD700;
+            font-size: 22px;
+            margin: 20px auto;
+            max-width: 500px;
+            line-height: 1.6;
+            text-shadow: 1px 1px #000;
+        }
+
+        hr {
+            border: none;
+            height: 2px;
+            background: repeating-linear-gradient(90deg, #FF69B4, #FFD700, #FF69B4, #FFD700);
+            margin: 20px auto;
+            max-width: 400px;
+        }
+
+        .instructions {
+            font-family: "Courier New", monospace;
+            color: #00FFFF;
+            font-size: 16px;
+            margin: 25px auto;
+            max-width: 450px;
+            line-height: 1.8;
+            text-shadow: 1px 1px #000;
+        }
+
+        marquee {
+            color: #FF69B4;
+            font-family: "Comic Sans MS", "Comic Sans", cursive;
+            font-size: 18px;
+            margin: 15px 0;
+        }
+
+        .blink {
+            animation: blink-anim 1s steps(2, start) infinite;
+        }
+
+        @keyframes blink-anim {
+            to { visibility: hidden; }
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 30px;
+            font-size: 18px;
+            color: #aaa;
+            text-decoration: underline;
+            font-family: "Courier New", monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>HAPPY BIRTHDAY HEATHER!!!</h1>
+
+    <marquee scrollamount="2">~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~ "meowmeow" ~*~*~ SCAVENGER HUNT ~*~*~ SCAVENGER HUNT ~*~*~</marquee>
+
+    <hr>
+
+    <div class="message">
+        hello, my love. months and months ago, i shared a playlist with you using this site. I thought I was being unsubtle in my love proclamation,<br> 
+        But I suppose I wasn't... I sat at my computer imagining if there would ever be a day where I would<br>
+        use it to share another very special gift with the one I love for their<br>
+        birthday. i'm so happy that i get the chance to. I'm so grateful to have you in my life :) meow meow meow meow meow meow meow <br>
+        aaaand you've been chosen for another bullshit scavenger hunt.<br>
+        each clue leads to the next.<br>
+        <span class="blink">pay attention to everything.</span>
+    </div>
+
+    <hr>
+
+    <div class="instructions">
+        1. each page has an encoded clue<br>
+        2. decode it to find a location<br>
+        3. go there and find the next clue<br>
+        4. use the pathfinder to continue
+    </div>
+
+    <hr>
+
+    <a href="index.html" class="back-link">Back</a>
+
+    <script>
+        const el = document.querySelector('.blink');
+        const normal = 'pay attention to everything.';
+        const meow = '"meowmeow"';
+        let count = 0;
+        setInterval(() => {
+            count++;
+            el.textContent = (count % 15 === 0) ? meow : normal;
+        }, 1000);
+    </script>
+</body>
+</html>
