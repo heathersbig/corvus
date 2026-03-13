@@ -17,10 +17,10 @@
 			--sea: #dce8f0;
 			--land: #ece1cf;
 			--land-stroke: #c7b69b;
-			--good: #1a7a4a;
-			--good-bg: rgba(26,122,74,0.08);
-			--bad: #c23028;
-			--bad-bg: rgba(194,48,40,0.08);
+			--good: #0072B2;
+			--good-bg: rgba(0,114,178,0.08);
+			--bad: #D55E00;
+			--bad-bg: rgba(213,94,0,0.08);
 			--selected: #2563eb;
 			--selected-bg: rgba(37,99,235,0.08);
 			--warn: #d97706;
@@ -215,8 +215,8 @@
 		}
 		.callout strong { display: block; margin-bottom: 2px; }
 		.callout .sub { color: var(--muted); font-size: 0.82rem; }
-		.callout.good-callout { border-color: rgba(26,122,74,0.2); background: var(--good-bg); }
-		.callout.bad-callout { border-color: rgba(194,48,40,0.2); background: var(--bad-bg); }
+		.callout.good-callout { border-color: rgba(0,114,178,0.25); background: var(--good-bg); }
+		.callout.bad-callout { border-color: rgba(213,94,0,0.25); background: var(--bad-bg); }
 
 		/* Quiz cards */
 		.assignments {
@@ -508,8 +508,8 @@
 			</div>
 			<div class="map-legend" id="mapLegend">
 				<span class="legend-item"><span class="swatch" style="background:var(--accent)"></span>Quiz markers</span>
-				<span class="legend-item"><span class="swatch" style="background:var(--good)"></span>Correct</span>
-				<span class="legend-item"><span class="swatch" style="background:var(--bad)"></span>Incorrect</span>
+				<span class="legend-item"><span class="swatch" style="background:var(--good);outline:2px solid var(--good);outline-offset:2px"></span>✓ Correct</span>
+				<span class="legend-item"><span class="swatch" style="background:var(--bad);outline:2px dashed var(--bad);outline-offset:2px"></span>✗ Incorrect</span>
 				<span class="legend-item"><span class="swatch" style="background:var(--selected)"></span>Selected</span>
 			</div>
 		</div>
@@ -847,10 +847,11 @@ function renderQuiz() {
 		if (m.id === state.selectedMarkerId) cls.push("selected");
 		if (m.correct === true) cls.push("good");
 		if (m.correct === false) cls.push("bad");
-		let sub = m.correct === true ? "Correct" : m.correct === false ? (state.revealed ? `→ ${m.name}` : "Incorrect") : m.assigned ? "Assigned" : "";
+		let sub = m.correct === true ? "✓ Correct" : m.correct === false ? (state.revealed ? `✗ → ${m.name}` : "✗ Incorrect") : m.assigned ? "Assigned" : "";
 		if (!m.assigned && !m.correct && state.revealed) sub = `→ ${m.name}`;
+		const icon = m.correct === true ? " ✓" : m.correct === false ? " ✗" : "";
 		return `<button class="${cls.join(" ")}" data-mc="${m.id}">
-			<div class="num">#${m.id}</div>
+			<div class="num">#${m.id}${icon}</div>
 			<div class="answer">${m.assigned ? esc(m.assigned) : '<span style="color:var(--muted)">—</span>'}</div>
 			${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
 		</button>`;
@@ -937,9 +938,25 @@ function renderMarkers() {
 		Object.entries({cx:m.displayX,cy:m.displayY,r:zs(13),fill:status,stroke:"white","stroke-width":zs(2.5)}).forEach(([k,v])=>c.setAttribute(k,v));
 		g.appendChild(c);
 
+		// Shape cue: dashed outer ring on incorrect
+		if (m.correct === false) {
+			const ring = document.createElementNS("http://www.w3.org/2000/svg","circle");
+			Object.entries({cx:m.displayX,cy:m.displayY,r:zs(17),fill:"none",stroke:"var(--bad)","stroke-width":zs(2),"stroke-dasharray":`${zs(3)} ${zs(3)}`}).forEach(([k,v])=>ring.setAttribute(k,v));
+			g.appendChild(ring);
+		}
+		// Shape cue: solid outer ring on correct
+		if (m.correct === true) {
+			const ring = document.createElementNS("http://www.w3.org/2000/svg","circle");
+			Object.entries({cx:m.displayX,cy:m.displayY,r:zs(17),fill:"none",stroke:"var(--good)","stroke-width":zs(2)}).forEach(([k,v])=>ring.setAttribute(k,v));
+			g.appendChild(ring);
+		}
+
 		const t = document.createElementNS("http://www.w3.org/2000/svg","text");
-		Object.entries({x:m.displayX,y:m.displayY+zs(4.5),"text-anchor":"middle","font-size":zs(12),"font-weight":700,fill:"white"}).forEach(([k,v])=>t.setAttribute(k,v));
-		t.textContent = m.id;
+		// Show ✓/✗ after checking instead of just numbers
+		const label = m.correct === true ? "✓" : m.correct === false ? "✗" : String(m.id);
+		const fsize = m.correct != null ? zs(15) : zs(12);
+		Object.entries({x:m.displayX,y:m.displayY+zs(m.correct != null ? 5.5 : 4.5),"text-anchor":"middle","font-size":fsize,"font-weight":700,fill:"white"}).forEach(([k,v])=>t.setAttribute(k,v));
+		t.textContent = label;
 		g.appendChild(t);
 
 		if (state.revealed) {
@@ -1010,10 +1027,10 @@ function handleMapClick(e) {
 
 	// Determine quality
 	let quality, msg, cls;
-	if (dist < 50) { quality = "perfect"; msg = "Spot on!"; cls = "good"; }
-	else if (dist < 150) { quality = "great"; msg = "Very close!"; cls = "good"; }
-	else if (dist < 350) { quality = "ok"; msg = "Getting warm"; cls = "close"; }
-	else { quality = "miss"; msg = "Not quite — study this one"; cls = "bad"; }
+	if (dist < 50) { quality = "perfect"; msg = "✓ Spot on!"; cls = "good"; }
+	else if (dist < 150) { quality = "great"; msg = "✓ Very close!"; cls = "good"; }
+	else if (dist < 350) { quality = "ok"; msg = "~ Getting warm"; cls = "close"; }
+	else { quality = "miss"; msg = "✗ Not quite — study this one"; cls = "bad"; }
 
 	const isCorrect = dist < 350;
 	recordAttempt(place.name, isCorrect);
