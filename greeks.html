@@ -3,395 +3,398 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Ancient World Map Quiz</title>
+	<title>Ancient World Map — Study & Quiz</title>
+	<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 	<style>
 		:root {
-			--bg: #f4efe6;
-			--panel: #fffaf2;
-			--ink: #1f2937;
+			--bg: #f5f0e8;
+			--panel: #fffbf5;
+			--ink: #1a1a1a;
 			--muted: #6b7280;
 			--line: #d7ccbc;
-			--accent: #8b5e34;
-			--accent-2: #c6935c;
-			--sea: #e8f0f6;
+			--accent: #9b5e2a;
+			--accent-light: #d4a06a;
+			--sea: #dce8f0;
 			--land: #ece1cf;
 			--land-stroke: #c7b69b;
-			--good: #237a52;
-			--bad: #a33a34;
-			--selected: #1d4ed8;
-			--shadow: 0 10px 28px rgba(50, 35, 18, 0.08);
+			--good: #1a7a4a;
+			--good-bg: rgba(26,122,74,0.08);
+			--bad: #c23028;
+			--bad-bg: rgba(194,48,40,0.08);
+			--selected: #2563eb;
+			--selected-bg: rgba(37,99,235,0.08);
+			--warn: #d97706;
+			--shadow-sm: 0 1px 3px rgba(50,35,18,0.06);
+			--shadow: 0 4px 20px rgba(50,35,18,0.08);
+			--shadow-lg: 0 12px 40px rgba(50,35,18,0.12);
+			--radius: 16px;
+			--radius-sm: 10px;
 		}
-		* {
-			box-sizing: border-box;
-		}
+		* { box-sizing: border-box; margin: 0; }
 		body {
-			margin: 0;
-			font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-			background: linear-gradient(180deg, #f7f2ea 0%, #efe7da 100%);
+			font-family: 'DM Sans', system-ui, sans-serif;
+			background: var(--bg);
 			color: var(--ink);
+			min-height: 100vh;
 		}
-		.page {
-			max-width: 1600px;
-			margin: 0 auto;
-			padding: 24px;
+
+		/* ── Top bar ── */
+		.topbar {
+			background: rgba(255,251,245,0.85);
+			backdrop-filter: blur(12px);
+			border-bottom: 1px solid rgba(155,94,42,0.1);
+			padding: 12px 24px;
+			position: sticky; top: 0; z-index: 50;
 		}
-		.header {
-			display: flex;
-			flex-wrap: wrap;
-			align-items: end;
-			justify-content: space-between;
-			gap: 16px;
-			margin-bottom: 18px;
+		.topbar-inner {
+			max-width: 1680px; margin: 0 auto;
+			display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
 		}
-		.header h1 {
-			margin: 0;
-			font-size: clamp(1.7rem, 2.8vw, 2.6rem);
-			line-height: 1.05;
+		.brand {
+			font-family: 'Instrument Serif', serif;
+			font-size: 1.5rem;
+			color: var(--accent);
+			white-space: nowrap;
+			letter-spacing: -0.02em;
 		}
-		.header p {
-			margin: 8px 0 0;
-			max-width: 72ch;
-			color: var(--muted);
+		.brand small { font-family: 'DM Sans', sans-serif; font-size: 0.7rem; color: var(--muted); display: block; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+		.mode-tabs {
+			display: flex; gap: 4px;
+			background: rgba(155,94,42,0.06);
+			border-radius: 12px; padding: 4px;
 		}
-		.top-controls {
-			display: grid;
-			grid-template-columns: repeat(6, minmax(0, auto));
-			gap: 10px;
-			align-items: center;
-			background: rgba(255,255,255,0.72);
-			border: 1px solid rgba(139,94,52,0.15);
-			border-radius: 18px;
-			padding: 12px;
-			box-shadow: var(--shadow);
-			backdrop-filter: blur(8px);
+		.mode-tab {
+			padding: 8px 16px; border: none; background: none;
+			font: 600 0.85rem 'DM Sans', sans-serif;
+			color: var(--muted); border-radius: 9px; cursor: pointer;
+			transition: all 0.2s;
 		}
-		.top-controls label,
-		.top-controls .tiny {
-			font-size: 0.88rem;
-			color: var(--muted);
+		.mode-tab:hover { color: var(--ink); }
+		.mode-tab.active {
+			background: white; color: var(--accent);
+			box-shadow: var(--shadow-sm);
 		}
-		select,
-		button,
-		input {
-			font: inherit;
+		.topbar-controls {
+			display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: wrap;
 		}
-		select,
-		input {
-			border: 1px solid var(--line);
-			background: white;
-			border-radius: 12px;
-			padding: 10px 12px;
-			color: var(--ink);
+		select, .btn {
+			font: 500 0.85rem 'DM Sans', sans-serif;
+			border: 1px solid rgba(155,94,42,0.15);
+			background: white; color: var(--ink);
+			border-radius: var(--radius-sm);
+			padding: 8px 12px; cursor: pointer;
+			transition: all 0.15s;
 		}
-		button {
-			border: 1px solid rgba(139,94,52,0.18);
-			background: white;
-			color: var(--ink);
-			border-radius: 12px;
-			padding: 10px 14px;
-			cursor: pointer;
-			transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-			box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+		select:focus, .btn:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+		.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+		.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+		.btn.primary:hover { background: #86521f; }
+		.btn.danger { background: var(--bad); color: white; border-color: var(--bad); }
+		.btn.ghost { background: transparent; }
+		.btn.sm { padding: 6px 10px; font-size: 0.8rem; }
+		.btn:disabled { opacity: 0.4; pointer-events: none; }
+		.chip {
+			display: inline-flex; align-items: center; gap: 5px;
+			padding: 5px 10px; border-radius: 999px;
+			font-size: 0.78rem; font-weight: 600;
+			background: rgba(155,94,42,0.08);
+			color: var(--accent);
 		}
-		button:hover {
-			transform: translateY(-1px);
-			box-shadow: 0 8px 18px rgba(0,0,0,0.07);
+		.chip.good { background: var(--good-bg); color: var(--good); }
+		.chip.bad { background: var(--bad-bg); color: var(--bad); }
+		.chip.selected { background: var(--selected-bg); color: var(--selected); }
+
+		/* ── Session stats strip ── */
+		.stats-strip {
+			max-width: 1680px; margin: 0 auto;
+			padding: 10px 24px;
+			display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+			font-size: 0.82rem; color: var(--muted);
 		}
-		button.primary {
-			background: var(--accent);
-			color: white;
-			border-color: var(--accent);
-		}
-		button.secondary {
-			background: #f9f0e2;
-		}
-		button.ghost {
-			background: transparent;
-		}
-		button.pill {
-			padding: 8px 10px;
-			border-radius: 999px;
-		}
+		.stats-strip .stat { font-weight: 600; color: var(--ink); }
+		.stats-strip .sep { width: 1px; height: 16px; background: var(--line); }
+
+		/* ── Layout ── */
+		.page { max-width: 1680px; margin: 0 auto; padding: 0 24px 40px; }
 		.layout {
 			display: grid;
-			grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.95fr);
-			gap: 18px;
-			align-items: start;
+			grid-template-columns: minmax(0, 1.6fr) minmax(340px, 0.95fr);
+			gap: 18px; align-items: start;
 		}
 		.panel {
-			background: rgba(255,255,255,0.80);
-			border: 1px solid rgba(139,94,52,0.15);
-			border-radius: 24px;
+			background: var(--panel);
+			border: 1px solid rgba(155,94,42,0.1);
+			border-radius: var(--radius);
 			box-shadow: var(--shadow);
-			backdrop-filter: blur(8px);
-		}
-		.map-panel {
-			padding: 14px;
-			position: sticky;
-			top: 16px;
-		}
-		.map-frame {
-			position: relative;
-			border-radius: 18px;
 			overflow: hidden;
-			border: 1px solid rgba(139,94,52,0.12);
-			background: white;
 		}
-		svg {
-			display: block;
-			width: 100%;
-			height: auto;
-			background: var(--sea);
+
+		/* ── Map ── */
+		.map-panel { position: sticky; top: 72px; }
+		.map-wrap { position: relative; }
+		svg#mapSvg {
+			display: block; width: 100%; height: auto;
+			background: var(--sea); border-radius: 0;
 		}
-		.grid-line {
-			stroke: rgba(107,114,128,0.18);
-			stroke-width: 1;
-			vector-effect: non-scaling-stroke;
+		.grid-line { stroke: rgba(107,114,128,0.15); stroke-width: 1; vector-effect: non-scaling-stroke; }
+		.grid-label { font-size: 12px; fill: rgba(107,114,128,0.6); user-select: none; }
+		.land-shape { fill: var(--land); stroke: var(--land-stroke); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+		/* Zoom controls */
+		.zoom-strip {
+			display: flex; align-items: center; gap: 6px;
+			padding: 8px 14px;
+			border-top: 1px solid rgba(155,94,42,0.08);
+			font-size: 0.78rem; color: var(--muted);
 		}
-		.grid-label {
-			font-size: 12px;
-			fill: rgba(107,114,128,0.78);
-			user-select: none;
+		.zoom-strip .label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 2px; }
+		.zoom-btn {
+			padding: 4px 10px; border-radius: 999px;
+			font: 600 0.75rem 'DM Sans', sans-serif;
+			border: 1.5px solid rgba(155,94,42,0.12);
+			background: white; color: var(--muted);
+			cursor: pointer; transition: all 0.15s;
 		}
-		.land-shape {
-			fill: var(--land);
-			stroke: var(--land-stroke);
-			stroke-width: 1.2;
-			vector-effect: non-scaling-stroke;
-		}
+		.zoom-btn:hover { border-color: var(--accent); color: var(--accent); }
+		.zoom-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
 		.map-legend {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 12px 18px;
-			font-size: 0.88rem;
-			color: var(--muted);
-			padding: 12px 2px 2px;
+			display: flex; flex-wrap: wrap; gap: 10px 16px;
+			padding: 10px 14px;
+			font-size: 0.78rem; color: var(--muted);
+			border-top: 1px solid rgba(155,94,42,0.08);
 		}
-		.legend-item {
-			display: inline-flex;
-			align-items: center;
-			gap: 8px;
+		.legend-item { display: inline-flex; align-items: center; gap: 6px; }
+		.swatch { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+		.tooltip {
+			position: absolute; pointer-events: none; z-index: 20;
+			padding: 6px 10px; border-radius: 8px;
+			background: rgba(20,20,20,0.92); color: white;
+			font-size: 0.78rem; font-weight: 500; line-height: 1.2;
+			opacity: 0; transform: translate(-50%, calc(-100% - 10px));
+			transition: opacity 0.1s; white-space: nowrap;
 		}
-		.swatch {
-			width: 14px;
-			height: 14px;
-			border-radius: 999px;
-			display: inline-block;
+		/* Click target for locate mode */
+		.map-clickzone {
+			position: absolute; inset: 0; cursor: crosshair; z-index: 5;
+			display: none;
 		}
-		.sidebar {
-			padding: 16px;
+		.map-clickzone.active { display: block; }
+		/* Locate feedback pulse */
+		@keyframes ping {
+			0% { r: 8; opacity: 1; }
+			100% { r: 40; opacity: 0; }
 		}
-		.sidebar h2 {
-			margin: 0 0 6px;
-			font-size: 1.1rem;
+		@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+		@keyframes shake {
+			0%, 100% { transform: translateX(0); }
+			20%, 60% { transform: translateX(-4px); }
+			40%, 80% { transform: translateX(4px); }
 		}
-		.sidebar p,
-		.note,
-		.small {
-			color: var(--muted);
-			font-size: 0.93rem;
-			line-height: 1.45;
+		.shake { animation: shake 0.4s ease; }
+
+		/* ── Sidebar ── */
+		.sidebar-inner { padding: 16px; }
+		.sidebar-header {
+			padding: 16px 16px 0;
 		}
-		.note {
-			margin-top: 10px;
-		}
-		.stats {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 8px;
-			margin: 14px 0 14px;
-		}
-		.stat-chip {
-			background: #f5ebdc;
-			border: 1px solid rgba(139,94,52,0.14);
-			border-radius: 999px;
-			padding: 8px 10px;
-			font-size: 0.88rem;
-		}
-		.callout {
-			border: 1px solid rgba(29,78,216,0.14);
-			background: rgba(29,78,216,0.06);
-			padding: 12px 14px;
-			border-radius: 16px;
-			margin-bottom: 14px;
-		}
-		.assignments {
-			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 10px;
-			margin-bottom: 14px;
-		}
-		.assignment {
-			border: 1px solid rgba(139,94,52,0.14);
-			background: #fff;
-			border-radius: 14px;
-			padding: 10px;
-			cursor: pointer;
-			min-height: 78px;
-			transition: border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
-		}
-		.assignment:hover {
-			transform: translateY(-1px);
-			box-shadow: 0 8px 18px rgba(0,0,0,0.05);
-		}
-		.assignment.selected {
-			border-color: var(--selected);
-			box-shadow: 0 0 0 3px rgba(29,78,216,0.12);
-		}
-		.assignment.good {
-			border-color: rgba(35,122,82,0.45);
-			background: rgba(35,122,82,0.06);
-		}
-		.assignment.bad {
-			border-color: rgba(163,58,52,0.45);
-			background: rgba(163,58,52,0.06);
-		}
-		.assignment .num {
-			font-weight: 700;
-			font-size: 0.92rem;
+		.sidebar-header h2 {
+			font-family: 'Instrument Serif', serif;
+			font-size: 1.35rem; font-weight: 400;
 			margin-bottom: 4px;
 		}
-		.assignment .answer {
-			font-size: 0.95rem;
+		.sidebar-header p { color: var(--muted); font-size: 0.88rem; line-height: 1.4; margin-bottom: 12px; }
+
+		/* Callout */
+		.callout {
+			margin: 0 16px 12px;
+			padding: 12px 14px;
+			border-radius: 12px;
+			border: 1px solid rgba(37,99,235,0.12);
+			background: rgba(37,99,235,0.04);
+			font-size: 0.88rem;
 		}
-		.assignment .sub {
-			color: var(--muted);
-			font-size: 0.82rem;
-			margin-top: 6px;
+		.callout strong { display: block; margin-bottom: 2px; }
+		.callout .sub { color: var(--muted); font-size: 0.82rem; }
+		.callout.good-callout { border-color: rgba(26,122,74,0.2); background: var(--good-bg); }
+		.callout.bad-callout { border-color: rgba(194,48,40,0.2); background: var(--bad-bg); }
+
+		/* Quiz cards */
+		.assignments {
+			display: grid; grid-template-columns: repeat(2, 1fr);
+			gap: 8px; margin-bottom: 12px;
 		}
-		.word-bank,
-		.study-list {
-			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			gap: 10px;
-			max-height: 54vh;
-			overflow: auto;
+		.assignment {
+			border: 1.5px solid rgba(155,94,42,0.12);
+			background: white; border-radius: 12px;
+			padding: 10px; cursor: pointer;
+			transition: all 0.15s; min-height: 70px;
+			position: relative;
+		}
+		.assignment:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+		.assignment.selected { border-color: var(--selected); background: var(--selected-bg); }
+		.assignment.good { border-color: var(--good); background: var(--good-bg); }
+		.assignment.bad { border-color: var(--bad); background: var(--bad-bg); }
+		.assignment .num { font-weight: 700; font-size: 0.82rem; color: var(--accent); margin-bottom: 3px; }
+		.assignment .answer { font-size: 0.9rem; font-weight: 500; }
+		.assignment .sub { color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+
+		/* Word bank */
+		.section-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+		.word-bank, .study-list {
+			display: grid; grid-template-columns: repeat(2, 1fr);
+			gap: 6px; max-height: 50vh; overflow-y: auto;
 			padding-right: 2px;
 		}
-		.study-list {
-			grid-template-columns: 1fr;
+		.study-list { grid-template-columns: 1fr; }
+		.bank-item, .study-item {
+			text-align: left; padding: 9px 11px;
+			border-radius: var(--radius-sm);
+			border: 1.5px solid rgba(155,94,42,0.1);
+			background: white; font-size: 0.88rem; font-weight: 500;
+			cursor: pointer; transition: all 0.15s;
 		}
-		.bank-item,
-		.study-item {
-			text-align: left;
-			padding: 11px 12px;
-			border-radius: 14px;
-			border: 1px solid rgba(139,94,52,0.14);
-			background: white;
+		.bank-item:hover, .study-item:hover { border-color: var(--accent); }
+		.bank-item.used { opacity: 0.35; background: var(--bg); pointer-events: none; }
+		.bank-item.active { border-color: var(--selected); background: var(--selected-bg); }
+		.study-item.active { border-color: var(--accent); background: rgba(155,94,42,0.06); }
+
+		/* Locate mode */
+		.locate-prompt {
+			text-align: center; padding: 20px 16px;
 		}
-		.bank-item.used {
-			opacity: 0.45;
-			background: #f4efe8;
+		.locate-prompt .place-name {
+			font-family: 'Instrument Serif', serif;
+			font-size: 2rem; color: var(--accent);
+			margin-bottom: 4px;
 		}
-		.bank-item.active {
-			border-color: var(--selected);
-			box-shadow: 0 0 0 3px rgba(29,78,216,0.12);
+		.locate-prompt .instruction { color: var(--muted); font-size: 0.9rem; }
+		.locate-feedback {
+			text-align: center; padding: 14px 16px;
+			border-radius: 12px; margin: 12px 16px;
 		}
-		.study-item.active {
-			border-color: var(--accent);
-			box-shadow: 0 0 0 3px rgba(139,94,52,0.12);
+		.locate-feedback.good { background: var(--good-bg); color: var(--good); }
+		.locate-feedback.close { background: rgba(217,119,6,0.08); color: var(--warn); }
+		.locate-feedback.bad { background: var(--bad-bg); color: var(--bad); }
+		.locate-feedback .dist { font-size: 1.6rem; font-weight: 700; }
+		.locate-feedback .msg { font-size: 0.88rem; margin-top: 2px; }
+
+		/* Progress bar */
+		.progress-bar-wrap {
+			height: 6px; background: rgba(155,94,42,0.08);
+			border-radius: 3px; overflow: hidden; margin: 8px 0;
 		}
+		.progress-bar-fill {
+			height: 100%; background: var(--accent);
+			border-radius: 3px; transition: width 0.4s ease;
+		}
+
+		/* Results */
 		.results {
-			margin-top: 14px;
+			margin: 12px 0 0;
 			padding: 12px 14px;
-			border-radius: 16px;
-			background: #f9f4eb;
-			border: 1px solid rgba(139,94,52,0.14);
-			min-height: 62px;
+			border-radius: 12px;
+			background: rgba(155,94,42,0.04);
+			border: 1px solid rgba(155,94,42,0.1);
+			font-size: 0.88rem;
 		}
-		.results strong {
-			font-size: 1.08rem;
+		.results strong { font-size: 1rem; }
+
+		/* Difficulty pills */
+		.diff-pills { display: flex; gap: 4px; }
+		.diff-pill {
+			padding: 5px 10px; border-radius: 999px;
+			font: 600 0.78rem 'DM Sans', sans-serif;
+			border: 1.5px solid rgba(155,94,42,0.12);
+			background: white; color: var(--muted);
+			cursor: pointer; transition: all 0.15s;
 		}
-		.tooltip {
-			position: absolute;
-			pointer-events: none;
-			z-index: 10;
-			padding: 8px 10px;
-			border-radius: 10px;
-			background: rgba(26,26,26,0.90);
-			color: white;
-			font-size: 0.82rem;
-			line-height: 1.2;
-			opacity: 0;
-			transform: translate(-50%, calc(-100% - 12px));
-			transition: opacity 0.12s ease;
-			white-space: nowrap;
+		.diff-pill:hover { border-color: var(--accent); color: var(--accent); }
+		.diff-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+		/* Search input */
+		.search-input {
+			width: 100%; padding: 9px 12px;
+			border: 1.5px solid rgba(155,94,42,0.12);
+			border-radius: var(--radius-sm);
+			font: 500 0.88rem 'DM Sans', sans-serif;
+			color: var(--ink); background: white;
+			transition: border-color 0.15s;
 		}
-		.footer {
-			margin-top: 14px;
-			color: var(--muted);
-			font-size: 0.82rem;
+		.search-input:focus { outline: none; border-color: var(--accent); }
+
+		/* Keyboard hint */
+		kbd {
+			display: inline-block; padding: 2px 6px;
+			border-radius: 4px; font-size: 0.72rem;
+			background: rgba(0,0,0,0.06); color: var(--muted);
+			border: 1px solid rgba(0,0,0,0.08);
+			font-family: 'DM Sans', sans-serif;
+			vertical-align: middle;
 		}
-		.hidden {
-			display: none !important;
-		}
+
+		.hidden { display: none !important; }
 		@media (max-width: 1100px) {
-			.layout {
-				grid-template-columns: 1fr;
-			}
-			.map-panel {
-				position: static;
-			}
+			.layout { grid-template-columns: 1fr; }
+			.map-panel { position: static; }
 		}
 		@media (max-width: 760px) {
-			.top-controls {
-				grid-template-columns: 1fr 1fr;
-			}
-			.assignments,
-			.word-bank {
-				grid-template-columns: 1fr;
-			}
+			.topbar-inner { gap: 10px; }
+			.assignments, .word-bank { grid-template-columns: 1fr; }
+			.brand { font-size: 1.2rem; }
 		}
 	</style>
 </head>
 <body>
-	<div class="page">
-		<div class="header">
-			<div>
-				<h1>Ancient World map quiz</h1>
-				<p>Built to feel like the real exam format: each round gives you <strong>10 numbered locations</strong> on the map and a <strong>20-term word bank</strong>. Ten are correct. Ten are decoys. Very civilized. Mildly cruel. Perfect for studying.</p>
-			</div>
-			<div class="top-controls">
-				<div>
-					<label for="modeSelect">Study set</label><br />
-					<select id="modeSelect">
-						<option value="all">All places</option>
-<option value="greece_aegean">Greece and Aegean</option>
-<option value="west_med">Western Mediterranean + North Africa</option>
-<option value="anatolia_persia">Anatolia / Asia Minor / Persia</option>
-<option value="mycenae_athens_sparta">Mycenae, Athens, and Sparta core</option>
-					</select>
-				</div>
-				<div>
-					<label>&nbsp;</label><br />
-					<button id="newQuizBtn" class="primary">New quiz</button>
-				</div>
-				<div>
-					<label>&nbsp;</label><br />
-					<button id="resetBtn" class="secondary">Reset answers</button>
-				</div>
-				<div>
-					<label>&nbsp;</label><br />
-					<button id="checkBtn">Check answers</button>
-				</div>
-				<div>
-					<label>&nbsp;</label><br />
-					<button id="revealBtn">Reveal answers</button>
-				</div>
-				<div>
-					<label>&nbsp;</label><br />
-					<button id="studyToggleBtn" class="ghost">Study mode</button>
-				</div>
-			</div>
-		</div>
 
-		<div class="layout">
-			<div class="panel map-panel">
-				<div class="map-frame">
-					<svg id="mapSvg" viewBox="0 0 1200 700" aria-label="Map of the ancient Mediterranean and Near East">
-						<rect x="0" y="0" width="1200" height="700" fill="var(--sea)"></rect>
-						<g id="gridLayer">
-							<line x1="25.5" y1="0" x2="25.5" y2="700" class="grid-line"/>
+<!-- ═══ TOP BAR ═══ -->
+<div class="topbar">
+	<div class="topbar-inner">
+		<div class="brand">Ancient World<small>Map Quiz & Study Tool</small></div>
+		<div class="mode-tabs">
+			<button class="mode-tab active" data-mode="quiz">Quiz</button>
+			<button class="mode-tab" data-mode="locate">Locate</button>
+			<button class="mode-tab" data-mode="study">Study</button>
+		</div>
+		<div class="topbar-controls">
+			<select id="regionSelect">
+				<option value="all">All places</option>
+				<option value="greece_aegean">Greece & Aegean</option>
+				<option value="west_med">W. Mediterranean & N. Africa</option>
+				<option value="anatolia_persia">Anatolia / Persia</option>
+				<option value="mycenae_athens_sparta">Mycenae–Athens–Sparta</option>
+			</select>
+			<div class="diff-pills" id="diffPills">
+				<button class="diff-pill" data-diff="easy">Easy</button>
+				<button class="diff-pill active" data-diff="medium">Medium</button>
+				<button class="diff-pill" data-diff="hard">Hard</button>
+			</div>
+			<button class="btn primary" id="newRoundBtn">New round</button>
+			<button class="btn" id="reviewMistakesBtn" disabled title="Review places you've gotten wrong">Review mistakes</button>
+		</div>
+	</div>
+</div>
+
+<!-- ═══ SESSION STATS ═══ -->
+<div class="stats-strip" id="statsStrip">
+	<span>Session: <span class="stat" id="statAttempts">0</span> attempts</span>
+	<span class="sep"></span>
+	<span>Accuracy: <span class="stat" id="statAccuracy">—</span></span>
+	<span class="sep"></span>
+	<span>Streak: <span class="stat" id="statStreak">0</span> 🔥</span>
+	<span class="sep"></span>
+	<span>Mastered: <span class="stat" id="statMastered">0</span> places</span>
+</div>
+
+<!-- ═══ MAIN LAYOUT ═══ -->
+<div class="page">
+	<div class="layout">
+		<!-- ── MAP ── -->
+		<div class="panel map-panel">
+			<div class="map-wrap">
+				<svg id="mapSvg" viewBox="0 0 1200 700" aria-label="Map of the ancient Mediterranean and Near East">
+					<rect x="0" y="0" width="1200" height="700" fill="var(--sea)"/>
+					<g id="gridLayer">
+<line x1="25.5" y1="0" x2="25.5" y2="700" class="grid-line"/>
 <text x="29.5" y="692" class="grid-label">-10°</text>
 <line x1="153.2" y1="0" x2="153.2" y2="700" class="grid-line"/>
 <text x="157.2" y="692" class="grid-label">0°</text>
@@ -423,9 +426,9 @@
 <text x="6" y="196.0" class="grid-label">40°N</text>
 <line x1="0" y1="75.0" x2="1200" y2="75.0" class="grid-line"/>
 <text x="6" y="71.0" class="grid-label">45°N</text>
-						</g>
-						<g id="landLayer">
-							<path d="M 42.6 510.3 L 42.3 515.1 L 42.3 553.0 L 0.4 551.7 L 0.8 615.6 L 0.0 615.8 L 0.0 549.0 L 3.6 547.4 L 7.8 527.9 L 18.5 525.2 L 23.1 528.5 L 28.9 528.5 L 33.0 522.8 L 40.9 522.0 L 40.6 508.6 L 42.6 508.6 L 42.6 510.3 Z" class="land-shape"/>
+</g>
+					<g id="landLayer">
+<path d="M 42.6 510.3 L 42.3 515.1 L 42.3 553.0 L 0.4 551.7 L 0.8 615.6 L 0.0 615.8 L 0.0 549.0 L 3.6 547.4 L 7.8 527.9 L 18.5 525.2 L 23.1 528.5 L 28.9 528.5 L 33.0 522.8 L 40.9 522.0 L 40.6 508.6 L 42.6 508.6 L 42.6 510.3 Z" class="land-shape"/>
 <path d="M 1199.3 67.1 L 1174.0 77.1 L 1185.5 120.5 L 1176.8 127.0 L 1177.8 141.3 L 1169.9 137.6 L 1163.5 128.6 L 1144.6 126.0 L 1123.4 125.3 L 1118.8 128.1 L 1100.6 117.5 L 1093.3 122.7 L 1091.4 137.5 L 1070.4 128.9 L 1062.0 132.4 L 1059.1 143.3 L 1051.8 148.0 L 1034.9 165.4 L 1029.4 183.3 L 1024.6 183.4 L 1021.1 171.6 L 1004.9 170.8 L 1002.3 150.3 L 996.0 150.1 L 997.0 125.1 L 981.7 106.8 L 959.8 108.7 L 944.9 112.4 L 932.7 89.9 L 922.2 80.4 L 902.4 62.5 L 900.0 60.3 L 867.2 75.1 L 867.7 167.3 L 861.1 168.5 L 852.2 148.9 L 843.6 141.9 L 829.1 147.1 L 823.4 155.4 L 822.7 149.3 L 825.9 138.9 L 823.4 130.2 L 808.6 121.7 L 802.9 99.2 L 795.8 92.9 L 795.4 84.8 L 807.8 87.1 L 808.3 68.9 L 819.2 64.8 L 830.3 68.5 L 832.6 44.1 L 830.3 28.7 L 817.6 29.9 L 806.7 23.8 L 791.9 34.8 L 780.0 40.0 L 773.5 36.0 L 774.8 23.1 L 766.7 6.4 L 757.2 7.1 L 752.7 0.0 L 1200.0 0.0 L 1200.0 66.5 L 1199.3 67.1 Z" class="land-shape"/>
 <path d="M 867.2 75.1 L 900.0 60.3 L 902.4 62.5 L 922.2 80.4 L 932.7 89.9 L 944.9 112.4 L 959.8 108.7 L 981.7 106.8 L 997.0 125.1 L 996.0 150.1 L 1002.3 150.3 L 1004.9 170.8 L 1021.1 171.6 L 1024.6 183.4 L 1029.4 183.3 L 1034.9 165.4 L 1051.8 148.0 L 1059.1 143.3 L 1062.9 145.8 L 1052.2 162.0 L 1061.6 171.4 L 1070.7 165.2 L 1085.8 178.3 L 1069.5 196.4 L 1059.8 193.9 L 1054.5 194.5 L 1052.7 187.6 L 1055.3 176.0 L 1038.2 181.8 L 1034.2 197.8 L 1028.1 211.7 L 1017.5 210.5 L 1014.2 221.5 L 1023.5 227.5 L 1026.3 246.1 L 1019.1 271.4 L 1009.5 266.1 L 1002.4 265.9 L 1002.7 250.6 L 985.7 239.9 L 972.4 227.7 L 964.1 215.9 L 949.5 198.7 L 943.2 172.9 L 938.9 168.3 L 925.1 169.5 L 920.2 164.4 L 918.8 144.4 L 901.6 131.2 L 890.9 145.7 L 880.0 154.3 L 882.1 166.9 L 867.7 167.3 L 867.2 75.1 Z" class="land-shape"/>
 <path d="M 457.7 700.0 L 472.3 699.9 L 472.3 650.0 L 523.7 650.0 L 573.2 650.0 L 623.8 650.0 L 627.9 674.5 L 625.1 679.1 L 626.7 700.0 L 457.7 700.0 L 457.7 700.0 Z" class="land-shape"/>
@@ -487,702 +490,840 @@
 <path d="M 393.6 52.3 L 403.4 45.7 L 411.3 46.8 L 418.2 56.6 L 419.7 64.6 L 427.4 70.5 L 428.5 80.8 L 435.9 88.0 L 439.9 82.4 L 443.1 85.5 L 440.1 89.8 L 442.4 94.1 L 439.3 99.8 L 440.4 108.9 L 446.6 119.7 L 441.8 127.5 L 439.6 135.5 L 441.0 138.5 L 438.9 142.0 L 433.0 142.4 L 428.6 143.9 L 428.2 142.0 L 429.7 139.0 L 431.2 132.9 L 429.4 133.1 L 426.9 128.4 L 424.8 127.3 L 423.1 123.3 L 420.7 121.7 L 418.9 118.2 L 416.6 119.6 L 414.9 127.9 L 411.8 129.7 L 412.8 127.5 L 408.0 122.3 L 403.8 119.7 L 401.9 116.2 L 398.5 111.9 L 401.5 110.8 L 403.4 99.0 L 397.2 89.4 L 400.4 78.4 L 395.8 78.5 L 395.8 78.5 L 400.7 69.1 L 396.7 62.0 L 393.6 52.3 L 393.6 52.3 Z" class="land-shape"/>
 <path d="M 406.0 137.5 L 405.2 132.8 L 399.6 145.1 L 400.5 153.1 L 397.8 151.1 L 394.2 143.0 L 388.7 138.0 L 390.1 133.8 L 392.0 120.0 L 396.1 114.2 L 398.5 111.9 L 401.9 116.2 L 403.8 119.7 L 408.0 122.3 L 412.8 127.5 L 411.8 129.7 L 409.4 135.3 L 406.0 137.5 Z" class="land-shape"/>
 <path d="M 415.2 144.6 L 412.1 142.0 L 409.4 135.3 L 411.8 129.7 L 414.9 127.9 L 416.6 119.6 L 418.9 118.2 L 420.7 121.7 L 423.1 123.3 L 424.8 127.3 L 426.9 128.4 L 429.4 133.1 L 431.2 132.9 L 429.7 139.0 L 428.2 142.0 L 428.6 143.9 L 425.8 144.8 L 418.2 148.7 L 417.7 153.8 L 416.0 153.6 L 415.2 144.6 Z" class="land-shape"/>
-						</g>
-						<g id="studyLayer"></g>
-						<g id="markerLayer"></g>
-					</svg>
-					<div class="tooltip" id="tooltip"></div>
-				</div>
-				<div class="map-legend">
-					<span class="legend-item"><span class="swatch" style="background: var(--accent);"></span>Quiz markers</span>
-					<span class="legend-item"><span class="swatch" style="background: var(--good);"></span>Correct</span>
-					<span class="legend-item"><span class="swatch" style="background: var(--bad);"></span>Incorrect</span>
-					<span class="legend-item"><span class="swatch" style="background: var(--selected);"></span>Selected</span>
-				</div>
-				<div class="footer">
-					Base map uses modern coastlines for orientation. Ancient points are approximate study locations, cross-checked against standard ancient-geography references such as Pleiades and the Ancient World Mapping Center.
-				</div>
+</g>
+					<g id="studyLayer"></g>
+					<g id="markerLayer"></g>
+					<g id="locateLayer"></g>
+				</svg>
+				<div class="map-clickzone" id="mapClickzone"></div>
+				<div class="tooltip" id="tooltip"></div>
+			</div>
+			<div class="zoom-strip">
+				<span class="label">Zoom</span>
+				<button class="zoom-btn active" data-zoom="full">Full map</button>
+				<button class="zoom-btn" data-zoom="greece">Greece & Aegean</button>
+				<button class="zoom-btn" data-zoom="peloponnese">Peloponnese</button>
+				<button class="zoom-btn" data-zoom="sicily">Sicily & Italy</button>
+				<button class="zoom-btn" data-zoom="persia">Anatolia → Persia</button>
+			</div>
+			<div class="map-legend" id="mapLegend">
+				<span class="legend-item"><span class="swatch" style="background:var(--accent)"></span>Quiz markers</span>
+				<span class="legend-item"><span class="swatch" style="background:var(--good)"></span>Correct</span>
+				<span class="legend-item"><span class="swatch" style="background:var(--bad)"></span>Incorrect</span>
+				<span class="legend-item"><span class="swatch" style="background:var(--selected)"></span>Selected</span>
+			</div>
+		</div>
+
+		<!-- ── SIDEBAR ── -->
+		<div class="panel" id="sidebar">
+			<div class="sidebar-header">
+				<h2 id="sidebarTitle">Quiz</h2>
+				<p id="sidebarIntro">Match each numbered marker to a place name from the word bank. Click a marker, then click a name.</p>
 			</div>
 
-			<div class="panel sidebar">
-				<h2 id="sidebarTitle">Quiz panel</h2>
-				<p id="sidebarIntro">Click a numbered marker on the map, then click a term in the word bank to assign it.</p>
-				<div class="stats" id="stats"></div>
+			<!-- Quiz callout -->
+			<div class="callout" id="callout">
+				<strong id="calloutStrong">Ready to go</strong>
+				<div class="sub" id="calloutText">Pick a region, difficulty, and hit New round.</div>
+			</div>
 
-				<div class="callout" id="callout">
-					<strong id="calloutStrong">Ready.</strong>
-					<div class="small" id="calloutText">Pick a location set, start a fresh quiz, and match all 10 numbered markers.</div>
+			<!-- ── QUIZ VIEW ── -->
+			<div id="quizView" class="sidebar-inner">
+				<div class="progress-bar-wrap"><div class="progress-bar-fill" id="quizProgress" style="width:0%"></div></div>
+				<div style="height:10px"></div>
+				<div class="assignments" id="assignments"></div>
+				<div class="section-label">Word bank — pick the right names</div>
+				<div class="word-bank" id="wordBank"></div>
+				<div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+					<button class="btn sm" id="checkBtn">Check answers</button>
+					<button class="btn sm ghost" id="revealBtn">Reveal</button>
+					<button class="btn sm ghost" id="resetBtn">Clear all</button>
 				</div>
+				<div class="results" id="results"></div>
+			</div>
 
-				<div id="quizView">
-					<div class="assignments" id="assignments"></div>
-					<div class="small" style="margin: 0 0 8px;">Word bank — 10 correct answers and 10 decoys</div>
-					<div class="word-bank" id="wordBank"></div>
+			<!-- ── LOCATE VIEW ── -->
+			<div id="locateView" class="sidebar-inner hidden">
+				<div class="progress-bar-wrap"><div class="progress-bar-fill" id="locateProgress" style="width:0%"></div></div>
+				<div class="locate-prompt" id="locatePrompt">
+					<div class="place-name" id="locateName">—</div>
+					<div class="instruction">Click on the map where you think this place is</div>
 				</div>
+				<div id="locateFeedbackArea"></div>
+				<div id="locateQueue" style="padding:0 16px; font-size:0.82rem; color:var(--muted);"></div>
+				<div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+					<button class="btn sm" id="locateSkipBtn">Skip <kbd>Space</kbd></button>
+					<button class="btn sm ghost" id="locateNextBtn" disabled>Next <kbd>Enter</kbd></button>
+				</div>
+				<div class="results" id="locateResults"></div>
+			</div>
 
-				<div id="studyView" class="hidden">
-					<div class="small" style="margin-bottom: 8px;">Search the current set, then click a place to highlight it on the map.</div>
-					<input id="studySearch" type="text" placeholder="Filter places..." />
-					<div style="height: 10px;"></div>
-					<div class="study-list" id="studyList"></div>
-				</div>
-
-				<div class="results" id="results">
-					<strong>How it works:</strong><br />
-					This opens in study-friendly quiz mode by default. Switch to Study mode whenever you want the full set laid out on the map.
-				</div>
-
-				<div class="note">
-					Included sets: Greece and Aegean, Western Mediterranean + North Africa, Anatolia / Persia, and a tighter Mycenae–Athens–Sparta core. The game uses the place names you gave me, with a couple of typo-rescue labels where your notes looked like they had been sprinting.
-				</div>
+			<!-- ── STUDY VIEW ── -->
+			<div id="studyView" class="sidebar-inner hidden">
+				<input class="search-input" id="studySearch" type="text" placeholder="Search places..." />
+				<div style="height:10px"></div>
+				<div class="study-list" id="studyList"></div>
 			</div>
 		</div>
 	</div>
+</div>
 
-	<script>
-		const MAP = {
-			width: 1200,
-			height: 700,
-			minLon: -12,
-			maxLon: 82,
-			minLat: 20,
-			maxLat: 48
-		};
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const MAP = { width:1200, height:700, minLon:-12, maxLon:82, minLat:20, maxLat:48 };
 
-		const MODES = [{"value": "all", "label": "All places"}, {"value": "greece_aegean", "label": "Greece and Aegean"}, {"value": "west_med", "label": "Western Mediterranean + North Africa"}, {"value": "anatolia_persia", "label": "Anatolia / Asia Minor / Persia"}, {"value": "mycenae_athens_sparta", "label": "Mycenae, Athens, and Sparta core"}];
-		const PLACES = [{"name": "Thebes", "lat": 38.325, "lon": 23.318, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Amphipolis", "lat": 40.823, "lon": 23.845, "tags": ["all", "greece_aegean"]}, {"name": "Olynthos", "lat": 40.294, "lon": 23.387, "tags": ["all", "greece_aegean"]}, {"name": "Pella", "lat": 40.76, "lon": 22.525, "tags": ["all", "greece_aegean"]}, {"name": "Vergina", "lat": 40.486, "lon": 22.318, "tags": ["all", "greece_aegean"]}, {"name": "Chalcidice", "lat": 40.3, "lon": 23.4, "tags": ["all", "greece_aegean"]}, {"name": "Mount Athos", "lat": 40.158, "lon": 24.326, "tags": ["all", "greece_aegean"]}, {"name": "Epirus", "lat": 39.6, "lon": 20.8, "tags": ["all", "greece_aegean"]}, {"name": "Macedon", "lat": 40.7, "lon": 22.9, "tags": ["all", "greece_aegean"]}, {"name": "Thessaly", "lat": 39.6, "lon": 22.4, "tags": ["all", "greece_aegean"]}, {"name": "Pherae", "lat": 39.45, "lon": 22.75, "tags": ["all", "greece_aegean"]}, {"name": "Leuctra", "lat": 38.215, "lon": 23.191, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Athens", "lat": 37.984, "lon": 23.728, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Euboaea", "lat": 38.5, "lon": 23.7, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Eretria", "lat": 38.4, "lon": 23.79, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Lefkandi", "lat": 38.417, "lon": 23.7, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Chalcis", "lat": 38.462, "lon": 23.594, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Plataea", "lat": 38.214, "lon": 23.28, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Marathon", "lat": 38.15, "lon": 24.0, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Salamis", "lat": 37.97, "lon": 23.48, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Thermopylae", "lat": 38.796, "lon": 22.536, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Artemision", "lat": 39.175, "lon": 23.24, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Sphacteria", "lat": 36.97, "lon": 21.66, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Pylos", "lat": 36.913, "lon": 21.696, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Messenia", "lat": 37.05, "lon": 21.85, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Megara", "lat": 37.995, "lon": 23.343, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Corcyra", "lat": 39.624, "lon": 19.922, "tags": ["all", "greece_aegean"]}, {"name": "Epidamnus", "lat": 41.31, "lon": 19.44, "tags": ["all", "greece_aegean"]}, {"name": "Sparta", "lat": 37.075, "lon": 22.429, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Troy", "lat": 39.957, "lon": 26.239, "tags": ["all", "greece_aegean", "anatolia_persia"]}, {"name": "Mycale", "lat": 37.65, "lon": 27.02, "tags": ["all", "greece_aegean", "anatolia_persia"]}, {"name": "Samos", "lat": 37.75, "lon": 26.98, "tags": ["all", "greece_aegean", "anatolia_persia"]}, {"name": "Naxos", "lat": 37.1, "lon": 25.38, "tags": ["all", "greece_aegean"]}, {"name": "Rhodes", "lat": 36.434, "lon": 28.217, "tags": ["all", "greece_aegean", "anatolia_persia"]}, {"name": "Crete", "lat": 35.24, "lon": 24.9, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Knossos", "lat": 35.298, "lon": 25.163, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Delphi", "lat": 38.482, "lon": 22.501, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Olympia", "lat": 37.638, "lon": 21.63, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Argos", "lat": 37.633, "lon": 22.733, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Mytilene", "lat": 39.106, "lon": 26.554, "tags": ["all", "greece_aegean", "anatolia_persia"]}, {"name": "Mylos (Milos)", "lat": 36.74, "lon": 24.43, "tags": ["all", "greece_aegean"]}, {"name": "Delos", "lat": 37.401, "lon": 25.268, "tags": ["all", "greece_aegean"]}, {"name": "Potidaea", "lat": 40.194, "lon": 23.329, "tags": ["all", "greece_aegean"]}, {"name": "Mantineia", "lat": 37.62, "lon": 22.39, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Charonea (Chaeronea)", "lat": 38.49, "lon": 22.85, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Messene", "lat": 37.178, "lon": 21.932, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Mycenae", "lat": 37.73, "lon": 22.754, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Corinth", "lat": 37.938, "lon": 22.932, "tags": ["all", "greece_aegean", "mycenae_athens_sparta"]}, {"name": "Arginusae", "lat": 39.0, "lon": 26.8, "tags": ["all", "anatolia_persia"]}, {"name": "Aegospotami", "lat": 40.23, "lon": 26.39, "tags": ["all", "anatolia_persia"]}, {"name": "Miletus", "lat": 37.53, "lon": 27.28, "tags": ["all", "anatolia_persia"]}, {"name": "Issus", "lat": 36.58, "lon": 36.17, "tags": ["all", "anatolia_persia"]}, {"name": "Granacus River", "lat": 40.39, "lon": 27.22, "tags": ["all", "anatolia_persia"]}, {"name": "Gaugemela", "lat": 36.36, "lon": 43.26, "tags": ["all", "anatolia_persia"]}, {"name": "Ipsus", "lat": 38.95, "lon": 30.99, "tags": ["all", "anatolia_persia"]}, {"name": "Babylon", "lat": 32.54, "lon": 44.42, "tags": ["all", "anatolia_persia"]}, {"name": "Susa", "lat": 32.19, "lon": 48.26, "tags": ["all", "anatolia_persia"]}, {"name": "Persepolis", "lat": 29.93, "lon": 52.89, "tags": ["all", "anatolia_persia"]}, {"name": "Sardis", "lat": 38.48, "lon": 28.04, "tags": ["all", "anatolia_persia"]}, {"name": "Antioch", "lat": 36.2, "lon": 36.16, "tags": ["all", "anatolia_persia"]}, {"name": "Pergamon", "lat": 39.13, "lon": 27.18, "tags": ["all", "anatolia_persia"]}, {"name": "Priene", "lat": 37.66, "lon": 27.3, "tags": ["all", "anatolia_persia"]}, {"name": "Seleucis on the Tigris", "lat": 33.1, "lon": 44.58, "tags": ["all", "anatolia_persia"]}, {"name": "Ai Khanoum", "lat": 37.165, "lon": 69.409, "tags": ["all", "anatolia_persia"]}, {"name": "Tyre", "lat": 33.27, "lon": 35.2, "tags": ["all", "anatolia_persia", "west_med"]}, {"name": "Cunaxa", "lat": 33.25, "lon": 44.25, "tags": ["all", "anatolia_persia"]}, {"name": "Halicarnassus", "lat": 37.037, "lon": 27.424, "tags": ["all", "anatolia_persia"]}, {"name": "Indus River", "lat": 27.5, "lon": 68.7, "tags": ["all", "anatolia_persia"]}, {"name": "Alexandria", "lat": 31.2, "lon": 29.92, "tags": ["all", "west_med"]}, {"name": "Siwa", "lat": 29.2, "lon": 25.52, "tags": ["all", "west_med"]}, {"name": "Carthage", "lat": 36.85, "lon": 10.33, "tags": ["all", "west_med"]}, {"name": "Syracuse", "lat": 37.075, "lon": 15.286, "tags": ["all", "west_med"]}, {"name": "Akragas", "lat": 37.308, "lon": 13.576, "tags": ["all", "west_med"]}, {"name": "Gela", "lat": 37.07, "lon": 14.24, "tags": ["all", "west_med"]}, {"name": "Himera", "lat": 37.99, "lon": 13.82, "tags": ["all", "west_med"]}, {"name": "Selinus", "lat": 37.583, "lon": 12.829, "tags": ["all", "west_med"]}, {"name": "Segesta", "lat": 37.94, "lon": 12.83, "tags": ["all", "west_med"]}, {"name": "Motya", "lat": 37.87, "lon": 12.47, "tags": ["all", "west_med"]}, {"name": "Rome", "lat": 41.893, "lon": 12.483, "tags": ["all", "west_med"]}, {"name": "Pithekoussai", "lat": 40.74, "lon": 13.95, "tags": ["all", "west_med"]}];
+const PLACES = [{"name":"Thebes","lat":38.325,"lon":23.318,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Amphipolis","lat":40.823,"lon":23.845,"tags":["all","greece_aegean"]},{"name":"Olynthos","lat":40.294,"lon":23.387,"tags":["all","greece_aegean"]},{"name":"Pella","lat":40.76,"lon":22.525,"tags":["all","greece_aegean"]},{"name":"Vergina","lat":40.486,"lon":22.318,"tags":["all","greece_aegean"]},{"name":"Chalcidice","lat":40.3,"lon":23.4,"tags":["all","greece_aegean"]},{"name":"Mount Athos","lat":40.158,"lon":24.326,"tags":["all","greece_aegean"]},{"name":"Epirus","lat":39.6,"lon":20.8,"tags":["all","greece_aegean"]},{"name":"Macedon","lat":40.7,"lon":22.9,"tags":["all","greece_aegean"]},{"name":"Thessaly","lat":39.6,"lon":22.4,"tags":["all","greece_aegean"]},{"name":"Pherae","lat":39.45,"lon":22.75,"tags":["all","greece_aegean"]},{"name":"Leuctra","lat":38.215,"lon":23.191,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Athens","lat":37.984,"lon":23.728,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Euboaea","lat":38.5,"lon":23.7,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Eretria","lat":38.4,"lon":23.79,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Lefkandi","lat":38.417,"lon":23.7,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Chalcis","lat":38.462,"lon":23.594,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Plataea","lat":38.214,"lon":23.28,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Marathon","lat":38.15,"lon":24.0,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Salamis","lat":37.97,"lon":23.48,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Thermopylae","lat":38.796,"lon":22.536,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Artemision","lat":39.175,"lon":23.24,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Sphacteria","lat":36.97,"lon":21.66,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Pylos","lat":36.913,"lon":21.696,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Messenia","lat":37.05,"lon":21.85,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Megara","lat":37.995,"lon":23.343,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Corcyra","lat":39.624,"lon":19.922,"tags":["all","greece_aegean"]},{"name":"Epidamnus","lat":41.31,"lon":19.44,"tags":["all","greece_aegean"]},{"name":"Sparta","lat":37.075,"lon":22.429,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Troy","lat":39.957,"lon":26.239,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Mycale","lat":37.65,"lon":27.02,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Samos","lat":37.75,"lon":26.98,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Naxos","lat":37.1,"lon":25.38,"tags":["all","greece_aegean"]},{"name":"Rhodes","lat":36.434,"lon":28.217,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Crete","lat":35.24,"lon":24.9,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Knossos","lat":35.298,"lon":25.163,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Delphi","lat":38.482,"lon":22.501,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Olympia","lat":37.638,"lon":21.63,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Argos","lat":37.633,"lon":22.733,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Mytilene","lat":39.106,"lon":26.554,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Mylos (Milos)","lat":36.74,"lon":24.43,"tags":["all","greece_aegean"]},{"name":"Delos","lat":37.401,"lon":25.268,"tags":["all","greece_aegean"]},{"name":"Potidaea","lat":40.194,"lon":23.329,"tags":["all","greece_aegean"]},{"name":"Mantineia","lat":37.62,"lon":22.39,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Charonea (Chaeronea)","lat":38.49,"lon":22.85,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Messene","lat":37.178,"lon":21.932,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Mycenae","lat":37.73,"lon":22.754,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Corinth","lat":37.938,"lon":22.932,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Arginusae","lat":39.0,"lon":26.8,"tags":["all","anatolia_persia"]},{"name":"Aegospotami","lat":40.23,"lon":26.39,"tags":["all","anatolia_persia"]},{"name":"Miletus","lat":37.53,"lon":27.28,"tags":["all","anatolia_persia"]},{"name":"Issus","lat":36.58,"lon":36.17,"tags":["all","anatolia_persia"]},{"name":"Granacus River","lat":40.39,"lon":27.22,"tags":["all","anatolia_persia"]},{"name":"Gaugemela","lat":36.36,"lon":43.26,"tags":["all","anatolia_persia"]},{"name":"Ipsus","lat":38.95,"lon":30.99,"tags":["all","anatolia_persia"]},{"name":"Babylon","lat":32.54,"lon":44.42,"tags":["all","anatolia_persia"]},{"name":"Susa","lat":32.19,"lon":48.26,"tags":["all","anatolia_persia"]},{"name":"Persepolis","lat":29.93,"lon":52.89,"tags":["all","anatolia_persia"]},{"name":"Sardis","lat":38.48,"lon":28.04,"tags":["all","anatolia_persia"]},{"name":"Antioch","lat":36.2,"lon":36.16,"tags":["all","anatolia_persia"]},{"name":"Pergamon","lat":39.13,"lon":27.18,"tags":["all","anatolia_persia"]},{"name":"Priene","lat":37.66,"lon":27.3,"tags":["all","anatolia_persia"]},{"name":"Seleucis on the Tigris","lat":33.1,"lon":44.58,"tags":["all","anatolia_persia"]},{"name":"Ai Khanoum","lat":37.165,"lon":69.409,"tags":["all","anatolia_persia"]},{"name":"Tyre","lat":33.27,"lon":35.2,"tags":["all","anatolia_persia","west_med"]},{"name":"Cunaxa","lat":33.25,"lon":44.25,"tags":["all","anatolia_persia"]},{"name":"Halicarnassus","lat":37.037,"lon":27.424,"tags":["all","anatolia_persia"]},{"name":"Indus River","lat":27.5,"lon":68.7,"tags":["all","anatolia_persia"]},{"name":"Alexandria","lat":31.2,"lon":29.92,"tags":["all","west_med"]},{"name":"Siwa","lat":29.2,"lon":25.52,"tags":["all","west_med"]},{"name":"Carthage","lat":36.85,"lon":10.33,"tags":["all","west_med"]},{"name":"Syracuse","lat":37.075,"lon":15.286,"tags":["all","west_med"]},{"name":"Akragas","lat":37.308,"lon":13.576,"tags":["all","west_med"]},{"name":"Gela","lat":37.07,"lon":14.24,"tags":["all","west_med"]},{"name":"Himera","lat":37.99,"lon":13.82,"tags":["all","west_med"]},{"name":"Selinus","lat":37.583,"lon":12.829,"tags":["all","west_med"]},{"name":"Segesta","lat":37.94,"lon":12.83,"tags":["all","west_med"]},{"name":"Motya","lat":37.87,"lon":12.47,"tags":["all","west_med"]},{"name":"Rome","lat":41.893,"lon":12.483,"tags":["all","west_med"]},{"name":"Pithekoussai","lat":40.74,"lon":13.95,"tags":["all","west_med"]}];
 
-		const els = {
-			modeSelect: document.getElementById("modeSelect"),
-			newQuizBtn: document.getElementById("newQuizBtn"),
-			resetBtn: document.getElementById("resetBtn"),
-			checkBtn: document.getElementById("checkBtn"),
-			revealBtn: document.getElementById("revealBtn"),
-			studyToggleBtn: document.getElementById("studyToggleBtn"),
-			stats: document.getElementById("stats"),
-			assignments: document.getElementById("assignments"),
-			wordBank: document.getElementById("wordBank"),
-			results: document.getElementById("results"),
-			calloutStrong: document.getElementById("calloutStrong"),
-			calloutText: document.getElementById("calloutText"),
-			markerLayer: document.getElementById("markerLayer"),
-			studyLayer: document.getElementById("studyLayer"),
-			tooltip: document.getElementById("tooltip"),
-			studySearch: document.getElementById("studySearch"),
-			studyList: document.getElementById("studyList"),
-			quizView: document.getElementById("quizView"),
-			studyView: document.getElementById("studyView"),
-			sidebarTitle: document.getElementById("sidebarTitle"),
-			sidebarIntro: document.getElementById("sidebarIntro")
-		};
+// SVG paths for land (preserved from original)
 
-		let state = {
-			mode: "all",
-			studyMode: false,
-			pool: [],
-			quiz: null,
-			selectedMarkerId: null,
-			revealed: false,
-			studySelectedName: null,
-			studyFilter: ""
-		};
+// Init SVG layers
 
-		function project(lon, lat) {
-			const x = ((lon - MAP.minLon) / (MAP.maxLon - MAP.minLon)) * MAP.width;
-			const y = MAP.height - ((lat - MAP.minLat) / (MAP.maxLat - MAP.minLat)) * MAP.height;
-			return { x, y };
-		}
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const DIFF = { easy:{markers:5,bank:8}, medium:{markers:10,bank:20}, hard:{markers:15,bank:30} };
 
-		function shuffle(list) {
-			const arr = [...list];
-			for (let i = arr.length - 1; i > 0; i -= 1) {
-				const j = Math.floor(Math.random() * (i + 1));
-				[arr[i], arr[j]] = [arr[j], arr[i]];
-			}
-			return arr;
-		}
+// Zoom presets: [x, y, width, height] in SVG coordinate space
+const ZOOM_PRESETS = {
+	full:         [0, 0, 1200, 700],
+	greece:       [310, 60, 300, 310],
+	peloponnese:  [360, 130, 180, 220],
+	sicily:       [140, 100, 250, 260],
+	persia:       [480, 50, 720, 500],
+};
+let currentViewBox = [0, 0, 1200, 700];
+let zoomAnimId = null;
 
-		function sample(list, count) {
-			return shuffle(list).slice(0, count);
-		}
+// Returns a scale factor for SVG element sizes based on current zoom
+// At full view (1200 wide) = 1.0, zoomed to Greece (300 wide) ≈ 0.25
+function zs(baseSize) { return baseSize * (currentViewBox[2] / 1200); }
 
-		function clamp(value, min, max) {
-			return Math.max(min, Math.min(max, value));
-		}
+const state = {
+	activeMode: "quiz", // quiz | locate | study
+	region: "all",
+	difficulty: "medium",
+	pool: [],
+	// Quiz
+	quiz: null,
+	selectedMarkerId: null,
+	revealed: false,
+	// Locate
+	locateQueue: [],
+	locateIndex: 0,
+	locateWaiting: true, // waiting for click
+	locateCurrentFeedback: null,
+	// Study
+	studyFilter: "",
+	studySelectedName: null,
+	// Session tracking
+	session: { attempts:0, correct:0, streak:0, bestStreak:0 },
+	// Per-place tracking: { placeName: { attempts, correct } }
+	placeStats: {},
+	// Mistakes queue for "review mistakes"
+	mistakes: new Set()
+};
 
-		function escapeHtml(text) {
-			return String(text)
-				.replaceAll("&", "&amp;")
-				.replaceAll("<", "&lt;")
-				.replaceAll(">", "&gt;")
-				.replaceAll('"', "&quot;")
-				.replaceAll("'", "&#39;");
-		}
+// ═══════════════════════════════════════
+// DOM REFS
+// ═══════════════════════════════════════
+const $ = id => document.getElementById(id);
+const els = {
+	regionSelect: $("regionSelect"),
+	newRoundBtn: $("newRoundBtn"),
+	reviewMistakesBtn: $("reviewMistakesBtn"),
+	checkBtn: $("checkBtn"),
+	revealBtn: $("revealBtn"),
+	resetBtn: $("resetBtn"),
+	assignments: $("assignments"),
+	wordBank: $("wordBank"),
+	quizProgress: $("quizProgress"),
+	results: $("results"),
+	callout: $("callout"),
+	calloutStrong: $("calloutStrong"),
+	calloutText: $("calloutText"),
+	markerLayer: $("markerLayer"),
+	studyLayer: $("studyLayer"),
+	locateLayer: $("locateLayer"),
+	tooltip: $("tooltip"),
+	mapClickzone: $("mapClickzone"),
+	mapLegend: $("mapLegend"),
+	sidebarTitle: $("sidebarTitle"),
+	sidebarIntro: $("sidebarIntro"),
+	// Views
+	quizView: $("quizView"),
+	locateView: $("locateView"),
+	studyView: $("studyView"),
+	// Locate
+	locateName: $("locateName"),
+	locateProgress: $("locateProgress"),
+	locateFeedbackArea: $("locateFeedbackArea"),
+	locateQueue: $("locateQueue"),
+	locateSkipBtn: $("locateSkipBtn"),
+	locateNextBtn: $("locateNextBtn"),
+	locateResults: $("locateResults"),
+	// Study
+	studySearch: $("studySearch"),
+	studyList: $("studyList"),
+	// Stats
+	statAttempts: $("statAttempts"),
+	statAccuracy: $("statAccuracy"),
+	statStreak: $("statStreak"),
+	statMastered: $("statMastered"),
+};
 
-		function getModeLabel(value) {
-			const found = MODES.find((mode) => mode.value === value);
-			return found ? found.label : value;
-		}
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+function project(lon, lat) {
+	return {
+		x: ((lon - MAP.minLon) / (MAP.maxLon - MAP.minLon)) * MAP.width,
+		y: MAP.height - ((lat - MAP.minLat) / (MAP.maxLat - MAP.minLat)) * MAP.height
+	};
+}
+function unproject(px, py) {
+	return {
+		lon: (px / MAP.width) * (MAP.maxLon - MAP.minLon) + MAP.minLon,
+		lat: ((MAP.height - py) / MAP.height) * (MAP.maxLat - MAP.minLat) + MAP.minLat
+	};
+}
+function haversineKm(lat1, lon1, lat2, lon2) {
+	const R = 6371;
+	const dLat = (lat2 - lat1) * Math.PI / 180;
+	const dLon = (lon2 - lon1) * Math.PI / 180;
+	const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+	return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function shuffle(arr) {
+	const a = [...arr];
+	for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+	return a;
+}
+function sample(arr, n) { return shuffle(arr).slice(0, n); }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function esc(t) { return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 
-		function getPool() {
-			return PLACES.filter((place) => place.tags.includes(state.mode));
-		}
+function recordAttempt(placeName, correct) {
+	state.session.attempts++;
+	if (correct) { state.session.correct++; state.session.streak++; }
+	else { state.session.bestStreak = Math.max(state.session.bestStreak, state.session.streak); state.session.streak = 0; state.mistakes.add(placeName); }
+	if (!state.placeStats[placeName]) state.placeStats[placeName] = {attempts:0,correct:0};
+	state.placeStats[placeName].attempts++;
+	if (correct) state.placeStats[placeName].correct++;
+	updateSessionStats();
+}
 
-		function createQuiz() {
-			state.pool = getPool();
-			const answers = sample(state.pool, 10);
-			let distractorPool = state.pool.filter((place) => !answers.includes(place));
-			if (distractorPool.length < 10) {
-				distractorPool = PLACES.filter((place) => !answers.includes(place));
-			}
-			const distractors = sample(distractorPool, 10);
-			const wordBank = shuffle([...answers, ...distractors]);
+function updateSessionStats() {
+	els.statAttempts.textContent = state.session.attempts;
+	const acc = state.session.attempts > 0 ? Math.round(state.session.correct / state.session.attempts * 100) + "%" : "—";
+	els.statAccuracy.textContent = acc;
+	els.statStreak.textContent = state.session.streak;
+	const mastered = Object.entries(state.placeStats).filter(([,s]) => s.correct >= 3 && s.correct/s.attempts >= 0.75).length;
+	els.statMastered.textContent = mastered;
+	els.reviewMistakesBtn.disabled = state.mistakes.size === 0;
+}
 
-			const markers = answers.map((place, index) => {
-				const point = project(place.lon, place.lat);
-				return {
-					id: index + 1,
-					name: place.name,
-					lon: place.lon,
-					lat: place.lat,
-					x: point.x,
-					y: point.y,
-					displayX: point.x,
-					displayY: point.y,
-					assigned: null,
-					correct: null
-				};
-			});
+function getPool(region) {
+	return PLACES.filter(p => p.tags.includes(region || state.region));
+}
 
-			resolveMarkerCollisions(markers);
+// ═══════════════════════════════════════
+// MODE SWITCHING
+// ═══════════════════════════════════════
+document.querySelectorAll(".mode-tab").forEach(tab => {
+	tab.addEventListener("click", () => {
+		document.querySelectorAll(".mode-tab").forEach(t => t.classList.remove("active"));
+		tab.classList.add("active");
+		switchMode(tab.dataset.mode);
+	});
+});
 
-			state.quiz = {
-				answers,
-				distractors,
-				wordBank,
-				markers
-			};
-			state.selectedMarkerId = markers[0]?.id ?? null;
-			state.revealed = false;
-			state.studySelectedName = null;
-		}
+function switchMode(mode) {
+	state.activeMode = mode;
+	els.quizView.classList.add("hidden");
+	els.locateView.classList.add("hidden");
+	els.studyView.classList.add("hidden");
+	els.mapClickzone.classList.remove("active");
+	clearLayers();
 
-		function resolveMarkerCollisions(markers) {
-			if (!markers.length) {
-				return;
-			}
+	if (mode === "quiz") {
+		els.quizView.classList.remove("hidden");
+		els.sidebarTitle.textContent = "Quiz";
+		els.sidebarIntro.textContent = "Match each numbered marker to a place from the word bank.";
+		els.mapLegend.classList.remove("hidden");
+		if (!state.quiz) createQuiz();
+		renderAll();
+	} else if (mode === "locate") {
+		els.locateView.classList.remove("hidden");
+		els.sidebarTitle.textContent = "Locate";
+		els.sidebarIntro.textContent = "See a place name, click where it is on the map. The closer you are, the better your score.";
+		els.mapLegend.classList.add("hidden");
+		els.mapClickzone.classList.add("active");
+		startLocateRound();
+	} else if (mode === "study") {
+		els.studyView.classList.remove("hidden");
+		els.sidebarTitle.textContent = "Study";
+		els.sidebarIntro.textContent = "Browse all places. Click any name to highlight it on the map.";
+		els.mapLegend.classList.add("hidden");
+		renderStudy();
+	}
+	updateCallout();
+}
 
-			for (let pass = 0; pass < 220; pass += 1) {
-				for (let i = 0; i < markers.length; i += 1) {
-					const a = markers[i];
+function clearLayers() {
+	els.markerLayer.innerHTML = "";
+	els.studyLayer.innerHTML = "";
+	els.locateLayer.innerHTML = "";
+}
 
-					for (let j = i + 1; j < markers.length; j += 1) {
-						const b = markers[j];
-						let dx = b.displayX - a.displayX;
-						let dy = b.displayY - a.displayY;
-						let dist = Math.hypot(dx, dy) || 0.001;
-						const minDist = 34;
+// ═══════════════════════════════════════
+// QUIZ MODE
+// ═══════════════════════════════════════
+function createQuiz() {
+	state.pool = getPool();
+	const diff = DIFF[state.difficulty];
+	const nMarkers = Math.min(diff.markers, state.pool.length);
+	const nBank = Math.min(diff.bank, state.pool.length);
+	const answers = sample(state.pool, nMarkers);
+	let distractorPool = state.pool.filter(p => !answers.includes(p));
+	if (distractorPool.length < nBank - nMarkers) distractorPool = PLACES.filter(p => !answers.includes(p));
+	const distractors = sample(distractorPool, nBank - nMarkers);
+	const wordBank = shuffle([...answers, ...distractors]);
 
-						if (dist < minDist) {
-							const push = (minDist - dist) / 2;
-							dx /= dist;
-							dy /= dist;
-							a.displayX -= dx * push;
-							a.displayY -= dy * push;
-							b.displayX += dx * push;
-							b.displayY += dy * push;
-						}
-					}
+	const markers = answers.map((place, i) => {
+		const pt = project(place.lon, place.lat);
+		return { id:i+1, name:place.name, lon:place.lon, lat:place.lat, x:pt.x, y:pt.y, displayX:pt.x, displayY:pt.y, assigned:null, correct:null };
+	});
+	resolveCollisions(markers);
 
-					a.displayX += (a.x - a.displayX) * 0.028;
-					a.displayY += (a.y - a.displayY) * 0.028;
+	state.quiz = { answers, distractors, wordBank, markers };
+	state.selectedMarkerId = markers[0]?.id ?? null;
+	state.revealed = false;
+}
 
-					a.displayX = clamp(a.displayX, 18, MAP.width - 18);
-					a.displayY = clamp(a.displayY, 18, MAP.height - 18);
+function resolveCollisions(markers, minDist) {
+	if (!minDist) minDist = 34;
+	for (let pass = 0; pass < 220; pass++) {
+		for (let i = 0; i < markers.length; i++) {
+			const a = markers[i];
+			for (let j = i+1; j < markers.length; j++) {
+				const b = markers[j];
+				let dx = b.displayX - a.displayX, dy = b.displayY - a.displayY;
+				let dist = Math.hypot(dx,dy) || 0.001;
+				if (dist < minDist) {
+					const push = (minDist-dist)/2; dx/=dist; dy/=dist;
+					a.displayX -= dx*push; a.displayY -= dy*push;
+					b.displayX += dx*push; b.displayY += dy*push;
 				}
 			}
+			a.displayX += (a.x - a.displayX)*0.028;
+			a.displayY += (a.y - a.displayY)*0.028;
+			a.displayX = clamp(a.displayX, 18, MAP.width-18);
+			a.displayY = clamp(a.displayY, 18, MAP.height-18);
+		}
+	}
+}
+
+function reResolveForZoom() {
+	if (!state.quiz) return;
+	// Reset display positions to actual, then re-resolve at current zoom scale
+	for (const m of state.quiz.markers) {
+		m.displayX = m.x;
+		m.displayY = m.y;
+	}
+	resolveCollisions(state.quiz.markers, zs(34));
+	renderMarkers();
+}
+
+function renderQuiz() {
+	if (!state.quiz) return;
+	const diff = DIFF[state.difficulty];
+	const assigned = state.quiz.markers.filter(m => m.assigned).length;
+	els.quizProgress.style.width = (assigned / state.quiz.markers.length * 100) + "%";
+
+	els.assignments.innerHTML = state.quiz.markers.map(m => {
+		const cls = ["assignment"];
+		if (m.id === state.selectedMarkerId) cls.push("selected");
+		if (m.correct === true) cls.push("good");
+		if (m.correct === false) cls.push("bad");
+		let sub = m.correct === true ? "Correct" : m.correct === false ? (state.revealed ? `→ ${m.name}` : "Incorrect") : m.assigned ? "Assigned" : "";
+		if (!m.assigned && !m.correct && state.revealed) sub = `→ ${m.name}`;
+		return `<button class="${cls.join(" ")}" data-mc="${m.id}">
+			<div class="num">#${m.id}</div>
+			<div class="answer">${m.assigned ? esc(m.assigned) : '<span style="color:var(--muted)">—</span>'}</div>
+			${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
+		</button>`;
+	}).join("");
+
+	els.assignments.querySelectorAll("[data-mc]").forEach(btn => {
+		btn.addEventListener("click", () => { state.selectedMarkerId = +btn.dataset.mc; renderQuiz(); renderMarkers(); updateCallout(); });
+	});
+
+	const usedNames = new Set(state.quiz.markers.filter(m=>m.assigned).map(m=>m.assigned));
+	const sel = state.quiz.markers.find(m => m.id === state.selectedMarkerId);
+
+	els.wordBank.innerHTML = state.quiz.wordBank.map(p => {
+		const isUsed = usedNames.has(p.name) && sel?.assigned !== p.name;
+		const isActive = sel?.assigned === p.name;
+		return `<button class="bank-item${isUsed?" used":""}${isActive?" active":""}" data-bp="${esc(p.name)}" ${isUsed?"disabled":""}>${esc(p.name)}</button>`;
+	}).join("");
+
+	els.wordBank.querySelectorAll("[data-bp]").forEach(btn => {
+		btn.addEventListener("click", () => assignPlace(btn.dataset.bp));
+	});
+}
+
+function assignPlace(name) {
+	if (!state.quiz || state.selectedMarkerId == null) return;
+	const marker = state.quiz.markers.find(m => m.id === state.selectedMarkerId);
+	if (!marker) return;
+	state.quiz.markers.forEach(m => { if (m.id !== marker.id && m.assigned === name) m.assigned = null; });
+	marker.assigned = name; marker.correct = null;
+	const next = state.quiz.markers.find(m => !m.assigned && m.id !== marker.id);
+	if (next) state.selectedMarkerId = next.id;
+	renderQuiz(); renderMarkers(); updateCallout();
+}
+
+function checkAnswers() {
+	if (!state.quiz) return;
+	let correct = 0;
+	state.quiz.markers.forEach(m => {
+		m.correct = m.assigned === m.name;
+		if (m.correct) correct++;
+		if (m.assigned) recordAttempt(m.name, m.correct);
+	});
+	els.results.innerHTML = `<strong>Score: ${correct} / ${state.quiz.markers.length}</strong><br>${correct === state.quiz.markers.length ? "Perfect round. That's genuinely impressive." : "Wrong answers are highlighted — study those, then try again."}`;
+	renderQuiz(); renderMarkers(); updateCallout(correct);
+}
+
+function revealAnswers() {
+	if (!state.quiz) return;
+	state.quiz.markers.forEach(m => { m.correct = m.assigned === m.name; });
+	state.revealed = true;
+	renderQuiz(); renderMarkers();
+	els.results.innerHTML = `<strong>Answers revealed.</strong><br>Correct names now shown on both the map and the cards.`;
+	updateCallout();
+}
+
+function resetQuizAnswers() {
+	if (!state.quiz) return;
+	state.quiz.markers.forEach(m => { m.assigned = null; m.correct = null; });
+	state.revealed = false;
+	state.selectedMarkerId = state.quiz.markers[0]?.id ?? null;
+	els.results.innerHTML = "";
+	renderAll();
+}
+
+function renderMarkers() {
+	els.markerLayer.innerHTML = "";
+	if (state.activeMode !== "quiz" || !state.quiz) return;
+
+	state.quiz.markers.forEach(m => {
+		const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+		g.style.cursor = "pointer";
+		const status = m.correct === true ? "var(--good)" : m.correct === false ? "var(--bad)" : m.id === state.selectedMarkerId ? "var(--selected)" : "var(--accent)";
+
+		if (Math.hypot(m.displayX-m.x, m.displayY-m.y) > zs(4)) {
+			const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+			Object.entries({x1:m.x,y1:m.y,x2:m.displayX,y2:m.displayY,stroke:"rgba(31,41,55,0.35)","stroke-width":zs(1.2),"stroke-dasharray":`${zs(4)} ${zs(4)}`}).forEach(([k,v])=>line.setAttribute(k,v));
+			g.appendChild(line);
+		}
+		const anchor = document.createElementNS("http://www.w3.org/2000/svg","circle");
+		Object.entries({cx:m.x,cy:m.y,r:zs(3),fill:status,opacity:0.6}).forEach(([k,v])=>anchor.setAttribute(k,v));
+		g.appendChild(anchor);
+
+		const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+		Object.entries({cx:m.displayX,cy:m.displayY,r:zs(13),fill:status,stroke:"white","stroke-width":zs(2.5)}).forEach(([k,v])=>c.setAttribute(k,v));
+		g.appendChild(c);
+
+		const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+		Object.entries({x:m.displayX,y:m.displayY+zs(4.5),"text-anchor":"middle","font-size":zs(12),"font-weight":700,fill:"white"}).forEach(([k,v])=>t.setAttribute(k,v));
+		t.textContent = m.id;
+		g.appendChild(t);
+
+		if (state.revealed) {
+			const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+			Object.entries({x:m.displayX+zs(18),y:m.displayY+zs(4),"font-size":zs(13),"font-weight":m.correct===false?700:600,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+			lbl.textContent = m.name;
+			g.appendChild(lbl);
 		}
 
-		function getMarkerById(id) {
-			return state.quiz?.markers.find((marker) => marker.id === id) ?? null;
+		g.addEventListener("click", () => { state.selectedMarkerId = m.id; renderQuiz(); renderMarkers(); updateCallout(); });
+		g.addEventListener("mouseenter", e => showTooltip(e, `#${m.id}${m.assigned ? " • "+m.assigned : ""}`));
+		g.addEventListener("mouseleave", hideTooltip);
+		els.markerLayer.appendChild(g);
+	});
+}
+
+// ═══════════════════════════════════════
+// LOCATE MODE (NEW!)
+// ═══════════════════════════════════════
+function startLocateRound(customPool) {
+	const pool = customPool || getPool();
+	const diff = DIFF[state.difficulty];
+	state.locateQueue = sample(pool, Math.min(diff.markers, pool.length));
+	state.locateIndex = 0;
+	state.locateWaiting = true;
+	state.locateCurrentFeedback = null;
+	els.locateFeedbackArea.innerHTML = "";
+	els.locateResults.innerHTML = "";
+	els.locateNextBtn.disabled = true;
+	els.locateSkipBtn.disabled = false;
+	showLocatePrompt();
+}
+
+function showLocatePrompt() {
+	if (state.locateIndex >= state.locateQueue.length) {
+		finishLocateRound();
+		return;
+	}
+	const place = state.locateQueue[state.locateIndex];
+	els.locateName.textContent = place.name;
+	els.locateProgress.style.width = (state.locateIndex / state.locateQueue.length * 100) + "%";
+	els.locateQueue.textContent = `${state.locateIndex + 1} of ${state.locateQueue.length}`;
+	state.locateWaiting = true;
+	els.locateNextBtn.disabled = true;
+	els.locateSkipBtn.disabled = false;
+	els.locateFeedbackArea.innerHTML = "";
+	els.locateLayer.innerHTML = "";
+	updateCallout();
+}
+
+function handleMapClick(e) {
+	if (state.activeMode !== "locate" || !state.locateWaiting) return;
+	const svg = $("mapSvg");
+	const rect = svg.getBoundingClientRect();
+	// Map screen coords to SVG coords using current viewBox
+	const vb = currentViewBox;
+	const px = vb[0] + ((e.clientX - rect.left) / rect.width) * vb[2];
+	const py = vb[1] + ((e.clientY - rect.top) / rect.height) * vb[3];
+	const clicked = unproject(px, py);
+
+	const place = state.locateQueue[state.locateIndex];
+	const dist = haversineKm(place.lat, place.lon, clicked.lat, clicked.lon);
+	const target = project(place.lon, place.lat);
+
+	state.locateWaiting = false;
+	els.locateNextBtn.disabled = false;
+	els.locateSkipBtn.disabled = true;
+
+	// Determine quality
+	let quality, msg, cls;
+	if (dist < 50) { quality = "perfect"; msg = "Spot on!"; cls = "good"; }
+	else if (dist < 150) { quality = "great"; msg = "Very close!"; cls = "good"; }
+	else if (dist < 350) { quality = "ok"; msg = "Getting warm"; cls = "close"; }
+	else { quality = "miss"; msg = "Not quite — study this one"; cls = "bad"; }
+
+	const isCorrect = dist < 350;
+	recordAttempt(place.name, isCorrect);
+
+	els.locateFeedbackArea.innerHTML = `<div class="locate-feedback ${cls}">
+		<div class="dist">${Math.round(dist)} km</div>
+		<div class="msg">${msg}</div>
+	</div>`;
+
+	// Draw on map: click point, correct point, line between
+	const layer = els.locateLayer;
+	layer.innerHTML = "";
+
+	// Pulse at correct location
+	const pulse = document.createElementNS("http://www.w3.org/2000/svg","circle");
+	Object.entries({cx:target.x,cy:target.y,r:zs(8),fill:"none",stroke:isCorrect?"var(--good)":"var(--bad)","stroke-width":zs(2)}).forEach(([k,v])=>pulse.setAttribute(k,v));
+	pulse.innerHTML = `<animate attributeName="r" from="${zs(8)}" to="${zs(40)}" dur="0.8s" fill="freeze"/><animate attributeName="opacity" from="1" to="0" dur="0.8s" fill="freeze"/>`;
+	layer.appendChild(pulse);
+
+	// Line from click to correct
+	const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+	Object.entries({x1:px,y1:py,x2:target.x,y2:target.y,stroke:"rgba(0,0,0,0.3)","stroke-width":zs(1.5),"stroke-dasharray":`${zs(6)} ${zs(4)}`}).forEach(([k,v])=>line.setAttribute(k,v));
+	layer.appendChild(line);
+
+	// Click dot
+	const clickDot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+	Object.entries({cx:px,cy:py,r:zs(5),fill:"var(--selected)",stroke:"white","stroke-width":zs(2)}).forEach(([k,v])=>clickDot.setAttribute(k,v));
+	layer.appendChild(clickDot);
+
+	// Correct dot + label
+	const correctDot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+	Object.entries({cx:target.x,cy:target.y,r:zs(6),fill:isCorrect?"var(--good)":"var(--bad)",stroke:"white","stroke-width":zs(2)}).forEach(([k,v])=>correctDot.setAttribute(k,v));
+	layer.appendChild(correctDot);
+
+	const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+	Object.entries({x:target.x+zs(12),y:target.y-zs(10),"font-size":zs(13),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+	lbl.textContent = place.name;
+	layer.appendChild(lbl);
+
+	updateCallout();
+}
+
+function locateNext() {
+	state.locateIndex++;
+	showLocatePrompt();
+}
+
+function locateSkip() {
+	const place = state.locateQueue[state.locateIndex];
+	if (place) {
+		recordAttempt(place.name, false);
+		// Show where it was
+		const target = project(place.lon, place.lat);
+		els.locateLayer.innerHTML = "";
+		const dot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+		Object.entries({cx:target.x,cy:target.y,r:zs(6),fill:"var(--warn)",stroke:"white","stroke-width":zs(2)}).forEach(([k,v])=>dot.setAttribute(k,v));
+		els.locateLayer.appendChild(dot);
+		const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+		Object.entries({x:target.x+zs(12),y:target.y-zs(10),"font-size":zs(13),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+		lbl.textContent = place.name;
+		els.locateLayer.appendChild(lbl);
+		els.locateFeedbackArea.innerHTML = `<div class="locate-feedback close"><div class="msg">Skipped — here's where it is</div></div>`;
+	}
+	state.locateWaiting = false;
+	els.locateNextBtn.disabled = false;
+	els.locateSkipBtn.disabled = true;
+}
+
+function finishLocateRound() {
+	els.locateName.textContent = "Done!";
+	els.locateProgress.style.width = "100%";
+	els.locateQueue.textContent = "";
+	els.locateResults.innerHTML = `<strong>Round complete.</strong><br>Hit New round for another, or try Review mistakes to drill the ones you missed.`;
+	els.locateNextBtn.disabled = true;
+	els.locateSkipBtn.disabled = true;
+	updateCallout();
+}
+
+els.mapClickzone.addEventListener("click", handleMapClick);
+els.locateSkipBtn.addEventListener("click", locateSkip);
+els.locateNextBtn.addEventListener("click", locateNext);
+
+// ═══════════════════════════════════════
+// STUDY MODE
+// ═══════════════════════════════════════
+function renderStudy() {
+	const pool = getPool().sort((a,b) => a.name.localeCompare(b.name));
+	const q = state.studyFilter.trim().toLowerCase();
+	const filtered = q ? pool.filter(p => p.name.toLowerCase().includes(q)) : pool;
+
+	els.studyList.innerHTML = filtered.map(p => {
+		const stats = state.placeStats[p.name];
+		let badge = "";
+		if (stats) {
+			const pct = Math.round(stats.correct/stats.attempts*100);
+			badge = `<span style="float:right;font-size:0.75rem;color:${pct >= 75 ? 'var(--good)' : pct >= 40 ? 'var(--warn)' : 'var(--bad)'}">${pct}%</span>`;
 		}
-
-		function getAssignedPlaceNames() {
-			return state.quiz?.markers.filter((marker) => marker.assigned).map((marker) => marker.assigned) ?? [];
-		}
-
-		function selectMarker(id) {
-			state.selectedMarkerId = id;
-			renderQuiz();
-			renderMarkers();
-		}
-
-		function assignPlaceToSelected(placeName) {
-			if (!state.quiz || state.selectedMarkerId === null) {
-				return;
-			}
-
-			const marker = getMarkerById(state.selectedMarkerId);
-			if (!marker) {
-				return;
-			}
-
-			for (const other of state.quiz.markers) {
-				if (other.id !== marker.id && other.assigned === placeName) {
-					other.assigned = null;
-				}
-			}
-
-			marker.assigned = placeName;
-			marker.correct = null;
-
-			const nextUnfilled = state.quiz.markers.find((item) => !item.assigned && item.id !== marker.id);
-			if (nextUnfilled) {
-				state.selectedMarkerId = nextUnfilled.id;
-			}
-
-			renderQuiz();
-			renderMarkers();
-			updateCallout();
-		}
-
-		function resetAnswers() {
-			if (!state.quiz) {
-				return;
-			}
-
-			for (const marker of state.quiz.markers) {
-				marker.assigned = null;
-				marker.correct = null;
-			}
-
-			state.revealed = false;
-			state.selectedMarkerId = state.quiz.markers[0]?.id ?? null;
-			renderAll();
-		}
-
-		function checkAnswers() {
-			if (!state.quiz) {
-				return;
-			}
-
-			let correctCount = 0;
-
-			for (const marker of state.quiz.markers) {
-				marker.correct = marker.assigned === marker.name;
-				if (marker.correct) {
-					correctCount += 1;
-				}
-			}
-
-			const completed = state.quiz.markers.filter((marker) => marker.assigned).length;
-			const unfinished = state.quiz.markers.length - completed;
-
-			els.results.innerHTML = `
-				<strong>Score: ${correctCount} / ${state.quiz.markers.length}</strong><br />
-				${unfinished > 0 ? `You still left <strong>${unfinished}</strong> blank. The gods notice these things.` : "Everything is filled in. Nice."}
-			`;
-
-			renderQuiz();
-			renderMarkers();
-			updateCallout(correctCount);
-		}
-
-		function revealAnswers() {
-			if (!state.quiz) {
-				return;
-			}
-
-			for (const marker of state.quiz.markers) {
-				marker.correct = marker.assigned === marker.name;
-			}
-
-			state.revealed = true;
-			renderQuiz();
-			renderMarkers();
-			els.results.innerHTML = `
-				<strong>Answers revealed.</strong><br />
-				The correct place name now appears beside each numbered marker on the map and under each assignment card.
-			`;
-			updateCallout();
-		}
-
-		function toggleStudyMode() {
-			state.studyMode = !state.studyMode;
-			els.studyToggleBtn.textContent = state.studyMode ? "Back to quiz" : "Study mode";
-			renderAll();
-		}
-
-		function updateStats() {
-			const poolCount = state.pool.length;
-			const assignedCount = state.quiz ? state.quiz.markers.filter((marker) => marker.assigned).length : 0;
-			const chips = [
-				`<span class="stat-chip">Set: ${escapeHtml(getModeLabel(state.mode))}</span>`,
-				`<span class="stat-chip">Places in set: ${poolCount}</span>`
-			];
-
-			if (!state.studyMode && state.quiz) {
-				chips.push(`<span class="stat-chip">Assigned: ${assignedCount} / 10</span>`);
-				chips.push(`<span class="stat-chip">Word bank: 20</span>`);
-			}
-
-			if (state.studyMode) {
-				const visibleCount = getFilteredStudyPlaces().length;
-				chips.push(`<span class="stat-chip">Visible in study list: ${visibleCount}</span>`);
-			}
-
-			els.stats.innerHTML = chips.join("");
-		}
-
-		function updateCallout(score = null) {
-			if (state.studyMode) {
-				els.calloutStrong.textContent = "Study mode";
-				els.calloutText.textContent = "Click a place name to highlight it on the map. Hover over dots to see labels. Much calmer. Slightly less gladiatorial.";
-				return;
-			}
-
-			const assignedCount = state.quiz ? state.quiz.markers.filter((marker) => marker.assigned).length : 0;
-
-			if (score !== null) {
-				els.calloutStrong.textContent = `Checked: ${score} / 10`;
-				els.calloutText.textContent = score === 10
-					? "Perfect. You have earned the right to become insufferable in section."
-					: "Wrong answers are color-coded now. Use them. That is what they are for.";
-				return;
-			}
-
-			if (state.revealed) {
-				els.calloutStrong.textContent = "Answer key is showing";
-				els.calloutText.textContent = "Use New quiz for another randomized round with the same region set or switch to Study mode for the full map.";
-				return;
-			}
-
-			const selected = getMarkerById(state.selectedMarkerId);
-
-			if (!selected) {
-				els.calloutStrong.textContent = "Pick a marker";
-				els.calloutText.textContent = "Then click a place name from the word bank.";
-				return;
-			}
-
-			els.calloutStrong.textContent = `Marker ${selected.id} selected`;
-			els.calloutText.textContent = selected.assigned
-				? `Current answer: ${selected.assigned}. Click another term if you want to change it.`
-				: `Choose the place that belongs at marker ${selected.id}. You have assigned ${assignedCount} of 10 so far.`;
-		}
-
-		function renderQuiz() {
-			if (!state.quiz) {
-				return;
-			}
-
-			els.quizView.classList.remove("hidden");
-			els.studyView.classList.add("hidden");
-			els.sidebarTitle.textContent = "Quiz panel";
-			els.sidebarIntro.textContent = "Click a numbered marker on the map, then click a term in the word bank to assign it.";
-
-			const cards = state.quiz.markers.map((marker) => {
-				const classes = ["assignment"];
-				if (marker.id === state.selectedMarkerId) {
-					classes.push("selected");
-				}
-				if (marker.correct === true) {
-					classes.push("good");
-				}
-				if (marker.correct === false) {
-					classes.push("bad");
-				}
-
-				let sub = "Unanswered";
-				if (marker.correct === true) {
-					sub = "Correct";
-				} else if (marker.correct === false) {
-					sub = state.revealed
-						? `Correct answer: ${marker.name}`
-						: "Incorrect";
-				} else if (state.revealed) {
-					sub = `Correct answer: ${marker.name}`;
-				} else if (marker.assigned) {
-					sub = "Assigned";
-				}
-
-				return `
-					<button class="${classes.join(" ")}" data-marker-card="${marker.id}">
-						<div class="num">Marker ${marker.id}</div>
-						<div class="answer">${marker.assigned ? escapeHtml(marker.assigned) : "<span style='color: var(--muted);'>Choose from word bank</span>"}</div>
-						<div class="sub">${escapeHtml(sub)}</div>
-					</button>
-				`;
-			}).join("");
-
-			els.assignments.innerHTML = cards;
-
-			for (const button of els.assignments.querySelectorAll("[data-marker-card]")) {
-				button.addEventListener("click", () => {
-					selectMarker(Number(button.dataset.markerCard));
-				});
-			}
-
-			const usedNames = new Set(getAssignedPlaceNames());
-			const selectedMarker = getMarkerById(state.selectedMarkerId);
-
-			const items = state.quiz.wordBank.map((place) => {
-				const isUsedElsewhere = usedNames.has(place.name) && selectedMarker?.assigned !== place.name;
-				const isActive = selectedMarker?.assigned === place.name;
-				return `
-					<button class="bank-item${isUsedElsewhere ? " used" : ""}${isActive ? " active" : ""}" data-bank-place="${escapeHtml(place.name)}" ${isUsedElsewhere ? "disabled" : ""}>
-						${escapeHtml(place.name)}
-					</button>
-				`;
-			}).join("");
-
-			els.wordBank.innerHTML = items;
-
-			for (const button of els.wordBank.querySelectorAll("[data-bank-place]")) {
-				button.addEventListener("click", () => {
-					assignPlaceToSelected(button.dataset.bankPlace);
-				});
-			}
-		}
-
-		function renderMarkers() {
-			els.markerLayer.innerHTML = "";
-			els.studyLayer.innerHTML = "";
-
-			if (state.studyMode) {
-				renderStudyDots();
-				return;
-			}
-
-			if (!state.quiz) {
-				return;
-			}
-
-			for (const marker of state.quiz.markers) {
-				const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-				group.setAttribute("tabindex", "0");
-				group.setAttribute("role", "button");
-				group.style.cursor = "pointer";
-
-				const status = marker.correct === true
-					? "var(--good)"
-					: marker.correct === false
-						? "var(--bad)"
-						: marker.id === state.selectedMarkerId
-							? "var(--selected)"
-							: "var(--accent)";
-
-				if (Math.hypot(marker.displayX - marker.x, marker.displayY - marker.y) > 4) {
-					const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-					line.setAttribute("x1", marker.x.toFixed(1));
-					line.setAttribute("y1", marker.y.toFixed(1));
-					line.setAttribute("x2", marker.displayX.toFixed(1));
-					line.setAttribute("y2", marker.displayY.toFixed(1));
-					line.setAttribute("stroke", "rgba(31,41,55,0.45)");
-					line.setAttribute("stroke-width", "1.5");
-					line.setAttribute("stroke-dasharray", "4 4");
-					group.appendChild(line);
-				}
-
-				const anchor = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-				anchor.setAttribute("cx", marker.x.toFixed(1));
-				anchor.setAttribute("cy", marker.y.toFixed(1));
-				anchor.setAttribute("r", "3.2");
-				anchor.setAttribute("fill", status);
-				anchor.setAttribute("opacity", "0.75");
-				group.appendChild(anchor);
-
-				const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-				circle.setAttribute("cx", marker.displayX.toFixed(1));
-				circle.setAttribute("cy", marker.displayY.toFixed(1));
-				circle.setAttribute("r", "13");
-				circle.setAttribute("fill", status);
-				circle.setAttribute("stroke", "white");
-				circle.setAttribute("stroke-width", "2.5");
-				group.appendChild(circle);
-
-				const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-				text.setAttribute("x", marker.displayX.toFixed(1));
-				text.setAttribute("y", (marker.displayY + 4.5).toFixed(1));
-				text.setAttribute("text-anchor", "middle");
-				text.setAttribute("font-size", "12");
-				text.setAttribute("font-weight", "700");
-				text.setAttribute("fill", "white");
-				text.textContent = marker.id;
-				group.appendChild(text);
-
-				if (state.revealed) {
-					const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-					label.setAttribute("x", (marker.displayX + 18).toFixed(1));
-					label.setAttribute("y", (marker.displayY + 4).toFixed(1));
-					label.setAttribute("font-size", "14");
-					label.setAttribute("font-weight", marker.correct === false ? "700" : "600");
-					label.setAttribute("fill", "var(--ink)");
-					label.textContent = marker.name;
-					group.appendChild(label);
-				}
-
-				group.addEventListener("click", () => selectMarker(marker.id));
-				group.addEventListener("mouseenter", (event) => {
-					showTooltip(event, `Marker ${marker.id}${marker.assigned ? ` • ${marker.assigned}` : ""}`);
-				});
-				group.addEventListener("mouseleave", hideTooltip);
-				group.addEventListener("focus", (event) => {
-					showTooltip(event, `Marker ${marker.id}`);
-				});
-				group.addEventListener("blur", hideTooltip);
-
-				els.markerLayer.appendChild(group);
-			}
-		}
-
-		function getFilteredStudyPlaces() {
-			const query = state.studyFilter.trim().toLowerCase();
-			const base = [...state.pool].sort((a, b) => a.name.localeCompare(b.name));
-			if (!query) {
-				return base;
-			}
-			return base.filter((place) => place.name.toLowerCase().includes(query));
-		}
-
-		function renderStudyList() {
-			els.quizView.classList.add("hidden");
-			els.studyView.classList.remove("hidden");
-			els.sidebarTitle.textContent = "Study mode";
-			els.sidebarIntro.textContent = "Browse the full set for the selected region and click any place to light it up on the map.";
-
-			const items = getFilteredStudyPlaces().map((place) => `
-				<button class="study-item${state.studySelectedName === place.name ? " active" : ""}" data-study-place="${escapeHtml(place.name)}">
-					${escapeHtml(place.name)}
-				</button>
-			`).join("");
-
-			els.studyList.innerHTML = items || `<div class="small">No places match that filter.</div>`;
-
-			for (const button of els.studyList.querySelectorAll("[data-study-place]")) {
-				button.addEventListener("click", () => {
-					state.studySelectedName = button.dataset.studyPlace;
-					renderAll();
-				});
-			}
-		}
-
-		function renderStudyDots() {
-			const visible = getFilteredStudyPlaces();
-
-			for (const place of visible) {
-				const point = project(place.lon, place.lat);
-				const selected = state.studySelectedName === place.name;
-
-				const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-
-				const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-				dot.setAttribute("cx", point.x.toFixed(1));
-				dot.setAttribute("cy", point.y.toFixed(1));
-				dot.setAttribute("r", selected ? "6.5" : "4.2");
-				dot.setAttribute("fill", selected ? "var(--accent)" : "rgba(139,94,52,0.85)");
-				dot.setAttribute("stroke", "white");
-				dot.setAttribute("stroke-width", selected ? "2.2" : "1.5");
-				group.appendChild(dot);
-
-				if (selected) {
-					const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
-					label.setAttribute("x", (point.x + 10).toFixed(1));
-					label.setAttribute("y", (point.y - 10).toFixed(1));
-					label.setAttribute("font-size", "14");
-					label.setAttribute("font-weight", "700");
-					label.setAttribute("fill", "var(--ink)");
-					label.textContent = place.name;
-					group.appendChild(label);
-				}
-
-				group.addEventListener("mouseenter", (event) => {
-					showTooltip(event, place.name);
-				});
-				group.addEventListener("mouseleave", hideTooltip);
-				group.addEventListener("click", () => {
-					state.studySelectedName = place.name;
-					renderAll();
-				});
-
-				els.studyLayer.appendChild(group);
-			}
-		}
-
-		function showTooltip(event, text) {
-			const box = document.getElementById("mapSvg").getBoundingClientRect();
-			let clientX = 0;
-			let clientY = 0;
-
-			if (event.clientX && event.clientY) {
-				clientX = event.clientX;
-				clientY = event.clientY;
-			} else {
-				const targetBox = event.target.getBoundingClientRect();
-				clientX = targetBox.left + targetBox.width / 2;
-				clientY = targetBox.top + targetBox.height / 2;
-			}
-
-			els.tooltip.textContent = text;
-			els.tooltip.style.left = `${clientX - box.left}px`;
-			els.tooltip.style.top = `${clientY - box.top}px`;
-			els.tooltip.style.opacity = "1";
-		}
-
-		function hideTooltip() {
-			els.tooltip.style.opacity = "0";
-		}
-
-		function renderAll() {
-			updateStats();
-			updateCallout();
-
-			if (state.studyMode) {
-				renderStudyList();
-			} else {
-				renderQuiz();
-			}
-
-			renderMarkers();
-		}
-
-		function setMode(modeValue) {
-			state.mode = modeValue;
-			createQuiz();
-			renderAll();
-		}
-
-		els.modeSelect.addEventListener("change", () => {
-			setMode(els.modeSelect.value);
+		return `<button class="study-item${state.studySelectedName===p.name?" active":""}" data-sp="${esc(p.name)}">${esc(p.name)}${badge}</button>`;
+	}).join("") || `<div style="color:var(--muted);font-size:0.88rem;padding:8px">No places match.</div>`;
+
+	els.studyList.querySelectorAll("[data-sp]").forEach(btn => {
+		btn.addEventListener("click", () => {
+			state.studySelectedName = btn.dataset.sp;
+			renderStudy();
+			renderStudyDots();
 		});
+	});
 
-		els.newQuizBtn.addEventListener("click", () => {
-			createQuiz();
-			renderAll();
-			els.results.innerHTML = `
-				<strong>Fresh quiz generated.</strong><br />
-				You have 10 numbered markers and a new 20-term bank from the ${escapeHtml(getModeLabel(state.mode))} set.
-			`;
-		});
+	renderStudyDots();
+	updateCallout();
+}
 
-		els.resetBtn.addEventListener("click", () => {
-			resetAnswers();
-			els.results.innerHTML = `
-				<strong>Answers cleared.</strong><br />
-				Same map, same word bank, blank slate.
-			`;
-		});
+function renderStudyDots() {
+	els.studyLayer.innerHTML = "";
+	if (state.activeMode !== "study") return;
+	const pool = getPool().sort((a,b) => a.name.localeCompare(b.name));
+	const q = state.studyFilter.trim().toLowerCase();
+	const filtered = q ? pool.filter(p => p.name.toLowerCase().includes(q)) : pool;
 
-		els.checkBtn.addEventListener("click", checkAnswers);
-		els.revealBtn.addEventListener("click", revealAnswers);
-		els.studyToggleBtn.addEventListener("click", toggleStudyMode);
+	filtered.forEach(p => {
+		const pt = project(p.lon, p.lat);
+		const sel = state.studySelectedName === p.name;
+		const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+		g.style.cursor = "pointer";
 
-		els.studySearch.addEventListener("input", () => {
-			state.studyFilter = els.studySearch.value;
-			renderAll();
-		});
+		const dot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+		Object.entries({cx:pt.x,cy:pt.y,r:sel?zs(7):zs(4),fill:sel?"var(--accent)":"rgba(155,94,42,0.8)",stroke:"white","stroke-width":sel?zs(2.2):zs(1.2)}).forEach(([k,v])=>dot.setAttribute(k,v));
+		g.appendChild(dot);
 
-		setMode("all");
-	</script>
+		if (sel) {
+			const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+			Object.entries({x:pt.x+zs(12),y:pt.y-zs(10),"font-size":zs(14),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+			lbl.textContent = p.name;
+			g.appendChild(lbl);
+		}
+
+		g.addEventListener("mouseenter", e => showTooltip(e, p.name));
+		g.addEventListener("mouseleave", hideTooltip);
+		g.addEventListener("click", () => { state.studySelectedName = p.name; renderStudy(); });
+		els.studyLayer.appendChild(g);
+	});
+}
+
+els.studySearch.addEventListener("input", () => { state.studyFilter = els.studySearch.value; renderStudy(); });
+
+// ═══════════════════════════════════════
+// CALLOUT
+// ═══════════════════════════════════════
+function updateCallout(score = null) {
+	const c = els.callout;
+	c.className = "callout";
+
+	if (state.activeMode === "locate") {
+		if (state.locateIndex >= state.locateQueue.length && state.locateQueue.length > 0) {
+			els.calloutStrong.textContent = "Round finished";
+			els.calloutText.textContent = `Session accuracy: ${state.session.attempts > 0 ? Math.round(state.session.correct/state.session.attempts*100) : 0}%`;
+		} else if (!state.locateWaiting && state.locateQueue.length > 0) {
+			els.calloutStrong.textContent = "Press Enter or click Next";
+			els.calloutText.textContent = "Review the answer on the map, then move on.";
+		} else {
+			els.calloutStrong.textContent = "Click on the map";
+			els.calloutText.textContent = "Find the highlighted place as precisely as you can.";
+		}
+		return;
+	}
+
+	if (state.activeMode === "study") {
+		els.calloutStrong.textContent = "Study mode";
+		els.calloutText.textContent = state.studySelectedName ? `Showing: ${state.studySelectedName}` : "Click any place to see it on the map. Accuracy shown if you've been quizzed.";
+		return;
+	}
+
+	// Quiz mode
+	if (score !== null) {
+		c.className = score === state.quiz.markers.length ? "callout good-callout" : "callout bad-callout";
+		els.calloutStrong.textContent = `${score} / ${state.quiz.markers.length}`;
+		els.calloutText.textContent = score === state.quiz.markers.length ? "Perfect. Genuinely impressive." : "Wrong answers are highlighted. Study those, then try again.";
+		return;
+	}
+	if (state.revealed) {
+		els.calloutStrong.textContent = "Answers revealed";
+		els.calloutText.textContent = "Labels shown on map. Hit New round for another set.";
+		return;
+	}
+	const sel = state.quiz?.markers.find(m => m.id === state.selectedMarkerId);
+	if (sel) {
+		els.calloutStrong.textContent = `Marker #${sel.id}`;
+		els.calloutText.textContent = sel.assigned ? `Current: ${sel.assigned}` : "Choose from the word bank below.";
+	} else {
+		els.calloutStrong.textContent = "Pick a marker";
+		els.calloutText.textContent = "Click a numbered circle on the map.";
+	}
+}
+
+// ═══════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════
+function showTooltip(e, text) {
+	const box = $("mapSvg").getBoundingClientRect();
+	let cx = e.clientX ?? 0, cy = e.clientY ?? 0;
+	if (!cx && e.target) { const r = e.target.getBoundingClientRect(); cx = r.left+r.width/2; cy = r.top+r.height/2; }
+	els.tooltip.textContent = text;
+	els.tooltip.style.left = `${cx - box.left}px`;
+	els.tooltip.style.top = `${cy - box.top}px`;
+	els.tooltip.style.opacity = "1";
+}
+function hideTooltip() { els.tooltip.style.opacity = "0"; }
+
+// ═══════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════
+function renderAll() {
+	if (state.activeMode === "quiz") { renderQuiz(); renderMarkers(); }
+	else if (state.activeMode === "locate") { /* handled by startLocateRound */ }
+	else if (state.activeMode === "study") { renderStudy(); }
+	updateCallout();
+	updateSessionStats();
+}
+
+// ═══════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════
+els.regionSelect.addEventListener("change", () => {
+	state.region = els.regionSelect.value;
+	state.pool = getPool();
+	if (state.activeMode === "quiz") { createQuiz(); renderAll(); }
+	else if (state.activeMode === "locate") startLocateRound();
+	else renderStudy();
+});
+
+document.querySelectorAll(".diff-pill").forEach(pill => {
+	pill.addEventListener("click", () => {
+		document.querySelectorAll(".diff-pill").forEach(p => p.classList.remove("active"));
+		pill.classList.add("active");
+		state.difficulty = pill.dataset.diff;
+	});
+});
+
+els.newRoundBtn.addEventListener("click", () => {
+	if (state.activeMode === "quiz") { createQuiz(); els.results.innerHTML = ""; renderAll(); }
+	else if (state.activeMode === "locate") startLocateRound();
+	else renderStudy();
+});
+
+els.reviewMistakesBtn.addEventListener("click", () => {
+	const mistakePlaces = PLACES.filter(p => state.mistakes.has(p.name));
+	if (mistakePlaces.length === 0) return;
+	if (state.activeMode === "locate") {
+		startLocateRound(mistakePlaces);
+	} else {
+		// Switch to locate mode for review
+		document.querySelectorAll(".mode-tab").forEach(t => t.classList.remove("active"));
+		document.querySelector('[data-mode="locate"]').classList.add("active");
+		switchMode("locate");
+		startLocateRound(mistakePlaces);
+	}
+});
+
+els.checkBtn.addEventListener("click", checkAnswers);
+els.revealBtn.addEventListener("click", revealAnswers);
+els.resetBtn.addEventListener("click", resetQuizAnswers);
+
+// Keyboard shortcuts
+document.addEventListener("keydown", e => {
+	if (state.activeMode === "locate") {
+		if (e.key === "Enter" && !els.locateNextBtn.disabled) { e.preventDefault(); locateNext(); }
+		if (e.key === " " && !els.locateSkipBtn.disabled) { e.preventDefault(); locateSkip(); }
+	}
+});
+
+// ═══════════════════════════════════════
+// ZOOM
+// ═══════════════════════════════════════
+function animateViewBox(target, duration = 400) {
+	const svg = $("mapSvg");
+	const start = [...currentViewBox];
+	const startTime = performance.now();
+	if (zoomAnimId) cancelAnimationFrame(zoomAnimId);
+	function step(now) {
+		const t = Math.min((now - startTime) / duration, 1);
+		const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // easeInOut
+		const vb = start.map((s, i) => s + (target[i] - s) * ease);
+		svg.setAttribute("viewBox", vb.map(v => v.toFixed(1)).join(" "));
+		currentViewBox = vb;
+		if (t < 1) zoomAnimId = requestAnimationFrame(step);
+		else {
+			currentViewBox = [...target];
+			zoomAnimId = null;
+			// Re-render overlays at final zoom scale
+			if (state.activeMode === "quiz") reResolveForZoom();
+			else if (state.activeMode === "study") renderStudyDots();
+		}
+	}
+	zoomAnimId = requestAnimationFrame(step);
+}
+
+document.querySelectorAll(".zoom-btn").forEach(btn => {
+	btn.addEventListener("click", () => {
+		document.querySelectorAll(".zoom-btn").forEach(b => b.classList.remove("active"));
+		btn.classList.add("active");
+		const preset = ZOOM_PRESETS[btn.dataset.zoom];
+		if (preset) animateViewBox(preset);
+	});
+});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+createQuiz();
+renderAll();
+</script>
 </body>
 </html>
