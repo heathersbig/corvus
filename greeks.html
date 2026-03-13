@@ -948,7 +948,7 @@ function renderQuiz() {
 		if (m.id === state.selectedMarkerId) cls.push("selected");
 		if (m.correct === true) cls.push("good");
 		if (m.correct === false) cls.push("bad");
-		let sub = m.correct === true ? "✓ Correct" : m.correct === false ? (state.revealed ? `✗ → ${m.name}` : "✗ Incorrect") : m.assigned ? "Assigned" : "";
+		let sub = m.correct === true ? "✓ Correct" : m.correct === false ? `✗ Correct answer: ${m.name}` : m.assigned ? "Assigned" : "";
 		if (!m.assigned && !m.correct && state.revealed) sub = `→ ${m.name}`;
 		const icon = m.correct === true ? " ✓" : m.correct === false ? " ✗" : "";
 
@@ -958,6 +958,7 @@ function renderQuiz() {
 			const info = PLACE_INFO[m.name];
 			if (info) {
 				infoHtml = `<div class="place-info">
+					<div style="font-weight:700;font-size:0.88rem;margin-bottom:3px">${esc(m.name)}</div>
 					<div class="pi-date">${esc(info.date)}</div>
 					<div class="pi-event">${esc(info.event)}</div>
 					<div class="pi-tip">📍 ${esc(info.tip)}</div>
@@ -1054,6 +1055,13 @@ function renderMarkers() {
 		Object.entries({cx:m.displayX,cy:m.displayY,r:zs(13),fill:status,stroke:"white","stroke-width":zs(2.5)}).forEach(([k,v])=>c.setAttribute(k,v));
 		g.appendChild(c);
 
+		// Selected marker: bright pulsing outer ring
+		if (m.id === state.selectedMarkerId && m.correct == null) {
+			const sel = document.createElementNS("http://www.w3.org/2000/svg","circle");
+			Object.entries({cx:m.displayX,cy:m.displayY,r:zs(19),fill:"none",stroke:"var(--selected)","stroke-width":zs(2.5),opacity:0.5}).forEach(([k,v])=>sel.setAttribute(k,v));
+			g.appendChild(sel);
+		}
+
 		// Shape cue: dashed outer ring on incorrect
 		if (m.correct === false) {
 			const ring = document.createElementNS("http://www.w3.org/2000/svg","circle");
@@ -1067,23 +1075,28 @@ function renderMarkers() {
 			g.appendChild(ring);
 		}
 
+		// Always show the marker number inside the circle
 		const t = document.createElementNS("http://www.w3.org/2000/svg","text");
-		// Show ✓/✗ after checking instead of just numbers
-		const label = m.correct === true ? "✓" : m.correct === false ? "✗" : String(m.id);
-		const fsize = m.correct != null ? zs(15) : zs(12);
-		Object.entries({x:m.displayX,y:m.displayY+zs(m.correct != null ? 5.5 : 4.5),"text-anchor":"middle","font-size":fsize,"font-weight":700,fill:"white"}).forEach(([k,v])=>t.setAttribute(k,v));
-		t.textContent = label;
+		Object.entries({x:m.displayX,y:m.displayY+zs(4.5),"text-anchor":"middle","font-size":zs(12),"font-weight":700,fill:"white"}).forEach(([k,v])=>t.setAttribute(k,v));
+		t.textContent = m.id;
 		g.appendChild(t);
 
-		if (state.revealed) {
+		// After check or reveal: show correct place name + ✓/✗ badge next to marker
+		if (m.correct !== null || state.revealed) {
+			const badge = m.correct === true ? " ✓" : m.correct === false ? " ✗" : "";
 			const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
-			Object.entries({x:m.displayX+zs(18),y:m.displayY+zs(4),"font-size":zs(13),"font-weight":m.correct===false?700:600,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
-			lbl.textContent = m.name;
+			Object.entries({x:m.displayX+zs(18),y:m.displayY+zs(4),"font-size":zs(12),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+			lbl.textContent = m.name + badge;
 			g.appendChild(lbl);
 		}
 
 		g.addEventListener("click", () => { state.selectedMarkerId = m.id; renderQuiz(); renderMarkers(); updateCallout(); });
-		g.addEventListener("mouseenter", e => showTooltip(e, `#${m.id}${m.assigned ? " • "+m.assigned : ""}`));
+		g.addEventListener("mouseenter", e => {
+			let tip = `#${m.id}`;
+			if (m.assigned) tip += ` — your answer: ${m.assigned}`;
+			if (m.correct !== null) tip += m.correct ? " ✓" : ` ✗ (correct: ${m.name})`;
+			showTooltip(e, tip);
+		});
 		g.addEventListener("mouseleave", hideTooltip);
 		els.markerLayer.appendChild(g);
 	});
