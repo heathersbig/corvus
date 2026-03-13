@@ -237,6 +237,15 @@
 		.assignment .num { font-weight: 700; font-size: 0.82rem; color: var(--accent); margin-bottom: 3px; }
 		.assignment .answer { font-size: 0.9rem; font-weight: 500; }
 		.assignment .sub { color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+		.place-info {
+			margin-top: 6px; padding: 8px 9px;
+			background: rgba(155,94,42,0.04);
+			border-radius: 8px; border: 1px solid rgba(155,94,42,0.08);
+			font-size: 0.78rem; line-height: 1.45; color: var(--ink);
+		}
+		.place-info .pi-date { font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+		.place-info .pi-event { margin-bottom: 4px; }
+		.place-info .pi-tip { color: var(--muted); font-style: italic; }
 
 		/* Word bank */
 		.section-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
@@ -562,6 +571,8 @@
 			<div id="studyView" class="sidebar-inner hidden">
 				<input class="search-input" id="studySearch" type="text" placeholder="Search places..." />
 				<div style="height:10px"></div>
+				<div id="studyInfoPanel"></div>
+				<div style="height:10px"></div>
 				<div class="study-list" id="studyList"></div>
 			</div>
 		</div>
@@ -577,6 +588,92 @@ const MAP = { width:1200, height:700, minLon:-12, maxLon:82, minLat:20, maxLat:4
 const PLACES = [{"name":"Thebes","lat":38.325,"lon":23.318,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Amphipolis","lat":40.823,"lon":23.845,"tags":["all","greece_aegean"]},{"name":"Olynthos","lat":40.294,"lon":23.387,"tags":["all","greece_aegean"]},{"name":"Pella","lat":40.76,"lon":22.525,"tags":["all","greece_aegean"]},{"name":"Vergina","lat":40.486,"lon":22.318,"tags":["all","greece_aegean"]},{"name":"Chalcidice","lat":40.3,"lon":23.4,"tags":["all","greece_aegean"]},{"name":"Mount Athos","lat":40.158,"lon":24.326,"tags":["all","greece_aegean"]},{"name":"Epirus","lat":39.6,"lon":20.8,"tags":["all","greece_aegean"]},{"name":"Macedon","lat":40.7,"lon":22.9,"tags":["all","greece_aegean"]},{"name":"Thessaly","lat":39.6,"lon":22.4,"tags":["all","greece_aegean"]},{"name":"Pherae","lat":39.45,"lon":22.75,"tags":["all","greece_aegean"]},{"name":"Leuctra","lat":38.215,"lon":23.191,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Athens","lat":37.984,"lon":23.728,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Euboaea","lat":38.5,"lon":23.7,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Eretria","lat":38.4,"lon":23.79,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Lefkandi","lat":38.417,"lon":23.7,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Chalcis","lat":38.462,"lon":23.594,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Plataea","lat":38.214,"lon":23.28,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Marathon","lat":38.15,"lon":24.0,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Salamis","lat":37.97,"lon":23.48,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Thermopylae","lat":38.796,"lon":22.536,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Artemision","lat":39.175,"lon":23.24,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Sphacteria","lat":36.97,"lon":21.66,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Pylos","lat":36.913,"lon":21.696,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Messenia","lat":37.05,"lon":21.85,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Megara","lat":37.995,"lon":23.343,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Corcyra","lat":39.624,"lon":19.922,"tags":["all","greece_aegean"]},{"name":"Epidamnus","lat":41.31,"lon":19.44,"tags":["all","greece_aegean"]},{"name":"Sparta","lat":37.075,"lon":22.429,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Troy","lat":39.957,"lon":26.239,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Mycale","lat":37.65,"lon":27.02,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Samos","lat":37.75,"lon":26.98,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Naxos","lat":37.1,"lon":25.38,"tags":["all","greece_aegean"]},{"name":"Rhodes","lat":36.434,"lon":28.217,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Crete","lat":35.24,"lon":24.9,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Knossos","lat":35.298,"lon":25.163,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Delphi","lat":38.482,"lon":22.501,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Olympia","lat":37.638,"lon":21.63,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Argos","lat":37.633,"lon":22.733,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Mytilene","lat":39.106,"lon":26.554,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Mylos (Milos)","lat":36.74,"lon":24.43,"tags":["all","greece_aegean"]},{"name":"Delos","lat":37.401,"lon":25.268,"tags":["all","greece_aegean"]},{"name":"Potidaea","lat":40.194,"lon":23.329,"tags":["all","greece_aegean"]},{"name":"Mantineia","lat":37.62,"lon":22.39,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Charonea (Chaeronea)","lat":38.49,"lon":22.85,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Messene","lat":37.178,"lon":21.932,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Mycenae","lat":37.73,"lon":22.754,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Corinth","lat":37.938,"lon":22.932,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Arginusae","lat":39.0,"lon":26.8,"tags":["all","anatolia_persia"]},{"name":"Aegospotami","lat":40.23,"lon":26.39,"tags":["all","anatolia_persia"]},{"name":"Miletus","lat":37.53,"lon":27.28,"tags":["all","anatolia_persia"]},{"name":"Issus","lat":36.58,"lon":36.17,"tags":["all","anatolia_persia"]},{"name":"Granacus River","lat":40.39,"lon":27.22,"tags":["all","anatolia_persia"]},{"name":"Gaugemela","lat":36.36,"lon":43.26,"tags":["all","anatolia_persia"]},{"name":"Ipsus","lat":38.95,"lon":30.99,"tags":["all","anatolia_persia"]},{"name":"Babylon","lat":32.54,"lon":44.42,"tags":["all","anatolia_persia"]},{"name":"Susa","lat":32.19,"lon":48.26,"tags":["all","anatolia_persia"]},{"name":"Persepolis","lat":29.93,"lon":52.89,"tags":["all","anatolia_persia"]},{"name":"Sardis","lat":38.48,"lon":28.04,"tags":["all","anatolia_persia"]},{"name":"Antioch","lat":36.2,"lon":36.16,"tags":["all","anatolia_persia"]},{"name":"Pergamon","lat":39.13,"lon":27.18,"tags":["all","anatolia_persia"]},{"name":"Priene","lat":37.66,"lon":27.3,"tags":["all","anatolia_persia"]},{"name":"Seleucis on the Tigris","lat":33.1,"lon":44.58,"tags":["all","anatolia_persia"]},{"name":"Ai Khanoum","lat":37.165,"lon":69.409,"tags":["all","anatolia_persia"]},{"name":"Tyre","lat":33.27,"lon":35.2,"tags":["all","anatolia_persia","west_med"]},{"name":"Cunaxa","lat":33.25,"lon":44.25,"tags":["all","anatolia_persia"]},{"name":"Halicarnassus","lat":37.037,"lon":27.424,"tags":["all","anatolia_persia"]},{"name":"Indus River","lat":27.5,"lon":68.7,"tags":["all","anatolia_persia"]},{"name":"Alexandria","lat":31.2,"lon":29.92,"tags":["all","west_med"]},{"name":"Siwa","lat":29.2,"lon":25.52,"tags":["all","west_med"]},{"name":"Carthage","lat":36.85,"lon":10.33,"tags":["all","west_med"]},{"name":"Syracuse","lat":37.075,"lon":15.286,"tags":["all","west_med"]},{"name":"Akragas","lat":37.308,"lon":13.576,"tags":["all","west_med"]},{"name":"Gela","lat":37.07,"lon":14.24,"tags":["all","west_med"]},{"name":"Himera","lat":37.99,"lon":13.82,"tags":["all","west_med"]},{"name":"Selinus","lat":37.583,"lon":12.829,"tags":["all","west_med"]},{"name":"Segesta","lat":37.94,"lon":12.83,"tags":["all","west_med"]},{"name":"Motya","lat":37.87,"lon":12.47,"tags":["all","west_med"]},{"name":"Rome","lat":41.893,"lon":12.483,"tags":["all","west_med"]},{"name":"Pithekoussai","lat":40.74,"lon":13.95,"tags":["all","west_med"]}];
 
 // SVG paths for land (preserved from original)
+
+// ═══════════════════════════════════════
+// HISTORICAL NOTES — shown after check/reveal
+// ═══════════════════════════════════════
+const PLACE_INFO = {
+"Thebes": {date:"c. 1400 BC – 335 BC",event:"Boeotian powerhouse. Led by Epaminondas, crushed Sparta at Leuctra (371 BC) and briefly dominated Greece. Sacred Band = elite 150 paired fighters. Alexander razed it in 335 BC as a warning.",tip:"Thebes is inland, NW of Athens — look for it near Leuctra and Plataea in Boeotia."},
+"Amphipolis": {date:"437 BC (founded)",event:"Athenian colony on the Strymon River in Thrace. Its loss to Brasidas (424 BC) was a turning point of the Peloponnesian War. Thucydides was exiled for failing to defend it.",tip:"Far NE Greece near the coast — think 'Amphipolis = up north in Macedonia.'"},
+"Olynthos": {date:"Destroyed 348 BC",event:"Head of the Chalcidian League. Philip II besieged and destroyed it despite Athens' Olynthiac orations by Demosthenes urging its defense.",tip:"Chalcidice peninsula, between Pella and Mount Athos."},
+"Pella": {date:"c. 400–168 BC",event:"Capital of Macedon from Archelaus onward. Birthplace of Alexander the Great (356 BC). Had famous pebble mosaics.",tip:"Inland Macedonia, west of Thessaloniki — the royal seat before Alexander went east."},
+"Vergina": {date:"c. 1000–300 BC",event:"Ancient Aigai, original capital of Macedon. Royal tombs discovered 1977 — likely Philip II's burial with gold larnax and star of Macedon.",tip:"Near Pella, a bit SW — remember: Vergina = tombs = Philip II's golden chest."},
+"Chalcidice": {date:"8th c.–4th c. BC",event:"Three-fingered peninsula (Kassandra, Sithonia, Athos). Heavily colonized by southern Greek cities. Philip II absorbed it into Macedon.",tip:"The trident-shaped peninsula sticking into the Aegean south of Thessaloniki."},
+"Mount Athos": {date:"Antiquity onward",event:"Easternmost finger of Chalcidice. Xerxes dug a canal across it (480 BC) to avoid the storms that wrecked his father's fleet. Later became a center of Orthodox monasticism.",tip:"Tip of the third finger of Chalcidice — Xerxes' canal is the ancient exam fact."},
+"Epirus": {date:"c. 470–167 BC",event:"NW Greek region. Home of the oracle at Dodona (Zeus). Pyrrhus of Epirus (319–272 BC) won 'Pyrrhic victories' against Rome.",tip:"Upper-left corner of Greece, west coast — mountainous, faces the Adriatic."},
+"Macedon": {date:"c. 808–168 BC",event:"Northern Greek kingdom. Under Philip II unified Greece; under Alexander III conquered the Persian Empire. Fell to Rome at Pydna (168 BC).",tip:"The broad region in N. Greece — Pella, Vergina, and Amphipolis are all inside it."},
+"Thessaly": {date:"Archaic–Classical",event:"Fertile central Greek plain — best cavalry in Greece. Controlled Thermopylae's southern approach. Jason of Pherae briefly unified it (370s BC).",tip:"Big flat region south of Macedon, north of Boeotia — the breadbasket of Greece."},
+"Pherae": {date:"4th c. BC",event:"Thessalian city where the tyrant Jason of Pherae built a powerful state in the 370s BC. His assassination prevented him from dominating Greece before Philip II did.",tip:"In Thessaly — think 'Pherae = Jason = almost-Philip.'"},
+"Leuctra": {date:"371 BC",event:"Battle where Theban general Epaminondas shattered Spartan military myth. His oblique order (deep left wing) killed Spartan king Cleombrotus I. Ended Spartan hegemony for good.",tip:"In Boeotia near Thebes — the battle that broke Sparta's reputation."},
+"Athens": {date:"c. 3000 BC onward",event:"Birthplace of democracy (Cleisthenes, 508 BC), center of philosophy (Socrates, Plato, Aristotle), drama, and the Delian League/Athenian Empire. Defeated Persia at Marathon and Salamis. Lost the Peloponnesian War to Sparta (404 BC).",tip:"East coast of Attica with its port at Piraeus — the cultural capital of the classical world."},
+"Euboaea": {date:"Archaic–Classical",event:"Long island hugging the east coast of central Greece. Major cities Chalcis and Eretria were early colonizers and rivals. Euboean alphabet became basis for Latin script.",tip:"The big sausage-shaped island right next to mainland Greece, east of Boeotia."},
+"Eretria": {date:"c. 800–490 BC",event:"Major Euboean city and early colonizer. Helped Ionian Revolt (499 BC) and was destroyed by Persians in retaliation (490 BC) just before Marathon.",tip:"On Euboea's SW coast, facing Attica — burned by Darius as a warm-up for Marathon."},
+"Lefkandi": {date:"c. 1000–825 BC",event:"Key Dark Age site on Euboea. The 'Heroon' (c. 950 BC) — a massive apsidal building with warrior burial and sacrificed horses — shows surprising wealth during Greece's 'dark' period.",tip:"Between Chalcis and Eretria on Euboea — the site that proved the Dark Age wasn't totally dark."},
+"Chalcis": {date:"8th c. BC onward",event:"Euboean city and prolific colonizer — gave its name to Chalcidice. Fought the Lelantine War against neighboring Eretria (c. 710–650 BC), one of Greece's earliest recorded conflicts.",tip:"Northern end of Euboea at the narrow strait — 'Chalcis' → 'Chalcidice' (colonies named after it)."},
+"Plataea": {date:"479 BC",event:"Site of the decisive Greek land victory over Persia. Pausanias led combined Greek forces that destroyed Mardonius' army. Ended the Persian invasion for good.",tip:"In Boeotia, between Thebes and Athens — the battle that paired with Salamis to end the Persian Wars."},
+"Marathon": {date:"490 BC",event:"Athenians (with Plataean allies) defeated Darius I's invasion force. Miltiades commanded. Pheidippides' run gave us the modern marathon. First proof Greeks could beat Persia in open battle.",tip:"NE coast of Attica, facing the sea — the Persians landed on the beach here."},
+"Salamis": {date:"480 BC",event:"Decisive naval battle where Themistocles' Athenian fleet destroyed Xerxes' navy in narrow straits. Xerxes watched from a throne onshore. Turned the tide of the Persian invasion.",tip:"Island in the Saronic Gulf, right off Athens/Piraeus — narrow straits = Greek advantage."},
+"Thermopylae": {date:"480 BC",event:"'Hot Gates' — narrow coastal pass where Leonidas and 300 Spartans (plus allies) held Xerxes' army for three days. Betrayed by Ephialtes via a mountain path. Iconic last stand.",tip:"The narrow pass between mountains and sea, N of Boeotia — 'Thermo' = hot springs there."},
+"Artemision": {date:"480 BC",event:"Naval battle fought simultaneously with Thermopylae, off the north tip of Euboea. Inconclusive but bought time. Greek fleet withdrew south to Salamis after Thermopylae fell.",tip:"Northern tip of Euboea — think: 'Artemision + Thermopylae = same week, sea + land.'"},
+"Sphacteria": {date:"425 BC",event:"Island off Pylos where Athenians trapped and captured 120 Spartan hoplites — a massive shock. Proved Spartans would surrender rather than die. Huge morale blow to Sparta.",tip:"Tiny island right next to Pylos, SW Peloponnese — 'Sphacteria = Spartans surrendered.'"},
+"Pylos": {date:"425 BC / Bronze Age",event:"Athenian Demosthenes fortified this bay in the Peloponnesian War, leading to the Sphacteria disaster for Sparta. Also site of Nestor's Mycenaean palace (Bronze Age).",tip:"SW corner of the Peloponnese — Messenian coast. Two eras: Nestor's palace + Peloponnesian War."},
+"Messenia": {date:"8th–4th c. BC",event:"Region in SW Peloponnese enslaved by Sparta as helots. Two major Messenian Wars. Epaminondas liberated it after Leuctra (369 BC) and founded Messene as its capital.",tip:"SW Peloponnese — 'Messenia = helots = Sparta's bread supply.'"},
+"Megara": {date:"8th–5th c. BC",event:"City between Athens and Corinth. Founded Megara Hyblaea (Sicily) and Byzantium. The Megarian Decree (432 BC) — Athens' trade embargo — was a trigger for the Peloponnesian War.",tip:"On the isthmus between Attica and the Peloponnese — squeezed between Athens and Corinth."},
+"Corcyra": {date:"c. 734 BC (colonized)",event:"Modern Corfu. Corinthian colony that rebelled. The Corcyra-Corinth conflict (435–433 BC) dragged Athens in and directly triggered the Peloponnesian War (Thucydides Book I).",tip:"Island off NW Greece — 'Corcyra = Corfu = the war's spark.'"},
+"Epidamnus": {date:"c. 627 BC (founded)",event:"Corinthian colony on the Adriatic (modern Durrës, Albania). Civil strife here in 435 BC set off the chain: Corcyra intervened → Corinth objected → Athens involved → Peloponnesian War.",tip:"On the Adriatic coast, modern Albania — 'Epidamnus = domino that started the big war.'"},
+"Sparta": {date:"c. 900–192 BC",event:"Military oligarchy in Laconia. Two kings, ephors, Gerousia. Helot-based economy. Won the Peloponnesian War (404 BC) but hegemony collapsed after Leuctra (371 BC). Never recovered.",tip:"Inland Peloponnese in the Eurotas valley, south of Argos — no walls, the Spartans were the walls."},
+"Troy": {date:"c. 3000–1180 BC",event:"Site of Homer's Iliad (Trojan War, c. 1180 BC traditional). Schliemann excavated it in 1870s. Multiple layers of settlement. Controls the Hellespont/Dardanelles strait.",tip:"NW Anatolia at the entrance to the Dardanelles — 'Troy = where Asia meets Europe's shipping lane.'"},
+"Mycale": {date:"479 BC",event:"Promontory on the Anatolian coast opposite Samos. Greek naval victory over Persia on the same day as Plataea (tradition). Ended Persian naval threat in the Aegean.",tip:"Across the strait from Samos — 'Mycale + Plataea = double whammy, same day, one at sea one on land.'"},
+"Samos": {date:"6th c.–5th c. BC",event:"Major Ionian island. Under tyrant Polycrates (c. 538–522 BC) — massive building projects including a tunnel (Tunnel of Eupalinos). Birthplace of Pythagoras. Key Delian League member.",tip:"Large island off the Anatolian coast near Miletus — 'Samos = Polycrates = Pythagoras.'"},
+"Naxos": {date:"Archaic–Classical",event:"Largest Cycladic island. First Greek state to revolt against Persia unsuccessfully (502 BC), prompting the Ionian Revolt. Center of marble quarrying and early monumental sculpture.",tip:"Biggest island in the Cyclades chain, center of the Aegean."},
+"Rhodes": {date:"408 BC (synoecism)",event:"Island at SE Aegean. Three cities merged into one in 408 BC. Famous for the Colossus (c. 280 BC), one of the Seven Wonders. Major naval power and trade hub.",tip:"Far SE corner of the Aegean, close to Anatolia — 'Rhodes = Colossus = naval crossroads.'"},
+"Crete": {date:"c. 3000–1450 BC",event:"Minoan civilization — earliest European palatial culture. Thalassocracy (sea empire). Linear A script (undeciphered). Collapsed c. 1450 BC, possibly linked to Thera eruption.",tip:"Largest Greek island, far south — 'Crete = Minoans = before Mycenaeans.'"},
+"Knossos": {date:"c. 1950–1350 BC",event:"Chief Minoan palace. Excavated by Arthur Evans (1900). Throne room, frescoes, labyrinth myth (Minotaur). Linear B tablets show Mycenaean takeover c. 1450 BC.",tip:"North-central Crete — 'Knossos = labyrinth = Arthur Evans.'"},
+"Delphi": {date:"8th c.–4th c. BC",event:"Panhellenic sanctuary of Apollo. Home of the Pythia (oracle). 'Navel of the world' (omphalos). Site of Pythian Games. City-states consulted it before wars, colonization, everything.",tip:"On the slopes of Mount Parnassus, central Greece — 'Delphi = oracle = center of the Greek world.'"},
+"Olympia": {date:"776 BC (traditional first games)",event:"Sanctuary of Zeus in the western Peloponnese. Site of the Olympic Games every four years. Phidias' Statue of Zeus = one of the Seven Wonders.",tip:"Western Peloponnese, inland — NOT on Mount Olympus (that's in Thessaly). Common mistake!"},
+"Argos": {date:"c. 2000 BC onward",event:"One of Greece's oldest continuously inhabited cities. Rival of Sparta in the Peloponnese. Destroyed Mycenae (468 BC). Often neutral or opposed Spartan hegemony.",tip:"NE Peloponnese, the Argive plain — near Mycenae. 'Argos = Sparta's local rival.'"},
+"Mytilene": {date:"6th–4th c. BC",event:"Chief city of Lesbos island. Revolted from the Delian League (428 BC). Athens debated destroying it — the Mytilenean Debate (Thucydides) is a key text on justice and empire.",tip:"On the island of Lesbos, NE Aegean near Anatolia — 'Mytilene = the famous debate about mercy.'"},
+"Mylos (Milos)": {date:"416 BC",event:"Cycladic island. Athens attacked neutral Melos in 416 BC. The Melian Dialogue (Thucydides) — 'the strong do what they can, the weak suffer what they must' — is THE text on power politics.",tip:"SW Cyclades — 'Melos = Melian Dialogue = Athenian imperialism at its harshest.'"},
+"Delos": {date:"c. 700 BC onward",event:"Sacred island, mythical birthplace of Apollo and Artemis. Treasury of the Delian League stored here (478 BC) until Pericles moved it to Athens. Major trade hub in Hellenistic era.",tip:"Tiny island in the center of the Cyclades — 'Delos = Delian League = Apollo's birthplace.'"},
+"Potidaea": {date:"432 BC",event:"Corinthian colony on Chalcidice that revolted from Athens. Its siege (432 BC) was one of the immediate causes of the Peloponnesian War. Socrates fought there.",tip:"Neck of the westernmost Chalcidice finger — 'Potidaea = Corinth's colony = war trigger.'"},
+"Mantineia": {date:"418 BC / 362 BC",event:"Two famous battles here in the Peloponnese. In 418 BC Sparta reasserted dominance. In 362 BC Epaminondas won but died, ending Theban hegemony — both sides claimed victory, nobody won.",tip:"Inland Arcadia, Peloponnese — 'Mantineia 362 = Epaminondas dies = everyone loses.'"},
+"Charonea (Chaeronea)": {date:"338 BC",event:"Philip II of Macedon defeated Athens and Thebes here, ending Greek city-state independence. 18-year-old Alexander led the cavalry charge that broke the Sacred Band. Created the League of Corinth.",tip:"In Boeotia, W of Thebes — 'Chaeronea = Philip wins = Greek freedom ends.'"},
+"Messene": {date:"369 BC (founded)",event:"City founded by Epaminondas after liberating Messenia from Sparta. Massive fortification walls (still standing). Symbol of Theban intervention and Spartan decline.",tip:"SW Peloponnese — 'Messene ≠ Messenia (city vs. region). Founded after Leuctra freed the helots.'"},
+"Mycenae": {date:"c. 1600–1100 BC",event:"Center of Mycenaean civilization. Lion Gate, Shaft Graves (gold death masks), tholos tombs. Agamemnon's legendary kingdom. Schliemann excavated the 'Mask of Agamemnon' (1876).",tip:"NE Peloponnese hilltop, near Argos — 'Mycenae = Lion Gate = gold masks = Bronze Age power.'"},
+"Corinth": {date:"c. 800–146 BC",event:"Wealthy city on the isthmus — controlled both the Saronic and Corinthian gulfs. Major colonizer (Syracuse, Corcyra). Rival of Athens. Romans destroyed it 146 BC. Rebuilt by Caesar.",tip:"On the narrow isthmus connecting Peloponnese to central Greece — geography = wealth."},
+"Arginusae": {date:"406 BC",event:"Naval battle where Athens won a costly victory over Sparta near Lesbos. But Athenians executed six winning generals for failing to rescue drowning sailors — a political scandal that weakened Athens before its final defeat.",tip:"Small islands near Lesbos — 'Arginusae = Athens wins the battle but kills its own generals.'"},
+"Aegospotami": {date:"405 BC",event:"Lysander's Spartan fleet destroyed the Athenian navy on the Hellespont. Athens lost 170 ships. This ended the Peloponnesian War — Athens starved and surrendered within months.",tip:"On the Hellespont (Dardanelles) in Thrace — 'Aegospotami = goat rivers = Athens' fleet dies = war over.'"},
+"Miletus": {date:"c. 600–494 BC",event:"Leading Ionian city in Anatolia. Birthplace of philosophy (Thales, Anaximander, Anaximenes). Started the Ionian Revolt (499 BC) against Persia. Persians sacked it in 494 BC.",tip:"SW Anatolian coast — 'Miletus = where philosophy began = Ionian Revolt's epicenter.'"},
+"Issus": {date:"333 BC",event:"Alexander's second major battle against Persia. Defeated Darius III in a narrow coastal plain near modern Iskenderun, Turkey. Darius fled, leaving his family behind. Famous mosaic from Pompeii depicts this battle.",tip:"SE corner of Anatolia, near the Syrian border — 'Issus = narrow space = Alexander's second win.'"},
+"Granacus River": {date:"334 BC",event:"Alexander's first battle in Asia. Cavalry charge across the river against Persian satraps. Nearly killed in personal combat. Won control of western Anatolia.",tip:"NW Anatolia near Troy — 'Granicus = first battle = Alexander almost dies crossing a river.'"},
+"Gaugemela": {date:"331 BC",event:"Alexander's decisive victory over Darius III in Mesopotamia (near modern Mosul, Iraq). Outnumbered but outmaneuvered Persia's massive army. Ended the Achaemenid Empire.",tip:"Deep in Mesopotamia, near the Tigris — 'Gaugamela = checkmate = Persian Empire falls.'"},
+"Ipsus": {date:"301 BC",event:"Battle of the Diadochi (Alexander's successors). Antigonus I killed. Divided Alexander's empire into Ptolemaic, Seleucid, and Antigonid kingdoms. Settled the post-Alexander power struggle.",tip:"Central Anatolia (Phrygia) — 'Ipsus = the battle that split Alexander's empire into three.'"},
+"Babylon": {date:"c. 2300 BC – 323 BC",event:"Ancient Mesopotamian capital. Alexander made it his imperial capital and died here (323 BC, age 32). Hanging Gardens (one of the Seven Wonders, if they existed). Center of astronomy and mathematics.",tip:"On the Euphrates in modern Iraq — 'Babylon = where Alexander died = Hanging Gardens.'"},
+"Susa": {date:"c. 4000 BC onward",event:"Ancient Elamite capital, later Achaemenid winter capital. Alexander held the mass wedding here (324 BC), marrying 10,000 soldiers to Persian women. Stored vast Persian treasury.",tip:"SW Iran — 'Susa = Achaemenid winter palace = mass weddings = treasury.'"},
+"Persepolis": {date:"c. 515–330 BC",event:"Ceremonial capital of the Achaemenid Empire. Built by Darius I and Xerxes. Alexander burned it (330 BC) — revenge for Xerxes' burning of Athens. Incredible relief carvings of tribute-bearers.",tip:"Southern Iran (Fars) — 'Persepolis = Persia's showpiece = Alexander burned it.'"},
+"Sardis": {date:"c. 680–334 BC",event:"Capital of Lydia under Croesus (richest man in the world). First coins minted here. Fell to Cyrus the Great (547 BC). Ionian Greeks burned it (498 BC) — this provoked the Persian Wars.",tip:"Western Anatolia inland — 'Sardis = Croesus = first coins = the fire that started the Persian Wars.'"},
+"Antioch": {date:"300 BC (founded)",event:"Founded by Seleucus I, named for his father Antiochus. Became the Seleucid capital and one of the largest cities of the Hellenistic and Roman world. Major center of early Christianity.",tip:"On the Orontes River in modern Turkey near the Syrian border — 'Antioch = Seleucid capital.'"},
+"Pergamon": {date:"c. 281–133 BC",event:"Attalid kingdom capital in NW Anatolia. Famous library (rivaled Alexandria). Invented parchment (pergamena). Great Altar of Zeus. Bequeathed to Rome by Attalus III.",tip:"NW Anatolian coast, inland — 'Pergamon = parchment = great library = gave itself to Rome.'"},
+"Priene": {date:"4th c. BC",event:"Small Ionian city, but a textbook example of Hippodamian grid planning. Alexander dedicated its temple of Athena. Well-preserved Hellenistic town plan.",tip:"Near Miletus on the Anatolian coast — 'Priene = perfect grid city = urban planning showcase.'"},
+"Seleucis on the Tigris": {date:"c. 305 BC (founded)",event:"Seleucid capital in Mesopotamia built by Seleucus I. Major Hellenistic metropolis, possibly 600,000 people. Replaced Babylon as the region's urban center. Later eclipsed by Ctesiphon.",tip:"On the Tigris in Iraq, near Babylon — 'Seleucia = Seleucus's Babylon replacement.'"},
+"Ai Khanoum": {date:"c. 300–145 BC",event:"Easternmost known Greek city, in modern Afghanistan at the junction of the Oxus and Kokcha rivers. Had a gymnasium, theater, and Delphic maxims inscribed at its entrance. Proof of deep Hellenistic reach into Central Asia.",tip:"Far NE corner of the map, Afghanistan — 'Ai Khanoum = Greek city in Afghanistan = how far Hellenism spread.'"},
+"Tyre": {date:"c. 2750 BC onward",event:"Major Phoenician port city (modern Lebanon). Alexander besieged the island city for 7 months (332 BC), building a causeway to reach it. Founded Carthage. Center of purple dye trade.",tip:"Lebanese coast — 'Tyre = island siege = Alexander's causeway = mother of Carthage.'"},
+"Cunaxa": {date:"401 BC",event:"Battle where Cyrus the Younger tried to overthrow his brother Artaxerxes II. Cyrus died. His 10,000 Greek mercenaries had to march home — Xenophon's Anabasis ('The March of the 10,000').",tip:"Near Babylon in Iraq — 'Cunaxa = Xenophon = the 10,000's long walk home.'"},
+"Halicarnassus": {date:"5th–4th c. BC",event:"Carian city in SW Anatolia. Home of Herodotus ('Father of History'). The Mausoleum (tomb of Mausolus, c. 350 BC) was one of the Seven Wonders. Alexander besieged it in 334 BC.",tip:"SW Anatolian coast (modern Bodrum) — 'Halicarnassus = Herodotus + Mausoleum.'"},
+"Indus River": {date:"326 BC",event:"Eastern limit of Alexander's conquests. His army mutinied at the Hyphasis (Beas) tributary and refused to go further. Alexander turned back — the edge of the Greek world.",tip:"Far eastern edge of the map, modern Pakistan — 'Indus = where Alexander's army said no more.'"},
+"Alexandria": {date:"331 BC (founded)",event:"Founded by Alexander in Egypt. Became the intellectual capital of the Hellenistic world — Great Library, Lighthouse (Pharos, Seven Wonders), Mouseion. Ptolemaic capital. Euclid, Eratosthenes, Archimedes worked here.",tip:"Egyptian coast at the Nile Delta — 'Alexandria = library = lighthouse = Ptolemies.'"},
+"Siwa": {date:"331 BC",event:"Oasis in the western Egyptian desert. Alexander trekked 300 miles through the desert to consult the Oracle of Amun here. The oracle reportedly called him son of Zeus — Alexander took that very seriously.",tip:"Deep in the Libyan desert, west of the Nile — 'Siwa = Alexander's desert pilgrimage = son of Zeus.'"},
+"Carthage": {date:"c. 814–146 BC",event:"Phoenician (Tyrian) colony in modern Tunisia. Major Mediterranean naval power. Fought three Punic Wars against Rome. Hannibal. Rome destroyed it utterly in 146 BC. Fought Greeks over Sicily for centuries.",tip:"North African coast, modern Tunis — 'Carthage = Phoenician Rome = Hannibal's home base.'"},
+"Syracuse": {date:"733 BC (founded)",event:"Corinthian colony. Became the largest and richest Greek city in the west. Defeated Athens' catastrophic Sicilian Expedition (415–413 BC). Home of Archimedes. Tyrants: Dionysius I, Hiero II.",tip:"SE corner of Sicily — 'Syracuse = Athens' worst defeat = Archimedes = western Greek superpower.'"},
+"Akragas": {date:"c. 580 BC (founded)",event:"Greek colony in southern Sicily (modern Agrigento). Became fabulously wealthy. Defeated Carthage at Himera (480 BC) alongside Syracuse. Famous Temple of Olympian Zeus. Tyrant Theron.",tip:"South coast of Sicily — 'Akragas = Agrigento = Valley of the Temples = Sicilian wealth.'"},
+"Gela": {date:"c. 688 BC (founded)",event:"Rhodian-Cretan colony on Sicily's south coast. Founded Akragas. Aeschylus (the tragedian) died here. Tyrant Hippocrates expanded its power in the early 5th century.",tip:"South coast of Sicily between Akragas and Syracuse — 'Gela = mother of Akragas = where Aeschylus died.'"},
+"Himera": {date:"480 BC",event:"Site of the great battle where Gelon of Syracuse and Theron of Akragas defeated Carthage — traditionally on the same day as Salamis. Ended the first major Carthaginian attempt on Greek Sicily.",tip:"North coast of Sicily — 'Himera 480 = Salamis of the west = Greeks beat Carthage.'"},
+"Selinus": {date:"c. 628–409 BC",event:"Westernmost major Greek colony on Sicily. Spectacular temples (still standing). Conflict with Segesta triggered Athens' Sicilian Expedition. Carthage destroyed it in 409 BC.",tip:"SW coast of Sicily — 'Selinus = temples = the Segesta rivalry that pulled Athens into disaster.'"},
+"Segesta": {date:"5th c. BC",event:"Elymian (non-Greek) city in NW Sicily. Its war with Greek Selinus led it to beg Athens for help, directly causing the Sicilian Expedition (415 BC) — one of history's great strategic blunders.",tip:"NW Sicily, inland — 'Segesta = the plea that doomed Athens' Sicilian Expedition.'"},
+"Motya": {date:"c. 800–397 BC",event:"Phoenician island colony off western Sicily. Carthage's main base in Sicily. Dionysius I of Syracuse destroyed it in 397 BC — innovative siege with a causeway (foreshadowing Alexander at Tyre).",tip:"Tiny island off Sicily's NW tip — 'Motya = Carthage's Sicily base = destroyed by Syracuse.'"},
+"Rome": {date:"753 BC (traditional founding)",event:"Eventually conquered the entire Mediterranean. During the Greek period, it was growing from a Latin city-state. Defeated Pyrrhus of Epirus (275 BC), then Carthage, then the Hellenistic kingdoms.",tip:"Central Italian peninsula on the Tiber — 'Rome = the power that eventually swallowed everyone.'"},
+"Pithekoussai": {date:"c. 770 BC",event:"On the island of Ischia in the Bay of Naples. One of the earliest Greek settlements in the west — trading post before a full colony. 'Nestor's Cup' inscription (c. 735 BC) found here — earliest known literary quotation in Greek.",tip:"Island in the Bay of Naples — 'Pithekoussai = Greeks' first western foothold = Nestor's Cup.'"}
+};
 
 // Init SVG layers
 
@@ -842,6 +939,10 @@ function renderQuiz() {
 	const assigned = state.quiz.markers.filter(m => m.assigned).length;
 	els.quizProgress.style.width = (assigned / state.quiz.markers.length * 100) + "%";
 
+	// Switch to 1-column when info is visible (cards get tall)
+	const showInfo = state.quiz.markers.some(m => m.correct !== null) || state.revealed;
+	els.assignments.style.gridTemplateColumns = showInfo ? "1fr" : "repeat(2, 1fr)";
+
 	els.assignments.innerHTML = state.quiz.markers.map(m => {
 		const cls = ["assignment"];
 		if (m.id === state.selectedMarkerId) cls.push("selected");
@@ -850,10 +951,25 @@ function renderQuiz() {
 		let sub = m.correct === true ? "✓ Correct" : m.correct === false ? (state.revealed ? `✗ → ${m.name}` : "✗ Incorrect") : m.assigned ? "Assigned" : "";
 		if (!m.assigned && !m.correct && state.revealed) sub = `→ ${m.name}`;
 		const icon = m.correct === true ? " ✓" : m.correct === false ? " ✗" : "";
+
+		// Historical info — show for the correct place after checking or revealing
+		let infoHtml = "";
+		if (m.correct !== null || state.revealed) {
+			const info = PLACE_INFO[m.name];
+			if (info) {
+				infoHtml = `<div class="place-info">
+					<div class="pi-date">${esc(info.date)}</div>
+					<div class="pi-event">${esc(info.event)}</div>
+					<div class="pi-tip">📍 ${esc(info.tip)}</div>
+				</div>`;
+			}
+		}
+
 		return `<button class="${cls.join(" ")}" data-mc="${m.id}">
 			<div class="num">#${m.id}${icon}</div>
 			<div class="answer">${m.assigned ? esc(m.assigned) : '<span style="color:var(--muted)">—</span>'}</div>
 			${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
+			${infoHtml}
 		</button>`;
 	}).join("");
 
@@ -1035,10 +1151,20 @@ function handleMapClick(e) {
 	const isCorrect = dist < 350;
 	recordAttempt(place.name, isCorrect);
 
+	let locateInfoHtml = "";
+	const locateInfo = PLACE_INFO[place.name];
+	if (locateInfo) {
+		locateInfoHtml = `<div class="place-info" style="margin:8px 16px 0;text-align:left">
+			<div class="pi-date">${esc(locateInfo.date)}</div>
+			<div class="pi-event">${esc(locateInfo.event)}</div>
+			<div class="pi-tip">📍 ${esc(locateInfo.tip)}</div>
+		</div>`;
+	}
+
 	els.locateFeedbackArea.innerHTML = `<div class="locate-feedback ${cls}">
 		<div class="dist">${Math.round(dist)} km</div>
 		<div class="msg">${msg}</div>
-	</div>`;
+	</div>${locateInfoHtml}`;
 
 	// Draw on map: click point, correct point, line between
 	const layer = els.locateLayer;
@@ -1092,7 +1218,16 @@ function locateSkip() {
 		Object.entries({x:target.x+zs(12),y:target.y-zs(10),"font-size":zs(13),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
 		lbl.textContent = place.name;
 		els.locateLayer.appendChild(lbl);
-		els.locateFeedbackArea.innerHTML = `<div class="locate-feedback close"><div class="msg">Skipped — here's where it is</div></div>`;
+		let skipInfoHtml = "";
+		const skipInfo = PLACE_INFO[place.name];
+		if (skipInfo) {
+			skipInfoHtml = `<div class="place-info" style="margin:8px 16px 0;text-align:left">
+				<div class="pi-date">${esc(skipInfo.date)}</div>
+				<div class="pi-event">${esc(skipInfo.event)}</div>
+				<div class="pi-tip">📍 ${esc(skipInfo.tip)}</div>
+			</div>`;
+		}
+		els.locateFeedbackArea.innerHTML = `<div class="locate-feedback close"><div class="msg">Skipped — here's where it is</div></div>${skipInfoHtml}`;
 	}
 	state.locateWaiting = false;
 	els.locateNextBtn.disabled = false;
@@ -1138,6 +1273,20 @@ function renderStudy() {
 			renderStudyDots();
 		});
 	});
+
+	// Show info for selected place
+	const infoPanel = document.getElementById("studyInfoPanel");
+	if (state.studySelectedName && PLACE_INFO[state.studySelectedName]) {
+		const info = PLACE_INFO[state.studySelectedName];
+		infoPanel.innerHTML = `<div class="place-info" style="border-color:var(--accent);background:rgba(155,94,42,0.03)">
+			<div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">${esc(state.studySelectedName)}</div>
+			<div class="pi-date">${esc(info.date)}</div>
+			<div class="pi-event">${esc(info.event)}</div>
+			<div class="pi-tip">📍 ${esc(info.tip)}</div>
+		</div>`;
+	} else {
+		infoPanel.innerHTML = "";
+	}
 
 	renderStudyDots();
 	updateCallout();
