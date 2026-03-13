@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Ancient World Map — Study & Quiz</title>
+	<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--bg: #f5f0e8;
+			--panel: #fffbf5;
+			--ink: #1a1a1a;
+			--muted: #6b7280;
+			--line: #d7ccbc;
+			--accent: #9b5e2a;
+			--accent-light: #d4a06a;
+			--sea: #dce8f0;
+			--land: #ece1cf;
+			--land-stroke: #c7b69b;
+			--good: #0072B2;
+			--good-bg: rgba(0,114,178,0.08);
+			--bad: #D55E00;
+			--bad-bg: rgba(213,94,0,0.08);
+			--selected: #2563eb;
+			--selected-bg: rgba(37,99,235,0.08);
+			--warn: #d97706;
+			--shadow-sm: 0 1px 3px rgba(50,35,18,0.06);
+			--shadow: 0 4px 20px rgba(50,35,18,0.08);
+			--shadow-lg: 0 12px 40px rgba(50,35,18,0.12);
+			--radius: 16px;
+			--radius-sm: 10px;
+		}
+		* { box-sizing: border-box; margin: 0; }
+		body {
+			font-family: 'DM Sans', system-ui, sans-serif;
+			background: var(--bg);
+			color: var(--ink);
+			min-height: 100vh;
+		}
+
+		/* ── Top bar ── */
+		.topbar {
+			background: rgba(255,251,245,0.85);
+			backdrop-filter: blur(12px);
+			border-bottom: 1px solid rgba(155,94,42,0.1);
+			padding: 12px 24px;
+			position: sticky; top: 0; z-index: 50;
+		}
+		.topbar-inner {
+			max-width: 1680px; margin: 0 auto;
+			display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+		}
+		.brand {
+			font-family: 'Instrument Serif', serif;
+			font-size: 1.5rem;
+			color: var(--accent);
+			white-space: nowrap;
+			letter-spacing: -0.02em;
+		}
+		.brand small { font-family: 'DM Sans', sans-serif; font-size: 0.7rem; color: var(--muted); display: block; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+		.mode-tabs {
+			display: flex; gap: 4px;
+			background: rgba(155,94,42,0.06);
+			border-radius: 12px; padding: 4px;
+		}
+		.mode-tab {
+			padding: 8px 16px; border: none; background: none;
+			font: 600 0.85rem 'DM Sans', sans-serif;
+			color: var(--muted); border-radius: 9px; cursor: pointer;
+			transition: all 0.2s;
+		}
+		.mode-tab:hover { color: var(--ink); }
+		.mode-tab.active {
+			background: white; color: var(--accent);
+			box-shadow: var(--shadow-sm);
+		}
+		.topbar-controls {
+			display: flex; gap: 8px; align-items: center; margin-left: auto; flex-wrap: wrap;
+		}
+		select, .btn {
+			font: 500 0.85rem 'DM Sans', sans-serif;
+			border: 1px solid rgba(155,94,42,0.15);
+			background: white; color: var(--ink);
+			border-radius: var(--radius-sm);
+			padding: 8px 12px; cursor: pointer;
+			transition: all 0.15s;
+		}
+		select:focus, .btn:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+		.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+		.btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+		.btn.primary:hover { background: #86521f; }
+		.btn.danger { background: var(--bad); color: white; border-color: var(--bad); }
+		.btn.ghost { background: transparent; }
+		.btn.sm { padding: 6px 10px; font-size: 0.8rem; }
+		.btn:disabled { opacity: 0.4; pointer-events: none; }
+		.chip {
+			display: inline-flex; align-items: center; gap: 5px;
+			padding: 5px 10px; border-radius: 999px;
+			font-size: 0.78rem; font-weight: 600;
+			background: rgba(155,94,42,0.08);
+			color: var(--accent);
+		}
+		.chip.good { background: var(--good-bg); color: var(--good); }
+		.chip.bad { background: var(--bad-bg); color: var(--bad); }
+		.chip.selected { background: var(--selected-bg); color: var(--selected); }
+
+		/* ── Session stats strip ── */
+		.stats-strip {
+			max-width: 1680px; margin: 0 auto;
+			padding: 10px 24px;
+			display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+			font-size: 0.82rem; color: var(--muted);
+		}
+		.stats-strip .stat { font-weight: 600; color: var(--ink); }
+		.stats-strip .sep { width: 1px; height: 16px; background: var(--line); }
+
+		/* ── Layout ── */
+		.page { max-width: 1680px; margin: 0 auto; padding: 0 24px 40px; }
+		.layout {
+			display: grid;
+			grid-template-columns: minmax(0, 1.6fr) minmax(340px, 0.95fr);
+			gap: 18px; align-items: start;
+		}
+		.panel {
+			background: var(--panel);
+			border: 1px solid rgba(155,94,42,0.1);
+			border-radius: var(--radius);
+			box-shadow: var(--shadow);
+			overflow: hidden;
+		}
+
+		/* ── Map ── */
+		.map-panel { position: sticky; top: 72px; }
+		.map-wrap { position: relative; }
+		svg#mapSvg {
+			display: block; width: 100%; height: auto;
+			background: var(--sea); border-radius: 0;
+		}
+		.grid-line { stroke: rgba(107,114,128,0.15); stroke-width: 1; vector-effect: non-scaling-stroke; }
+		.grid-label { font-size: 12px; fill: rgba(107,114,128,0.6); user-select: none; }
+		.land-shape { fill: var(--land); stroke: var(--land-stroke); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+		/* Zoom controls */
+		.zoom-strip {
+			display: flex; align-items: center; gap: 6px;
+			padding: 8px 14px;
+			border-top: 1px solid rgba(155,94,42,0.08);
+			font-size: 0.78rem; color: var(--muted);
+		}
+		.zoom-strip .label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 2px; }
+		.zoom-btn {
+			padding: 4px 10px; border-radius: 999px;
+			font: 600 0.75rem 'DM Sans', sans-serif;
+			border: 1.5px solid rgba(155,94,42,0.12);
+			background: white; color: var(--muted);
+			cursor: pointer; transition: all 0.15s;
+		}
+		.zoom-btn:hover { border-color: var(--accent); color: var(--accent); }
+		.zoom-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+		.map-legend {
+			display: flex; flex-wrap: wrap; gap: 10px 16px;
+			padding: 10px 14px;
+			font-size: 0.78rem; color: var(--muted);
+			border-top: 1px solid rgba(155,94,42,0.08);
+		}
+		.legend-item { display: inline-flex; align-items: center; gap: 6px; }
+		.swatch { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+		.tooltip {
+			position: absolute; pointer-events: none; z-index: 20;
+			padding: 6px 10px; border-radius: 8px;
+			background: rgba(20,20,20,0.92); color: white;
+			font-size: 0.78rem; font-weight: 500; line-height: 1.2;
+			opacity: 0; transform: translate(-50%, calc(-100% - 10px));
+			transition: opacity 0.1s; white-space: nowrap;
+		}
+		/* Click target for locate mode */
+		.map-clickzone {
+			position: absolute; inset: 0; cursor: crosshair; z-index: 5;
+			display: none;
+		}
+		.map-clickzone.active { display: block; }
+		/* Locate feedback pulse */
+		@keyframes ping {
+			0% { r: 8; opacity: 1; }
+			100% { r: 40; opacity: 0; }
+		}
+		@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+		@keyframes shake {
+			0%, 100% { transform: translateX(0); }
+			20%, 60% { transform: translateX(-4px); }
+			40%, 80% { transform: translateX(4px); }
+		}
+		.shake { animation: shake 0.4s ease; }
+
+		/* ── Sidebar ── */
+		.sidebar-inner { padding: 16px; }
+		.sidebar-header {
+			padding: 16px 16px 0;
+		}
+		.sidebar-header h2 {
+			font-family: 'Instrument Serif', serif;
+			font-size: 1.35rem; font-weight: 400;
+			margin-bottom: 4px;
+		}
+		.sidebar-header p { color: var(--muted); font-size: 0.88rem; line-height: 1.4; margin-bottom: 12px; }
+
+		/* Callout */
+		.callout {
+			margin: 0 16px 12px;
+			padding: 12px 14px;
+			border-radius: 12px;
+			border: 1px solid rgba(37,99,235,0.12);
+			background: rgba(37,99,235,0.04);
+			font-size: 0.88rem;
+		}
+		.callout strong { display: block; margin-bottom: 2px; }
+		.callout .sub { color: var(--muted); font-size: 0.82rem; }
+		.callout.good-callout { border-color: rgba(0,114,178,0.25); background: var(--good-bg); }
+		.callout.bad-callout { border-color: rgba(213,94,0,0.25); background: var(--bad-bg); }
+
+		/* Quiz cards */
+		.assignments {
+			display: grid; grid-template-columns: repeat(2, 1fr);
+			gap: 8px; margin-bottom: 12px;
+		}
+		.assignment {
+			border: 1.5px solid rgba(155,94,42,0.12);
+			background: white; border-radius: 12px;
+			padding: 10px; cursor: pointer;
+			transition: all 0.15s; min-height: 70px;
+			position: relative;
+		}
+		.assignment:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
+		.assignment.selected { border-color: var(--selected); background: var(--selected-bg); }
+		.assignment.good { border-color: var(--good); background: var(--good-bg); }
+		.assignment.bad { border-color: var(--bad); background: var(--bad-bg); }
+		.assignment .num { font-weight: 700; font-size: 0.82rem; color: var(--accent); margin-bottom: 3px; }
+		.assignment .answer { font-size: 0.9rem; font-weight: 500; }
+		.assignment .sub { color: var(--muted); font-size: 0.78rem; margin-top: 4px; }
+		.place-info {
+			margin-top: 6px; padding: 8px 9px;
+			background: rgba(155,94,42,0.04);
+			border-radius: 8px; border: 1px solid rgba(155,94,42,0.08);
+			font-size: 0.78rem; line-height: 1.45; color: var(--ink);
+		}
+		.place-info .pi-date { font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+		.place-info .pi-event { margin-bottom: 4px; }
+		.place-info .pi-tip { color: var(--muted); font-style: italic; }
+
+		/* Word bank */
+		.section-label { font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+		.word-bank, .study-list {
+			display: grid; grid-template-columns: repeat(2, 1fr);
+			gap: 6px; max-height: 50vh; overflow-y: auto;
+			padding-right: 2px;
+		}
+		.study-list { grid-template-columns: 1fr; }
+		.bank-item, .study-item {
+			text-align: left; padding: 9px 11px;
+			border-radius: var(--radius-sm);
+			border: 1.5px solid rgba(155,94,42,0.1);
+			background: white; font-size: 0.88rem; font-weight: 500;
+			cursor: pointer; transition: all 0.15s;
+		}
+		.bank-item:hover, .study-item:hover { border-color: var(--accent); }
+		.bank-item.used { opacity: 0.35; background: var(--bg); pointer-events: none; }
+		.bank-item.active { border-color: var(--selected); background: var(--selected-bg); }
+		.study-item.active { border-color: var(--accent); background: rgba(155,94,42,0.06); }
+
+		/* Locate mode */
+		.locate-prompt {
+			text-align: center; padding: 20px 16px;
+		}
+		.locate-prompt .place-name {
+			font-family: 'Instrument Serif', serif;
+			font-size: 2rem; color: var(--accent);
+			margin-bottom: 4px;
+		}
+		.locate-prompt .instruction { color: var(--muted); font-size: 0.9rem; }
+		.locate-feedback {
+			text-align: center; padding: 14px 16px;
+			border-radius: 12px; margin: 12px 16px;
+		}
+		.locate-feedback.good { background: var(--good-bg); color: var(--good); }
+		.locate-feedback.close { background: rgba(217,119,6,0.08); color: var(--warn); }
+		.locate-feedback.bad { background: var(--bad-bg); color: var(--bad); }
+		.locate-feedback .dist { font-size: 1.6rem; font-weight: 700; }
+		.locate-feedback .msg { font-size: 0.88rem; margin-top: 2px; }
+
+		/* Progress bar */
+		.progress-bar-wrap {
+			height: 6px; background: rgba(155,94,42,0.08);
+			border-radius: 3px; overflow: hidden; margin: 8px 0;
+		}
+		.progress-bar-fill {
+			height: 100%; background: var(--accent);
+			border-radius: 3px; transition: width 0.4s ease;
+		}
+
+		/* Results */
+		.results {
+			margin: 12px 0 0;
+			padding: 12px 14px;
+			border-radius: 12px;
+			background: rgba(155,94,42,0.04);
+			border: 1px solid rgba(155,94,42,0.1);
+			font-size: 0.88rem;
+		}
+		.results strong { font-size: 1rem; }
+
+		/* Difficulty pills */
+		.diff-pills { display: flex; gap: 4px; }
+		.diff-pill {
+			padding: 5px 10px; border-radius: 999px;
+			font: 600 0.78rem 'DM Sans', sans-serif;
+			border: 1.5px solid rgba(155,94,42,0.12);
+			background: white; color: var(--muted);
+			cursor: pointer; transition: all 0.15s;
+		}
+		.diff-pill:hover { border-color: var(--accent); color: var(--accent); }
+		.diff-pill.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+		/* Search input */
+		.search-input {
+			width: 100%; padding: 9px 12px;
+			border: 1.5px solid rgba(155,94,42,0.12);
+			border-radius: var(--radius-sm);
+			font: 500 0.88rem 'DM Sans', sans-serif;
+			color: var(--ink); background: white;
+			transition: border-color 0.15s;
+		}
+		.search-input:focus { outline: none; border-color: var(--accent); }
+
+		/* Keyboard hint */
+		kbd {
+			display: inline-block; padding: 2px 6px;
+			border-radius: 4px; font-size: 0.72rem;
+			background: rgba(0,0,0,0.06); color: var(--muted);
+			border: 1px solid rgba(0,0,0,0.08);
+			font-family: 'DM Sans', sans-serif;
+			vertical-align: middle;
+		}
+
+		.hidden { display: none !important; }
+		@media (max-width: 1100px) {
+			.layout { grid-template-columns: 1fr; }
+			.map-panel { position: static; }
+		}
+		@media (max-width: 760px) {
+			.topbar-inner { gap: 10px; }
+			.assignments, .word-bank { grid-template-columns: 1fr; }
+			.brand { font-size: 1.2rem; }
+		}
+	</style>
+</head>
+<body>
+
+<!-- ═══ TOP BAR ═══ -->
+<div class="topbar">
+	<div class="topbar-inner">
+		<div class="brand">Ancient World<small>Map Quiz & Study Tool</small></div>
+		<div class="mode-tabs">
+			<button class="mode-tab active" data-mode="quiz">Quiz</button>
+			<button class="mode-tab" data-mode="locate">Locate</button>
+			<button class="mode-tab" data-mode="study">Study</button>
+		</div>
+		<div class="topbar-controls">
+			<select id="regionSelect">
+				<option value="all">All places</option>
+				<option value="greece_aegean">Greece & Aegean</option>
+				<option value="west_med">W. Mediterranean & N. Africa</option>
+				<option value="anatolia_persia">Anatolia / Persia</option>
+				<option value="mycenae_athens_sparta">Mycenae–Athens–Sparta</option>
+			</select>
+			<div class="diff-pills" id="diffPills">
+				<button class="diff-pill" data-diff="easy">Easy</button>
+				<button class="diff-pill active" data-diff="medium">Medium</button>
+				<button class="diff-pill" data-diff="hard">Hard</button>
+			</div>
+			<button class="btn primary" id="newRoundBtn">New round</button>
+			<button class="btn" id="reviewMistakesBtn" disabled title="Review places you've gotten wrong">Review mistakes</button>
+		</div>
+	</div>
+</div>
+
+<!-- ═══ SESSION STATS ═══ -->
+<div class="stats-strip" id="statsStrip">
+	<span>Session: <span class="stat" id="statAttempts">0</span> attempts</span>
+	<span class="sep"></span>
+	<span>Accuracy: <span class="stat" id="statAccuracy">—</span></span>
+	<span class="sep"></span>
+	<span>Streak: <span class="stat" id="statStreak">0</span> 🔥</span>
+	<span class="sep"></span>
+	<span>Mastered: <span class="stat" id="statMastered">0</span> places</span>
+</div>
+
+<!-- ═══ MAIN LAYOUT ═══ -->
+<div class="page">
+	<div class="layout">
+		<!-- ── MAP ── -->
+		<div class="panel map-panel">
+			<div class="map-wrap">
+				<svg id="mapSvg" viewBox="0 0 1200 700" aria-label="Map of the ancient Mediterranean and Near East">
+					<rect x="0" y="0" width="1200" height="700" fill="var(--sea)"/>
+					<g id="gridLayer">
+<line x1="25.5" y1="0" x2="25.5" y2="700" class="grid-line"/>
+<text x="29.5" y="692" class="grid-label">-10°</text>
+<line x1="153.2" y1="0" x2="153.2" y2="700" class="grid-line"/>
+<text x="157.2" y="692" class="grid-label">0°</text>
+<line x1="280.9" y1="0" x2="280.9" y2="700" class="grid-line"/>
+<text x="284.9" y="692" class="grid-label">10°</text>
+<line x1="408.5" y1="0" x2="408.5" y2="700" class="grid-line"/>
+<text x="412.5" y="692" class="grid-label">20°</text>
+<line x1="536.2" y1="0" x2="536.2" y2="700" class="grid-line"/>
+<text x="540.2" y="692" class="grid-label">30°</text>
+<line x1="663.8" y1="0" x2="663.8" y2="700" class="grid-line"/>
+<text x="667.8" y="692" class="grid-label">40°</text>
+<line x1="791.5" y1="0" x2="791.5" y2="700" class="grid-line"/>
+<text x="795.5" y="692" class="grid-label">50°</text>
+<line x1="919.1" y1="0" x2="919.1" y2="700" class="grid-line"/>
+<text x="923.1" y="692" class="grid-label">60°</text>
+<line x1="1046.8" y1="0" x2="1046.8" y2="700" class="grid-line"/>
+<text x="1050.8" y="692" class="grid-label">70°</text>
+<line x1="1174.5" y1="0" x2="1174.5" y2="700" class="grid-line"/>
+<text x="1178.5" y="692" class="grid-label">80°</text>
+<line x1="0" y1="700.0" x2="1200" y2="700.0" class="grid-line"/>
+<text x="6" y="696.0" class="grid-label">20°N</text>
+<line x1="0" y1="575.0" x2="1200" y2="575.0" class="grid-line"/>
+<text x="6" y="571.0" class="grid-label">25°N</text>
+<line x1="0" y1="450.0" x2="1200" y2="450.0" class="grid-line"/>
+<text x="6" y="446.0" class="grid-label">30°N</text>
+<line x1="0" y1="325.0" x2="1200" y2="325.0" class="grid-line"/>
+<text x="6" y="321.0" class="grid-label">35°N</text>
+<line x1="0" y1="200.0" x2="1200" y2="200.0" class="grid-line"/>
+<text x="6" y="196.0" class="grid-label">40°N</text>
+<line x1="0" y1="75.0" x2="1200" y2="75.0" class="grid-line"/>
+<text x="6" y="71.0" class="grid-label">45°N</text>
+</g>
+					<g id="landLayer">
+<path d="M 42.6 510.3 L 42.3 515.1 L 42.3 553.0 L 0.4 551.7 L 0.8 615.6 L 0.0 615.8 L 0.0 549.0 L 3.6 547.4 L 7.8 527.9 L 18.5 525.2 L 23.1 528.5 L 28.9 528.5 L 33.0 522.8 L 40.9 522.0 L 40.6 508.6 L 42.6 508.6 L 42.6 510.3 Z" class="land-shape"/>
+<path d="M 1199.3 67.1 L 1174.0 77.1 L 1185.5 120.5 L 1176.8 127.0 L 1177.8 141.3 L 1169.9 137.6 L 1163.5 128.6 L 1144.6 126.0 L 1123.4 125.3 L 1118.8 128.1 L 1100.6 117.5 L 1093.3 122.7 L 1091.4 137.5 L 1070.4 128.9 L 1062.0 132.4 L 1059.1 143.3 L 1051.8 148.0 L 1034.9 165.4 L 1029.4 183.3 L 1024.6 183.4 L 1021.1 171.6 L 1004.9 170.8 L 1002.3 150.3 L 996.0 150.1 L 997.0 125.1 L 981.7 106.8 L 959.8 108.7 L 944.9 112.4 L 932.7 89.9 L 922.2 80.4 L 902.4 62.5 L 900.0 60.3 L 867.2 75.1 L 867.7 167.3 L 861.1 168.5 L 852.2 148.9 L 843.6 141.9 L 829.1 147.1 L 823.4 155.4 L 822.7 149.3 L 825.9 138.9 L 823.4 130.2 L 808.6 121.7 L 802.9 99.2 L 795.8 92.9 L 795.4 84.8 L 807.8 87.1 L 808.3 68.9 L 819.2 64.8 L 830.3 68.5 L 832.6 44.1 L 830.3 28.7 L 817.6 29.9 L 806.7 23.8 L 791.9 34.8 L 780.0 40.0 L 773.5 36.0 L 774.8 23.1 L 766.7 6.4 L 757.2 7.1 L 752.7 0.0 L 1200.0 0.0 L 1200.0 66.5 L 1199.3 67.1 Z" class="land-shape"/>
+<path d="M 867.2 75.1 L 900.0 60.3 L 902.4 62.5 L 922.2 80.4 L 932.7 89.9 L 944.9 112.4 L 959.8 108.7 L 981.7 106.8 L 997.0 125.1 L 996.0 150.1 L 1002.3 150.3 L 1004.9 170.8 L 1021.1 171.6 L 1024.6 183.4 L 1029.4 183.3 L 1034.9 165.4 L 1051.8 148.0 L 1059.1 143.3 L 1062.9 145.8 L 1052.2 162.0 L 1061.6 171.4 L 1070.7 165.2 L 1085.8 178.3 L 1069.5 196.4 L 1059.8 193.9 L 1054.5 194.5 L 1052.7 187.6 L 1055.3 176.0 L 1038.2 181.8 L 1034.2 197.8 L 1028.1 211.7 L 1017.5 210.5 L 1014.2 221.5 L 1023.5 227.5 L 1026.3 246.1 L 1019.1 271.4 L 1009.5 266.1 L 1002.4 265.9 L 1002.7 250.6 L 985.7 239.9 L 972.4 227.7 L 964.1 215.9 L 949.5 198.7 L 943.2 172.9 L 938.9 168.3 L 925.1 169.5 L 920.2 164.4 L 918.8 144.4 L 901.6 131.2 L 890.9 145.7 L 880.0 154.3 L 882.1 166.9 L 867.7 167.3 L 867.2 75.1 Z" class="land-shape"/>
+<path d="M 457.7 700.0 L 472.3 699.9 L 472.3 650.0 L 523.7 650.0 L 573.2 650.0 L 623.8 650.0 L 627.9 674.5 L 625.1 679.1 L 626.7 700.0 L 457.7 700.0 L 457.7 700.0 Z" class="land-shape"/>
+<path d="M 356.2 690.3 L 350.9 681.7 L 350.7 673.8 L 345.9 667.3 L 342.8 628.4 L 355.7 614.8 L 406.6 662.6 L 446.3 700.0 L 353.7 700.0 L 356.2 690.3 Z" class="land-shape"/>
+<path d="M 774.2 54.8 L 761.8 59.0 L 749.1 84.8 L 760.7 108.5 L 759.5 125.3 L 773.4 154.8 L 773.4 154.8 L 765.8 164.9 L 763.6 171.2 L 758.0 169.5 L 749.2 154.3 L 745.6 153.5 L 737.6 147.7 L 733.7 137.4 L 721.8 132.2 L 714.0 136.1 L 711.8 131.5 L 694.4 119.5 L 675.6 115.4 L 664.8 111.2 L 663.3 114.1 L 647.0 93.0 L 632.4 83.6 L 621.4 68.9 L 630.7 64.9 L 641.3 44.0 L 634.1 34.1 L 652.9 23.9 L 652.6 18.4 L 641.2 22.4 L 641.6 11.3 L 648.1 4.4 L 660.5 2.5 L 661.1 0.0 L 752.7 0.0 L 757.2 7.1 L 766.7 6.4 L 774.8 23.1 L 773.5 36.0 L 780.0 40.0 L 774.2 54.8 Z M 583.4 44.5 L 592.5 49.9 L 596.6 50.9 L 598.2 55.8 L 600.2 56.6 L 600.3 58.7 L 606.5 64.8 L 619.5 63.3 L 617.0 72.2 L 603.1 76.5 L 585.7 91.0 L 578.6 85.9 L 581.5 74.1 L 567.5 66.8 L 569.8 62.0 L 582.0 53.7 L 580.0 50.7 L 583.4 44.5 Z" class="land-shape"/>
+<path d="M 248.5 9.5 L 245.0 13.8 L 239.2 11.5 L 239.6 17.8 L 230.3 31.9 L 230.1 43.2 L 236.2 39.3 L 240.6 50.2 L 240.0 57.3 L 243.8 66.7 L 239.4 74.3 L 242.6 93.6 L 249.6 96.8 L 248.1 107.7 L 236.5 121.8 L 211.4 115.0 L 192.8 123.1 L 191.3 138.2 L 176.5 141.4 L 162.1 130.1 L 157.5 135.5 L 134.0 124.1 L 128.9 114.4 L 135.5 99.4 L 138.0 49.6 L 124.8 23.4 L 115.4 10.7 L 95.9 1.1 L 95.8 0.0 L 249.4 0.0 L 248.5 9.5 Z M 273.1 124.8 L 275.2 146.2 L 271.0 165.5 L 265.2 160.4 L 262.3 143.6 L 264.8 134.3 L 273.1 124.8 Z" class="land-shape"/>
+<path d="M 77.0 684.0 L 70.8 576.1 L 90.3 575.6 L 133.4 630.2 L 176.5 684.7 L 179.5 696.4 L 183.5 700.0 L 77.9 700.0 L 77.0 684.0 Z" class="land-shape"/>
+<path d="M 0.8 615.6 L 0.4 551.7 L 42.3 553.0 L 42.3 515.1 L 90.3 575.6 L 70.8 576.1 L 77.0 684.0 L 77.9 700.0 L 0.0 700.0 L 0.0 615.8 L 0.8 615.6 Z" class="land-shape"/>
+<path d="M 345.9 667.3 L 350.7 673.8 L 350.9 681.7 L 356.2 690.3 L 353.7 700.0 L 233.2 700.0 L 262.6 660.9 L 306.4 613.2 L 326.6 624.0 L 333.8 637.7 L 342.8 628.4 L 345.9 667.3 Z" class="land-shape"/>
+<path d="M 607.0 390.2 L 602.3 386.7 L 599.7 403.3 L 602.9 406.1 L 599.6 409.6 L 599.1 416.2 L 605.1 412.8 L 605.4 422.5 L 599.0 462.5 L 597.7 456.0 L 590.6 419.5 L 590.6 419.5 L 590.6 419.5 L 594.3 411.3 L 593.5 409.9 L 596.8 398.2 L 599.4 379.3 L 601.3 373.0 L 601.6 372.7 L 605.9 372.8 L 607.1 368.4 L 610.5 368.1 L 610.7 378.3 L 608.9 382.1 L 609.2 382.3 L 607.0 390.2 Z" class="land-shape"/>
+<path d="M 607.1 368.4 L 605.9 372.8 L 601.6 372.7 L 606.2 352.4 L 612.5 334.7 L 612.7 333.9 L 618.5 335.2 L 620.6 345.0 L 613.6 354.4 L 610.5 368.1 L 607.1 368.4 Z" class="land-shape"/>
+<path d="M 599.1 416.2 L 599.6 409.6 L 602.9 406.1 L 599.7 403.3 L 602.3 386.7 L 607.0 390.2 L 607.0 405.4 L 605.1 412.8 L 599.1 416.2 Z" class="land-shape"/>
+<path d="M 268.8 397.4 L 260.9 387.3 L 260.8 381.3 L 250.4 366.4 L 249.2 347.6 L 257.1 333.6 L 260.1 313.0 L 258.1 289.2 L 260.7 276.3 L 274.6 266.3 L 283.5 269.2 L 283.2 281.9 L 294.0 272.7 L 294.9 277.5 L 288.5 289.7 L 288.4 301.3 L 292.8 307.5 L 291.2 329.2 L 282.8 341.7 L 285.2 355.4 L 291.8 355.8 L 295.0 367.7 L 299.9 371.6 L 299.1 390.8 L 292.9 398.0 L 289.0 406.0 L 280.2 415.6 L 281.6 426.0 L 280.5 436.5 L 274.2 442.3 L 268.8 397.4 Z" class="land-shape"/>
+<path d="M 42.6 510.3 L 42.6 508.6 L 42.5 479.0 L 63.1 460.5 L 75.8 456.7 L 86.3 450.0 L 91.2 437.5 L 106.1 427.6 L 106.6 409.1 L 114.0 406.9 L 119.8 397.6 L 136.5 393.4 L 138.8 383.7 L 135.5 378.4 L 131.1 352.0 L 130.3 336.8 L 125.5 320.8 L 137.8 307.1 L 151.6 302.8 L 159.6 292.5 L 171.9 284.9 L 193.6 280.4 L 214.7 278.4 L 221.1 282.1 L 233.1 272.2 L 246.8 272.0 L 252.0 277.9 L 260.7 276.3 L 258.1 289.2 L 260.1 313.0 L 257.1 333.6 L 249.2 347.6 L 250.4 366.4 L 260.8 381.3 L 260.9 387.3 L 268.8 397.4 L 274.2 442.3 L 278.4 464.4 L 279.1 476.0 L 276.8 496.4 L 277.7 507.8 L 276.1 521.5 L 277.2 537.2 L 272.2 547.6 L 279.7 565.9 L 280.2 576.6 L 284.7 590.5 L 290.7 585.9 L 300.8 597.6 L 306.4 613.2 L 262.6 660.9 L 233.2 700.0 L 183.5 700.0 L 179.5 696.4 L 176.5 684.7 L 133.4 630.2 L 90.3 575.6 L 42.3 515.1 L 42.6 510.3 Z" class="land-shape"/>
+<path d="M 609.2 382.3 L 623.4 392.2 L 648.4 365.5 L 653.6 396.0 L 651.1 399.7 L 625.6 412.3 L 638.3 437.3 L 634.1 441.5 L 632.0 449.9 L 622.2 453.4 L 619.2 462.4 L 613.6 470.1 L 599.4 466.1 L 599.0 462.5 L 605.4 422.5 L 605.1 412.8 L 607.0 405.4 L 607.0 390.2 L 609.2 382.3 Z" class="land-shape"/>
+<path d="M 813.9 592.6 L 814.4 599.5 L 824.4 595.6 L 834.9 596.2 L 842.7 597.0 L 851.4 580.1 L 860.9 564.0 L 869.0 548.6 L 871.4 557.1 L 873.2 576.9 L 866.6 577.0 L 865.6 593.3 L 867.8 596.7 L 862.1 601.7 L 862.0 611.9 L 858.3 622.2 L 858.0 632.3 L 855.4 637.6 L 817.0 625.0 L 812.1 599.6 L 811.7 593.9 L 813.9 592.6 Z" class="land-shape"/>
+<path d="M 801.0 562.9 L 804.4 549.8 L 807.9 547.1 L 811.8 555.0 L 812.0 569.6 L 809.2 584.3 L 805.7 586.1 L 801.8 581.1 L 801.0 562.9 Z" class="land-shape"/>
+<path d="M 768.3 461.6 L 767.2 467.3 L 771.3 486.2 L 762.2 486.8 L 759.1 474.9 L 747.7 472.5 L 757.1 448.5 L 765.6 450.6 L 768.3 461.6 Z" class="land-shape"/>
+<path d="M 648.4 365.5 L 676.7 339.5 L 681.5 309.3 L 680.3 291.0 L 687.3 284.9 L 693.8 269.3 L 699.3 265.4 L 714.2 268.6 L 718.6 275.0 L 724.8 270.7 L 733.0 300.6 L 741.4 308.1 L 742.4 322.7 L 735.9 331.3 L 733.0 350.8 L 741.8 374.6 L 757.5 388.3 L 764.0 407.3 L 761.9 425.4 L 766.0 425.4 L 766.1 438.7 L 773.2 451.8 L 765.6 450.6 L 757.1 448.5 L 747.7 472.5 L 724.0 470.5 L 688.0 420.2 L 668.9 402.8 L 653.6 396.0 L 648.4 365.5 Z" class="land-shape"/>
+<path d="M 858.3 622.2 L 862.0 611.9 L 862.1 601.7 L 867.8 596.7 L 865.6 593.3 L 866.6 577.0 L 873.2 576.9 L 878.9 594.0 L 886.0 603.0 L 895.4 606.3 L 902.9 610.9 L 908.7 625.2 L 912.1 633.5 L 916.7 636.7 L 916.7 642.2 L 912.0 657.1 L 910.0 664.2 L 904.6 672.1 L 899.8 689.3 L 894.1 688.0 L 891.4 693.9 L 890.4 700.0 L 855.3 700.0 L 863.8 650.0 L 858.0 632.3 L 858.3 622.2 Z M 869.0 548.6 L 872.7 540.1 L 874.3 542.3 L 873.1 552.6 L 871.4 557.1 L 869.0 548.6 Z" class="land-shape"/>
+<path d="M 1082.9 689.5 L 1080.4 666.1 L 1061.8 681.1 L 1052.8 678.1 L 1036.1 647.8 L 1042.3 638.7 L 1038.5 628.9 L 1023.5 607.7 L 1032.0 591.0 L 1060.1 591.1 L 1057.6 569.6 L 1050.4 556.9 L 1049.0 537.7 L 1040.6 526.5 L 1054.7 500.3 L 1069.5 502.2 L 1082.9 476.0 L 1090.9 450.6 L 1103.3 425.5 L 1103.1 407.7 L 1113.9 393.2 L 1103.6 380.9 L 1099.2 364.0 L 1094.7 342.1 L 1100.9 331.3 L 1120.3 337.4 L 1134.5 333.7 L 1146.9 312.6 L 1160.6 342.0 L 1159.3 362.3 L 1164.4 375.1 L 1164.0 387.9 L 1154.8 384.5 L 1158.4 412.1 L 1170.9 427.9 L 1188.7 445.4 L 1180.6 456.8 L 1175.6 480.1 L 1188.0 489.6 L 1200.0 501.9 L 1200.0 501.9 L 1200.0 700.0 L 1082.8 700.0 L 1082.9 689.5 Z" class="land-shape"/>
+<path d="M 1200.0 501.9 L 1188.0 489.6 L 1175.6 480.1 L 1180.6 456.8 L 1188.7 445.4 L 1193.9 439.4 L 1200.0 444.0 L 1200.0 501.9 L 1200.0 501.9 Z" class="land-shape"/>
+<path d="M 1134.5 333.7 L 1120.3 337.4 L 1100.9 331.3 L 1094.7 342.1 L 1099.2 364.0 L 1103.6 380.9 L 1113.9 393.2 L 1103.1 407.7 L 1103.3 425.5 L 1090.9 450.6 L 1082.9 476.0 L 1069.5 502.2 L 1054.7 500.3 L 1040.6 526.5 L 1049.0 537.7 L 1050.4 556.9 L 1057.6 569.6 L 1060.1 591.1 L 1032.0 591.0 L 1023.5 607.7 L 1014.2 601.4 L 1010.4 583.4 L 1000.5 564.4 L 977.0 569.1 L 956.2 569.5 L 938.3 573.0 L 943.1 544.0 L 961.5 531.1 L 960.4 519.6 L 954.3 515.5 L 954.0 493.5 L 941.8 482.5 L 936.6 467.4 L 930.3 454.3 L 951.7 467.0 L 964.5 463.3 L 972.1 466.5 L 974.7 461.0 L 983.6 463.2 L 1000.2 452.8 L 1000.6 431.5 L 1007.7 417.4 L 1017.2 417.4 L 1018.6 410.4 L 1028.4 407.2 L 1033.1 409.5 L 1038.1 402.5 L 1037.4 387.5 L 1042.8 372.4 L 1050.9 366.0 L 1045.9 349.5 L 1058.1 350.3 L 1061.6 341.3 L 1061.0 331.7 L 1067.4 321.2 L 1065.9 308.7 L 1062.9 298.1 L 1070.4 287.3 L 1084.1 282.0 L 1098.7 279.1 L 1105.2 274.5 L 1112.7 271.7 L 1122.1 283.3 L 1125.9 302.5 L 1146.9 312.6 L 1134.5 333.7 Z" class="land-shape"/>
+<path d="M 1009.5 266.1 L 1019.1 271.4 L 1023.0 274.4 L 1032.2 266.4 L 1036.5 271.2 L 1040.7 259.8 L 1048.3 260.3 L 1050.3 256.6 L 1051.6 246.5 L 1057.1 237.8 L 1064.0 243.5 L 1062.6 251.2 L 1066.5 252.4 L 1065.3 273.4 L 1070.4 281.5 L 1074.8 276.3 L 1080.5 273.8 L 1088.4 262.6 L 1097.2 264.5 L 1110.4 264.5 L 1112.7 271.7 L 1105.2 274.5 L 1098.7 279.1 L 1084.1 282.0 L 1070.4 287.3 L 1062.9 298.1 L 1065.9 308.7 L 1067.4 321.2 L 1061.0 331.7 L 1061.6 341.3 L 1058.1 350.3 L 1045.9 349.5 L 1050.9 366.0 L 1042.8 372.4 L 1037.4 387.5 L 1038.1 402.5 L 1033.1 409.5 L 1028.4 407.2 L 1018.6 410.4 L 1017.2 417.4 L 1007.7 417.4 L 1000.6 431.5 L 1000.2 452.8 L 983.6 463.2 L 974.7 461.0 L 972.1 466.5 L 964.5 463.3 L 951.7 467.0 L 930.3 454.3 L 941.9 431.6 L 940.8 415.5 L 931.2 411.3 L 930.2 395.4 L 926.0 375.5 L 931.5 361.8 L 925.9 358.1 L 929.4 339.9 L 934.6 308.7 L 947.6 318.2 L 957.3 314.9 L 959.9 303.6 L 970.0 299.8 L 977.2 292.2 L 979.7 272.2 L 990.5 267.4 L 992.5 258.5 L 998.5 265.2 L 1002.4 265.9 L 1009.5 266.1 Z" class="land-shape"/>
+<path d="M 1026.3 246.1 L 1023.5 227.5 L 1014.2 221.5 L 1017.5 210.5 L 1028.1 211.7 L 1034.2 197.8 L 1038.2 181.8 L 1055.3 176.0 L 1052.7 187.6 L 1054.5 194.5 L 1059.8 193.9 L 1055.1 201.6 L 1041.2 197.4 L 1040.0 211.8 L 1053.8 209.9 L 1069.6 218.0 L 1093.7 214.2 L 1097.0 237.4 L 1101.2 234.8 L 1108.9 240.5 L 1108.5 250.2 L 1110.4 264.5 L 1097.2 264.5 L 1088.4 262.6 L 1080.5 273.8 L 1074.8 276.3 L 1070.4 281.5 L 1065.3 273.4 L 1066.5 252.4 L 1062.6 251.2 L 1064.0 243.5 L 1057.1 237.8 L 1051.6 246.5 L 1050.3 256.6 L 1048.3 260.3 L 1040.7 259.8 L 1036.5 271.2 L 1032.2 266.4 L 1023.0 274.4 L 1019.1 271.4 L 1026.3 246.1 Z" class="land-shape"/>
+<path d="M 1062.0 132.4 L 1070.4 128.9 L 1091.4 137.5 L 1093.3 122.7 L 1100.6 117.5 L 1118.8 128.1 L 1123.4 125.3 L 1144.6 126.0 L 1163.5 128.6 L 1169.9 137.6 L 1177.8 141.3 L 1176.0 146.9 L 1155.9 160.4 L 1151.3 170.4 L 1135.0 173.3 L 1130.1 189.3 L 1116.6 185.9 L 1107.8 190.8 L 1095.6 202.7 L 1097.4 208.5 L 1093.7 214.2 L 1069.6 218.0 L 1053.8 209.9 L 1040.0 211.8 L 1041.2 197.4 L 1055.1 201.6 L 1059.8 193.9 L 1069.5 196.4 L 1085.8 178.3 L 1070.7 165.2 L 1061.6 171.4 L 1052.2 162.0 L 1062.9 145.8 L 1059.1 143.3 L 1062.0 132.4 Z" class="land-shape"/>
+<path d="M 829.1 147.1 L 843.6 141.9 L 852.2 148.9 L 861.1 168.5 L 867.7 167.3 L 882.1 166.9 L 880.0 154.3 L 890.9 145.7 L 901.6 131.2 L 918.8 144.4 L 920.2 164.4 L 925.1 169.5 L 938.9 168.3 L 943.2 172.9 L 949.5 198.7 L 964.1 215.9 L 972.4 227.7 L 985.7 239.9 L 1002.7 250.6 L 1002.4 265.9 L 998.5 265.2 L 992.5 258.5 L 990.5 267.4 L 979.7 272.2 L 977.2 292.2 L 970.0 299.8 L 959.9 303.6 L 957.3 314.9 L 947.6 318.2 L 934.6 308.7 L 933.5 287.7 L 924.0 286.8 L 909.4 264.7 L 899.2 261.9 L 885.1 249.3 L 876.0 247.0 L 870.4 251.6 L 861.8 250.9 L 852.8 265.2 L 841.6 270.0 L 839.2 252.3 L 841.0 226.2 L 831.1 217.7 L 834.4 200.6 L 825.9 199.2 L 828.7 178.1 L 840.7 184.2 L 852.0 176.2 L 842.7 161.2 L 839.0 146.9 L 828.7 153.3 L 827.4 171.6 L 823.4 155.4 L 829.1 147.1 Z" class="land-shape"/>
+<path d="M 766.1 438.7 L 766.0 425.4 L 761.9 425.4 L 764.0 407.3 L 757.5 388.3 L 741.8 374.6 L 733.0 350.8 L 735.9 331.3 L 742.4 322.7 L 741.4 308.1 L 733.0 300.6 L 724.8 270.7 L 724.8 270.7 L 717.8 250.7 L 720.3 243.0 L 716.3 214.3 L 725.0 207.2 L 727.1 216.6 L 733.5 228.1 L 742.3 231.5 L 746.9 230.7 L 761.9 212.3 L 766.7 210.4 L 770.5 217.8 L 766.1 230.1 L 774.1 243.2 L 777.2 242.0 L 781.3 260.4 L 793.4 265.6 L 802.2 278.2 L 820.4 282.5 L 840.3 275.9 L 841.6 270.0 L 852.8 265.2 L 861.8 250.9 L 870.4 251.6 L 876.0 247.0 L 885.1 249.3 L 899.2 261.9 L 909.4 264.7 L 924.0 286.8 L 933.5 287.7 L 934.6 308.7 L 929.4 339.9 L 925.9 358.1 L 931.5 361.8 L 926.0 375.5 L 930.2 395.4 L 931.2 411.3 L 940.8 415.5 L 941.9 431.6 L 930.3 454.3 L 936.6 467.4 L 941.8 482.5 L 954.0 493.5 L 954.3 515.5 L 960.4 519.6 L 961.5 531.1 L 943.1 544.0 L 938.3 573.0 L 914.2 565.5 L 900.3 559.8 L 885.9 556.5 L 880.5 525.8 L 874.4 521.4 L 864.6 525.9 L 851.7 538.0 L 836.1 529.7 L 823.2 510.5 L 810.9 503.4 L 802.4 479.6 L 793.0 446.3 L 786.1 450.4 L 778.0 442.1 L 773.2 451.8 L 766.1 438.7 Z" class="land-shape"/>
+<path d="M 608.9 382.1 L 610.7 378.3 L 610.5 368.1 L 613.6 354.4 L 620.6 345.0 L 618.5 335.2 L 612.7 333.9 L 611.6 314.7 L 614.7 304.5 L 618.1 299.0 L 621.5 293.5 L 622.2 279.6 L 626.4 284.4 L 640.4 277.5 L 647.2 282.2 L 657.7 282.1 L 672.4 272.7 L 679.3 273.1 L 693.8 269.3 L 687.3 284.9 L 680.3 291.0 L 681.5 309.3 L 676.7 339.5 L 648.4 365.5 L 623.4 392.2 L 609.2 382.3 L 608.9 382.1 Z" class="land-shape"/>
+<path d="M 742.3 231.5 L 737.0 217.0 L 737.1 213.2 L 731.5 213.2 L 727.7 206.5 L 725.0 207.2 L 720.0 199.9 L 710.5 193.7 L 711.7 181.5 L 709.6 172.7 L 727.3 168.8 L 730.0 175.4 L 734.8 179.7 L 732.2 186.0 L 739.0 194.5 L 735.4 202.5 L 740.9 209.3 L 746.6 213.4 L 746.9 230.7 L 742.3 231.5 Z" class="land-shape"/>
+<path d="M 660.5 2.5 L 648.1 4.4 L 641.6 11.3 L 641.2 22.4 L 631.0 24.4 L 622.5 32.5 L 610.5 33.9 L 599.5 43.2 L 600.2 56.6 L 598.2 55.8 L 596.6 50.9 L 592.5 49.9 L 583.4 44.5 L 580.0 50.7 L 578.3 48.0 L 558.4 41.7 L 557.6 32.3 L 545.7 35.4 L 541.0 49.2 L 531.1 67.7 L 525.3 63.4 L 519.3 67.4 L 513.6 62.8 L 516.8 60.1 L 519.1 51.5 L 522.6 43.5 L 521.7 39.1 L 524.3 37.1 L 525.6 40.5 L 533.1 41.3 L 536.5 39.4 L 534.1 36.9 L 535.0 33.1 L 530.5 26.8 L 528.7 16.3 L 524.1 12.2 L 525.0 3.8 L 521.7 0.0 L 661.1 0.0 L 660.5 2.5 Z M 484.4 0.3 L 475.0 2.7 L 470.6 6.6 L 464.7 0.5 L 456.5 0.4 L 455.5 0.0 L 484.6 0.0 L 484.4 0.3 Z M 443.1 2.9 L 442.7 0.0 L 446.1 0.0 L 443.1 2.9 Z" class="land-shape"/>
+<path d="M 369.0 7.1 L 361.8 7.2 L 364.3 12.6 L 360.0 28.7 L 357.6 32.9 L 346.4 33.5 L 340.0 39.2 L 329.4 37.3 L 311.2 30.8 L 308.3 22.1 L 295.7 26.5 L 294.2 31.2 L 286.5 27.7 L 280.0 27.0 L 274.2 22.4 L 276.2 16.3 L 275.7 11.9 L 279.5 10.5 L 286.0 17.4 L 287.8 10.8 L 299.1 11.9 L 308.2 7.4 L 314.3 8.2 L 318.3 13.3 L 319.5 9.1 L 318.5 0.0 L 369.7 0.0 L 369.0 7.1 Z" class="land-shape"/>
+<path d="M 443.1 2.9 L 435.3 8.2 L 429.3 25.1 L 421.6 42.1 L 411.3 46.8 L 403.4 45.7 L 393.6 52.3 L 393.6 52.3 L 388.8 56.0 L 378.3 51.2 L 368.7 40.5 L 364.7 37.4 L 362.2 29.0 L 360.0 28.7 L 364.3 12.6 L 361.8 7.2 L 369.0 7.1 L 369.7 0.0 L 373.1 0.0 L 376.4 3.3 L 381.2 6.0 L 391.9 3.0 L 392.5 0.0 L 442.7 0.0 L 443.1 2.9 Z" class="land-shape"/>
+<path d="M 525.0 3.8 L 524.1 12.2 L 528.7 16.3 L 530.5 26.8 L 535.0 33.1 L 534.1 36.9 L 536.5 39.4 L 533.1 41.3 L 525.6 40.5 L 524.3 37.1 L 521.7 39.1 L 522.6 43.5 L 519.1 51.5 L 516.8 60.1 L 513.6 62.8 L 511.3 51.4 L 512.7 40.7 L 512.3 29.7 L 504.9 14.9 L 500.9 4.3 L 498.5 0.0 L 521.7 0.0 L 525.0 3.8 Z" class="land-shape"/>
+<path d="M 519.3 67.4 L 525.3 63.4 L 531.1 67.7 L 531.4 74.1 L 525.2 79.5 L 521.3 77.2 L 517.8 107.3 L 510.3 104.7 L 501.0 95.6 L 485.9 101.4 L 479.6 107.8 L 460.9 106.5 L 451.1 102.6 L 446.1 104.4 L 442.4 94.1 L 440.1 89.8 L 443.1 85.5 L 439.9 82.4 L 435.9 88.0 L 428.5 80.8 L 427.4 70.5 L 419.7 64.6 L 418.2 56.6 L 411.3 46.8 L 421.6 42.1 L 429.3 25.1 L 435.3 8.2 L 443.1 2.9 L 446.1 0.0 L 455.5 0.0 L 456.5 0.4 L 464.7 0.5 L 470.6 6.6 L 475.0 2.7 L 484.4 0.3 L 484.6 0.0 L 498.5 0.0 L 500.9 4.3 L 504.9 14.9 L 512.3 29.7 L 512.7 40.7 L 511.3 51.4 L 513.6 62.8 L 519.3 67.4 Z" class="land-shape"/>
+<path d="M 319.5 9.1 L 318.3 13.3 L 314.3 8.2 L 308.2 7.4 L 299.1 11.9 L 287.8 10.8 L 286.0 17.4 L 279.5 10.5 L 275.7 11.9 L 262.0 4.2 L 259.4 9.7 L 248.5 9.5 L 249.4 0.0 L 318.5 0.0 L 319.5 9.1 Z" class="land-shape"/>
+<path d="M 446.1 104.4 L 451.1 102.6 L 460.9 106.5 L 479.6 107.8 L 485.9 101.4 L 501.0 95.6 L 510.3 104.7 L 517.8 107.3 L 511.1 117.7 L 506.5 135.6 L 510.6 149.8 L 499.6 146.5 L 486.6 154.3 L 486.5 166.8 L 474.9 169.1 L 465.9 160.4 L 455.6 167.3 L 446.2 166.6 L 445.3 150.0 L 438.9 142.0 L 441.0 138.5 L 439.6 135.5 L 441.8 127.5 L 446.6 119.7 L 440.4 108.9 L 439.3 99.8 L 442.4 94.1 L 446.1 104.4 Z" class="land-shape"/>
+<path d="M 487.2 324.9 L 468.8 327.0 L 469.0 322.9 L 453.4 318.0 L 455.7 307.4 L 462.7 315.8 L 472.7 314.4 L 482.2 316.1 L 481.9 320.5 L 488.8 317.5 L 487.2 324.9 Z M 455.6 167.3 L 465.9 160.4 L 474.9 169.1 L 486.5 166.8 L 486.6 154.3 L 492.8 160.9 L 488.9 176.6 L 485.8 179.4 L 478.1 178.7 L 471.4 176.3 L 455.9 182.8 L 464.8 196.9 L 458.3 200.9 L 451.2 201.0 L 444.4 188.1 L 442.0 193.6 L 444.9 208.5 L 451.3 220.2 L 446.5 225.7 L 453.6 237.2 L 459.9 244.5 L 460.1 258.6 L 448.3 252.0 L 452.0 264.8 L 443.9 267.4 L 448.8 289.4 L 440.3 289.7 L 429.8 278.9 L 425.0 258.9 L 422.8 242.2 L 417.8 230.8 L 411.3 216.5 L 410.4 209.4 L 416.4 197.2 L 417.1 189.1 L 421.3 185.5 L 421.5 178.9 L 429.9 176.7 L 434.7 171.3 L 441.7 171.7 L 443.8 167.4 L 446.2 166.6 L 455.6 167.3 Z" class="land-shape"/>
+<path d="M 718.6 275.0 L 714.2 268.6 L 699.3 265.4 L 693.8 269.3 L 679.3 273.1 L 672.4 272.7 L 657.7 282.1 L 647.2 282.2 L 640.4 277.5 L 626.4 284.4 L 622.2 279.6 L 621.5 293.5 L 618.1 299.0 L 614.7 304.5 L 610.0 293.1 L 614.8 283.7 L 607.0 285.9 L 596.4 280.1 L 587.6 294.5 L 568.2 297.3 L 557.9 283.9 L 544.1 283.1 L 541.2 293.4 L 532.3 296.4 L 520.0 283.1 L 506.1 283.5 L 498.5 258.7 L 489.2 244.8 L 495.4 225.4 L 487.3 213.4 L 501.4 189.5 L 521.1 188.5 L 526.5 169.5 L 550.8 172.8 L 566.1 156.6 L 581.0 149.5 L 602.1 149.0 L 624.4 166.6 L 642.7 176.3 L 657.6 172.4 L 668.6 174.7 L 683.7 161.6 L 697.3 160.4 L 709.6 172.7 L 711.7 181.5 L 710.5 193.7 L 720.0 199.9 L 725.0 207.2 L 716.3 214.3 L 720.3 243.0 L 717.8 250.7 L 724.8 270.7 L 724.8 270.7 L 718.6 275.0 Z M 499.6 146.5 L 510.6 149.8 L 512.1 159.4 L 523.3 167.5 L 520.9 173.6 L 505.8 175.0 L 500.3 182.7 L 489.7 196.2 L 485.7 184.6 L 485.8 179.4 L 488.9 176.6 L 492.8 160.9 L 486.6 154.3 L 499.6 146.5 Z" class="land-shape"/>
+<path d="M 421.3 185.5 L 417.1 189.1 L 416.4 197.2 L 410.4 209.4 L 408.3 207.6 L 408.0 202.1 L 400.9 193.7 L 399.8 181.8 L 400.9 164.8 L 402.6 157.0 L 400.5 153.1 L 400.5 153.1 L 399.6 145.1 L 405.2 132.8 L 406.0 137.5 L 409.4 135.3 L 412.1 142.0 L 415.2 144.6 L 416.0 153.6 L 416.0 153.6 L 414.4 162.1 L 416.2 172.8 L 421.5 178.9 L 421.3 185.5 Z" class="land-shape"/>
+<path d="M 368.7 40.5 L 378.3 51.2 L 388.8 56.0 L 393.6 52.3 L 396.7 62.0 L 400.7 69.1 L 395.8 78.5 L 390.0 73.0 L 381.2 73.3 L 370.2 69.2 L 364.3 69.7 L 361.5 74.9 L 356.9 69.2 L 354.3 79.5 L 360.5 91.2 L 363.3 99.0 L 369.1 108.3 L 374.0 113.8 L 378.8 124.3 L 390.1 133.8 L 388.7 138.0 L 388.7 138.0 L 376.7 128.8 L 369.3 119.8 L 357.6 112.3 L 346.9 93.9 L 349.5 92.1 L 343.7 81.5 L 343.4 73.1 L 335.2 69.2 L 331.3 79.9 L 327.5 71.6 L 327.8 62.9 L 328.3 62.5 L 337.2 63.3 L 339.5 59.1 L 343.9 63.2 L 348.9 63.7 L 348.8 56.7 L 353.3 54.1 L 354.5 44.0 L 364.7 37.4 L 368.7 40.5 Z" class="land-shape"/>
+<path d="M 276.2 16.3 L 274.2 22.4 L 280.0 27.0 L 286.5 27.7 L 285.5 37.9 L 279.9 42.1 L 270.4 39.0 L 267.7 49.1 L 261.6 49.9 L 259.4 45.9 L 252.2 54.4 L 246.0 55.6 L 240.6 50.2 L 236.2 39.3 L 230.1 43.2 L 230.3 31.9 L 239.6 17.8 L 239.2 11.5 L 245.0 13.8 L 248.5 9.5 L 259.4 9.7 L 262.0 4.2 L 275.7 11.9 L 276.2 16.3 Z" class="land-shape"/>
+<path d="M 42.5 146.6 L 47.7 143.0 L 50.9 155.2 L 58.4 155.2 L 60.6 152.0 L 68.1 152.9 L 71.6 165.5 L 65.7 172.2 L 65.6 191.7 L 63.5 195.4 L 63.0 207.2 L 57.5 209.3 L 62.6 224.2 L 59.1 240.7 L 63.5 248.1 L 61.7 254.9 L 57.0 264.3 L 58.0 272.6 L 52.9 279.0 L 46.2 275.5 L 39.6 278.3 L 41.5 258.7 L 40.3 243.3 L 34.6 241.0 L 31.6 231.6 L 32.6 215.2 L 37.7 206.1 L 38.6 196.0 L 41.3 181.0 L 41.0 170.4 L 38.4 161.4 L 37.9 153.0 L 42.5 146.6 Z" class="land-shape"/>
+<path d="M 57.0 264.3 L 61.7 254.9 L 63.5 248.1 L 59.1 240.7 L 62.6 224.2 L 57.5 209.3 L 63.0 207.2 L 63.5 195.4 L 65.6 191.7 L 65.7 172.2 L 71.6 165.5 L 68.1 152.9 L 60.6 152.0 L 58.4 155.2 L 50.9 155.2 L 47.7 143.0 L 42.5 146.6 L 37.9 153.0 L 38.5 135.2 L 33.3 124.3 L 51.3 106.3 L 67.0 110.8 L 84.1 110.6 L 97.7 114.9 L 108.3 113.6 L 128.9 114.4 L 134.0 124.1 L 157.5 135.5 L 162.1 130.1 L 176.5 141.4 L 191.3 138.2 L 192.0 152.7 L 179.9 169.3 L 163.5 174.6 L 162.4 183.0 L 154.6 196.9 L 149.6 217.3 L 154.6 231.5 L 147.2 242.7 L 144.5 258.9 L 134.8 263.9 L 125.8 283.1 L 109.6 283.5 L 97.4 283.1 L 89.4 291.9 L 84.5 301.3 L 78.3 299.3 L 73.6 290.8 L 70.0 276.4 L 58.0 272.6 L 57.0 264.3 Z" class="land-shape"/>
+<path d="M 1176.8 127.0 L 1185.5 120.5 L 1174.0 77.1 L 1199.3 67.1 L 1200.0 66.5 L 1200.0 444.0 L 1193.9 439.4 L 1188.7 445.4 L 1170.9 427.9 L 1158.4 412.1 L 1154.8 384.5 L 1164.0 387.9 L 1164.4 375.1 L 1159.3 362.3 L 1160.6 342.0 L 1146.9 312.6 L 1125.9 302.5 L 1122.1 283.3 L 1112.7 271.7 L 1110.4 264.5 L 1108.5 250.2 L 1108.9 240.5 L 1101.2 234.8 L 1097.0 237.4 L 1093.7 214.2 L 1097.4 208.5 L 1095.6 202.7 L 1107.8 190.8 L 1116.6 185.9 L 1130.1 189.3 L 1135.0 173.3 L 1151.3 170.4 L 1155.9 160.4 L 1176.0 146.9 L 1177.8 141.3 L 1176.8 127.0 Z" class="land-shape"/>
+<path d="M 294.2 31.2 L 295.7 26.5 L 308.3 22.1 L 311.2 30.8 L 329.4 37.3 L 328.1 49.6 L 331.1 60.2 L 321.0 56.6 L 310.6 65.5 L 311.3 77.9 L 309.7 85.0 L 313.9 97.7 L 325.9 110.3 L 332.3 131.0 L 346.5 151.1 L 356.5 151.0 L 359.6 156.5 L 356.0 161.5 L 367.5 170.5 L 376.8 178.1 L 387.8 191.1 L 389.1 195.8 L 386.7 204.7 L 379.6 193.1 L 368.5 188.9 L 363.2 205.1 L 372.4 214.4 L 370.9 227.4 L 365.6 228.9 L 358.7 250.4 L 353.4 252.3 L 353.5 244.6 L 356.1 231.2 L 358.8 225.9 L 353.9 211.4 L 350.0 198.8 L 344.7 195.7 L 340.9 184.9 L 332.7 180.3 L 327.2 170.3 L 317.7 168.7 L 307.7 157.4 L 296.1 141.1 L 287.4 126.7 L 283.4 102.0 L 277.1 99.1 L 266.7 90.8 L 260.8 94.2 L 253.4 105.8 L 248.1 107.7 L 249.6 96.8 L 242.6 93.6 L 239.4 74.3 L 243.8 66.7 L 240.0 57.3 L 240.6 50.2 L 246.0 55.6 L 252.2 54.4 L 259.4 45.9 L 261.6 49.9 L 267.7 49.1 L 270.4 39.0 L 279.9 42.1 L 285.5 37.9 L 286.5 27.7 L 294.2 31.2 Z M 351.3 244.2 L 346.7 263.9 L 348.6 271.6 L 346.0 284.5 L 336.2 275.1 L 329.7 272.4 L 311.9 259.7 L 313.7 246.8 L 328.6 249.1 L 341.6 246.4 L 351.3 244.2 Z M 270.8 169.8 L 278.4 187.5 L 276.6 220.6 L 270.8 219.0 L 265.6 227.3 L 260.8 220.7 L 260.3 190.5 L 257.4 176.2 L 264.4 177.5 L 270.8 169.8 Z" class="land-shape"/>
+<path d="M 749.2 154.3 L 758.0 169.5 L 763.6 171.2 L 765.8 164.9 L 773.4 154.8 L 780.1 167.9 L 786.6 185.7 L 792.6 186.8 L 796.5 193.6 L 786.0 195.6 L 783.8 215.0 L 781.6 223.8 L 776.9 229.6 L 777.2 242.0 L 774.1 243.2 L 766.1 230.1 L 770.5 217.8 L 766.7 210.4 L 761.9 212.3 L 746.9 230.7 L 746.6 213.4 L 740.9 209.3 L 735.4 202.5 L 739.0 194.5 L 732.2 186.0 L 734.8 179.7 L 730.0 175.4 L 727.3 168.8 L 730.4 164.7 L 739.9 171.9 L 746.8 173.4 L 748.6 170.5 L 742.3 156.9 L 745.6 153.5 L 749.2 154.3 Z M 733.5 228.1 L 727.1 216.6 L 725.0 207.2 L 727.7 206.5 L 731.5 213.2 L 737.1 213.2 L 737.0 217.0 L 742.3 231.5 L 733.5 228.1 Z" class="land-shape"/>
+<path d="M 664.8 111.2 L 675.6 115.4 L 694.4 119.5 L 711.8 131.5 L 714.0 136.1 L 721.8 132.2 L 733.7 137.4 L 737.6 147.7 L 745.6 153.5 L 742.3 156.9 L 748.6 170.5 L 746.8 173.4 L 739.9 171.9 L 730.4 164.7 L 727.3 168.8 L 709.6 172.7 L 697.3 160.4 L 683.7 161.6 L 685.6 150.9 L 682.4 133.9 L 675.0 124.7 L 667.9 121.8 L 663.3 114.1 L 664.8 111.2 Z" class="land-shape"/>
+<path d="M 340.0 39.2 L 346.4 33.5 L 357.6 32.9 L 360.0 28.7 L 362.2 29.0 L 364.7 37.4 L 354.5 44.0 L 353.3 54.1 L 348.8 56.7 L 348.9 63.7 L 343.9 63.2 L 339.5 59.1 L 337.2 63.3 L 328.3 62.5 L 331.1 60.2 L 328.1 49.6 L 329.4 37.3 L 340.0 39.2 Z" class="land-shape"/>
+<path d="M 391.9 3.0 L 381.2 6.0 L 376.4 3.3 L 373.1 0.0 L 392.5 0.0 L 391.9 3.0 Z" class="land-shape"/>
+<path d="M 613.6 470.1 L 619.2 462.4 L 622.2 453.4 L 632.0 449.9 L 634.1 441.5 L 638.3 437.3 L 625.6 412.3 L 651.1 399.7 L 653.6 396.0 L 668.9 402.8 L 688.0 420.2 L 724.0 470.5 L 747.7 472.5 L 759.1 474.9 L 762.2 486.8 L 771.3 486.2 L 776.3 507.8 L 782.5 513.5 L 784.7 522.3 L 793.4 532.8 L 794.2 543.1 L 792.9 551.4 L 794.6 559.8 L 798.2 566.8 L 799.9 575.0 L 801.8 581.1 L 805.7 586.1 L 809.2 584.3 L 811.7 593.9 L 812.1 599.6 L 817.0 625.0 L 855.4 637.6 L 858.0 632.3 L 863.8 650.0 L 855.3 700.0 L 669.2 700.0 L 667.0 695.6 L 661.3 691.5 L 652.8 667.7 L 651.4 650.3 L 651.9 635.5 L 644.6 607.8 L 638.6 598.0 L 631.7 592.9 L 627.5 578.5 L 628.2 572.9 L 624.7 559.9 L 620.9 554.3 L 615.9 535.7 L 608.2 515.6 L 601.7 498.4 L 595.3 498.5 L 597.3 484.8 L 597.9 476.1 L 599.4 466.1 L 613.6 470.1 Z" class="land-shape"/>
+<path d="M 571.9 321.4 L 573.8 315.3 L 583.0 315.7 L 594.6 308.2 L 586.0 318.9 L 586.9 323.5 L 585.5 322.7 L 583.1 324.6 L 581.2 324.0 L 580.5 325.0 L 580.3 322.5 L 579.4 320.9 L 576.9 320.7 L 573.4 322.8 L 571.0 321.5 L 571.9 321.4 Z" class="land-shape"/>
+<path d="M 573.4 322.8 L 576.9 320.7 L 579.4 320.9 L 580.3 322.5 L 580.5 325.0 L 581.2 324.0 L 583.1 324.6 L 585.5 322.7 L 586.9 323.5 L 587.3 325.5 L 574.2 335.7 L 568.0 332.5 L 565.0 322.4 L 571.0 321.5 L 573.4 322.8 Z" class="land-shape"/>
+<path d="M 130.3 336.8 L 131.1 352.0 L 135.5 378.4 L 138.8 383.7 L 136.5 393.4 L 119.8 397.6 L 114.0 406.9 L 106.6 409.1 L 106.1 427.6 L 91.2 437.5 L 86.3 450.0 L 75.8 456.7 L 63.1 460.5 L 42.5 479.0 L 42.6 508.6 L 40.6 508.6 L 40.9 522.0 L 33.0 522.8 L 28.9 528.5 L 23.1 528.5 L 18.5 525.2 L 7.8 527.9 L 3.6 547.4 L 0.0 549.0 L 0.0 497.2 L 4.0 496.3 L 14.0 479.2 L 20.4 472.5 L 31.1 451.7 L 27.9 420.6 L 32.7 399.0 L 34.5 385.9 L 42.7 369.0 L 55.5 357.6 L 64.9 347.2 L 73.5 321.4 L 77.5 306.0 L 86.9 306.1 L 94.6 316.7 L 106.7 315.0 L 119.9 320.5 L 125.5 320.8 L 130.3 336.8 Z" class="land-shape"/>
+<path d="M 573.2 650.0 L 523.7 650.0 L 472.3 650.0 L 472.3 557.9 L 472.3 469.0 L 468.5 448.9 L 471.8 433.5 L 469.8 422.8 L 474.4 410.8 L 491.4 410.4 L 503.7 417.0 L 516.4 424.4 L 522.3 428.2 L 532.1 420.3 L 537.4 413.2 L 548.6 411.1 L 557.7 414.3 L 561.2 426.7 L 564.2 418.5 L 574.4 424.4 L 584.3 425.8 L 590.6 419.5 L 590.6 419.5 L 597.7 456.0 L 599.0 462.5 L 595.4 472.5 L 592.7 491.4 L 589.2 504.4 L 586.2 508.8 L 582.0 500.7 L 576.2 489.6 L 567.1 453.7 L 565.8 456.0 L 571.1 482.4 L 578.9 507.5 L 588.6 546.4 L 593.3 560.0 L 597.4 574.2 L 608.8 601.8 L 606.3 606.2 L 606.7 622.4 L 621.6 644.9 L 623.8 650.0 L 573.2 650.0 Z" class="land-shape"/>
+<path d="M 472.3 699.9 L 457.7 700.0 L 457.7 700.0 L 446.3 700.0 L 406.6 662.6 L 355.7 614.8 L 342.8 628.4 L 333.8 637.7 L 326.6 624.0 L 306.4 613.2 L 300.8 597.6 L 290.7 585.9 L 284.7 590.5 L 280.2 576.6 L 279.7 565.9 L 272.2 547.6 L 277.2 537.2 L 276.1 521.5 L 277.7 507.8 L 276.8 496.4 L 279.1 476.0 L 278.4 464.4 L 274.2 442.3 L 280.5 436.5 L 281.6 426.0 L 280.2 415.6 L 289.0 406.0 L 292.9 398.0 L 299.1 390.8 L 299.9 371.6 L 314.9 380.2 L 320.2 378.0 L 330.9 382.2 L 347.8 393.4 L 353.8 415.6 L 365.3 420.4 L 383.2 430.9 L 396.8 443.3 L 403.1 436.9 L 409.2 425.4 L 406.2 406.2 L 410.2 394.0 L 419.4 382.3 L 428.2 378.9 L 445.5 384.0 L 449.8 395.2 L 454.6 395.3 L 458.6 399.6 L 471.3 402.5 L 474.4 410.8 L 469.8 422.8 L 471.8 433.5 L 468.5 448.9 L 472.3 469.0 L 472.3 557.9 L 472.3 650.0 L 472.3 699.9 Z" class="land-shape"/>
+<path d="M 378.8 124.3 L 374.0 113.8 L 369.1 108.3 L 363.3 99.0 L 360.5 91.2 L 354.3 79.5 L 356.9 69.2 L 361.5 74.9 L 364.3 69.7 L 370.2 69.2 L 381.2 73.3 L 390.0 73.0 L 395.8 78.5 L 395.8 78.5 L 400.4 78.4 L 397.2 89.4 L 403.4 99.0 L 401.5 110.8 L 398.5 111.9 L 396.1 114.2 L 392.0 120.0 L 390.1 133.8 L 378.8 124.3 Z" class="land-shape"/>
+<path d="M 445.3 150.0 L 446.2 166.6 L 443.8 167.4 L 441.7 171.7 L 434.7 171.3 L 429.9 176.7 L 421.5 178.9 L 416.2 172.8 L 414.4 162.1 L 416.0 153.6 L 416.0 153.6 L 417.7 153.8 L 418.2 148.7 L 425.8 144.8 L 428.6 143.9 L 433.0 142.4 L 438.9 142.0 L 445.3 150.0 Z" class="land-shape"/>
+<path d="M 393.6 52.3 L 403.4 45.7 L 411.3 46.8 L 418.2 56.6 L 419.7 64.6 L 427.4 70.5 L 428.5 80.8 L 435.9 88.0 L 439.9 82.4 L 443.1 85.5 L 440.1 89.8 L 442.4 94.1 L 439.3 99.8 L 440.4 108.9 L 446.6 119.7 L 441.8 127.5 L 439.6 135.5 L 441.0 138.5 L 438.9 142.0 L 433.0 142.4 L 428.6 143.9 L 428.2 142.0 L 429.7 139.0 L 431.2 132.9 L 429.4 133.1 L 426.9 128.4 L 424.8 127.3 L 423.1 123.3 L 420.7 121.7 L 418.9 118.2 L 416.6 119.6 L 414.9 127.9 L 411.8 129.7 L 412.8 127.5 L 408.0 122.3 L 403.8 119.7 L 401.9 116.2 L 398.5 111.9 L 401.5 110.8 L 403.4 99.0 L 397.2 89.4 L 400.4 78.4 L 395.8 78.5 L 395.8 78.5 L 400.7 69.1 L 396.7 62.0 L 393.6 52.3 L 393.6 52.3 Z" class="land-shape"/>
+<path d="M 406.0 137.5 L 405.2 132.8 L 399.6 145.1 L 400.5 153.1 L 397.8 151.1 L 394.2 143.0 L 388.7 138.0 L 390.1 133.8 L 392.0 120.0 L 396.1 114.2 L 398.5 111.9 L 401.9 116.2 L 403.8 119.7 L 408.0 122.3 L 412.8 127.5 L 411.8 129.7 L 409.4 135.3 L 406.0 137.5 Z" class="land-shape"/>
+<path d="M 415.2 144.6 L 412.1 142.0 L 409.4 135.3 L 411.8 129.7 L 414.9 127.9 L 416.6 119.6 L 418.9 118.2 L 420.7 121.7 L 423.1 123.3 L 424.8 127.3 L 426.9 128.4 L 429.4 133.1 L 431.2 132.9 L 429.7 139.0 L 428.2 142.0 L 428.6 143.9 L 425.8 144.8 L 418.2 148.7 L 417.7 153.8 L 416.0 153.6 L 415.2 144.6 Z" class="land-shape"/>
+</g>
+					<g id="studyLayer"></g>
+					<g id="markerLayer"></g>
+					<g id="locateLayer"></g>
+				</svg>
+				<div class="map-clickzone" id="mapClickzone"></div>
+				<div class="tooltip" id="tooltip"></div>
+			</div>
+			<div class="zoom-strip">
+				<span class="label">Zoom</span>
+				<button class="zoom-btn active" data-zoom="full">Full map</button>
+				<button class="zoom-btn" data-zoom="greece">Greece & Aegean</button>
+				<button class="zoom-btn" data-zoom="peloponnese">Peloponnese</button>
+				<button class="zoom-btn" data-zoom="sicily">Sicily & Italy</button>
+				<button class="zoom-btn" data-zoom="persia">Anatolia → Persia</button>
+			</div>
+			<div class="map-legend" id="mapLegend">
+				<span class="legend-item"><span class="swatch" style="background:var(--accent)"></span>Quiz markers</span>
+				<span class="legend-item"><span class="swatch" style="background:var(--good);outline:2px solid var(--good);outline-offset:2px"></span>✓ Correct</span>
+				<span class="legend-item"><span class="swatch" style="background:var(--bad);outline:2px dashed var(--bad);outline-offset:2px"></span>✗ Incorrect</span>
+				<span class="legend-item"><span class="swatch" style="background:var(--selected)"></span>Selected</span>
+			</div>
+		</div>
+
+		<!-- ── SIDEBAR ── -->
+		<div class="panel" id="sidebar">
+			<div class="sidebar-header">
+				<h2 id="sidebarTitle">Quiz</h2>
+				<p id="sidebarIntro">Match each numbered marker to a place name from the word bank. Click a marker, then click a name.</p>
+			</div>
+
+			<!-- Quiz callout -->
+			<div class="callout" id="callout">
+				<strong id="calloutStrong">Ready to go</strong>
+				<div class="sub" id="calloutText">Pick a region, difficulty, and hit New round.</div>
+			</div>
+
+			<!-- ── QUIZ VIEW ── -->
+			<div id="quizView" class="sidebar-inner">
+				<div class="progress-bar-wrap"><div class="progress-bar-fill" id="quizProgress" style="width:0%"></div></div>
+				<div style="height:10px"></div>
+				<div class="assignments" id="assignments"></div>
+				<div class="section-label">Word bank — pick the right names</div>
+				<div class="word-bank" id="wordBank"></div>
+				<div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+					<button class="btn sm" id="checkBtn">Check answers</button>
+					<button class="btn sm ghost" id="revealBtn">Reveal</button>
+					<button class="btn sm ghost" id="resetBtn">Clear all</button>
+				</div>
+				<div class="results" id="results"></div>
+			</div>
+
+			<!-- ── LOCATE VIEW ── -->
+			<div id="locateView" class="sidebar-inner hidden">
+				<div class="progress-bar-wrap"><div class="progress-bar-fill" id="locateProgress" style="width:0%"></div></div>
+				<div class="locate-prompt" id="locatePrompt">
+					<div class="place-name" id="locateName">—</div>
+					<div class="instruction">Click on the map where you think this place is</div>
+				</div>
+				<div id="locateFeedbackArea"></div>
+				<div id="locateQueue" style="padding:0 16px; font-size:0.82rem; color:var(--muted);"></div>
+				<div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+					<button class="btn sm" id="locateSkipBtn">Skip <kbd>Space</kbd></button>
+					<button class="btn sm ghost" id="locateNextBtn" disabled>Next <kbd>Enter</kbd></button>
+				</div>
+				<div class="results" id="locateResults"></div>
+			</div>
+
+			<!-- ── STUDY VIEW ── -->
+			<div id="studyView" class="sidebar-inner hidden">
+				<input class="search-input" id="studySearch" type="text" placeholder="Search places..." />
+				<div style="height:10px"></div>
+				<div id="studyInfoPanel"></div>
+				<div style="height:10px"></div>
+				<div class="study-list" id="studyList"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const MAP = { width:1200, height:700, minLon:-12, maxLon:82, minLat:20, maxLat:48 };
+
+const PLACES = [{"name":"Thebes","lat":38.325,"lon":23.318,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Amphipolis","lat":40.823,"lon":23.845,"tags":["all","greece_aegean"]},{"name":"Olynthos","lat":40.294,"lon":23.387,"tags":["all","greece_aegean"]},{"name":"Pella","lat":40.76,"lon":22.525,"tags":["all","greece_aegean"]},{"name":"Vergina","lat":40.486,"lon":22.318,"tags":["all","greece_aegean"]},{"name":"Chalcidice","lat":40.3,"lon":23.4,"tags":["all","greece_aegean"]},{"name":"Mount Athos","lat":40.158,"lon":24.326,"tags":["all","greece_aegean"]},{"name":"Epirus","lat":39.6,"lon":20.8,"tags":["all","greece_aegean"]},{"name":"Macedon","lat":40.7,"lon":22.9,"tags":["all","greece_aegean"]},{"name":"Thessaly","lat":39.6,"lon":22.4,"tags":["all","greece_aegean"]},{"name":"Pherae","lat":39.45,"lon":22.75,"tags":["all","greece_aegean"]},{"name":"Leuctra","lat":38.215,"lon":23.191,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Athens","lat":37.984,"lon":23.728,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Euboaea","lat":38.5,"lon":23.7,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Eretria","lat":38.4,"lon":23.79,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Lefkandi","lat":38.417,"lon":23.7,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Chalcis","lat":38.462,"lon":23.594,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Plataea","lat":38.214,"lon":23.28,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Marathon","lat":38.15,"lon":24.0,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Salamis","lat":37.97,"lon":23.48,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Thermopylae","lat":38.796,"lon":22.536,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Artemision","lat":39.175,"lon":23.24,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Sphacteria","lat":36.97,"lon":21.66,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Pylos","lat":36.913,"lon":21.696,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Messenia","lat":37.05,"lon":21.85,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Megara","lat":37.995,"lon":23.343,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Corcyra","lat":39.624,"lon":19.922,"tags":["all","greece_aegean"]},{"name":"Epidamnus","lat":41.31,"lon":19.44,"tags":["all","greece_aegean"]},{"name":"Sparta","lat":37.075,"lon":22.429,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Troy","lat":39.957,"lon":26.239,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Mycale","lat":37.65,"lon":27.02,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Samos","lat":37.75,"lon":26.98,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Naxos","lat":37.1,"lon":25.38,"tags":["all","greece_aegean"]},{"name":"Rhodes","lat":36.434,"lon":28.217,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Crete","lat":35.24,"lon":24.9,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Knossos","lat":35.298,"lon":25.163,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Delphi","lat":38.482,"lon":22.501,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Olympia","lat":37.638,"lon":21.63,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Argos","lat":37.633,"lon":22.733,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Mytilene","lat":39.106,"lon":26.554,"tags":["all","greece_aegean","anatolia_persia"]},{"name":"Mylos (Milos)","lat":36.74,"lon":24.43,"tags":["all","greece_aegean"]},{"name":"Delos","lat":37.401,"lon":25.268,"tags":["all","greece_aegean"]},{"name":"Potidaea","lat":40.194,"lon":23.329,"tags":["all","greece_aegean"]},{"name":"Mantineia","lat":37.62,"lon":22.39,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Charonea (Chaeronea)","lat":38.49,"lon":22.85,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Messene","lat":37.178,"lon":21.932,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Mycenae","lat":37.73,"lon":22.754,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Corinth","lat":37.938,"lon":22.932,"tags":["all","greece_aegean","mycenae_athens_sparta"]},{"name":"Arginusae","lat":39.0,"lon":26.8,"tags":["all","anatolia_persia"]},{"name":"Aegospotami","lat":40.23,"lon":26.39,"tags":["all","anatolia_persia"]},{"name":"Miletus","lat":37.53,"lon":27.28,"tags":["all","anatolia_persia"]},{"name":"Issus","lat":36.58,"lon":36.17,"tags":["all","anatolia_persia"]},{"name":"Granacus River","lat":40.39,"lon":27.22,"tags":["all","anatolia_persia"]},{"name":"Gaugemela","lat":36.36,"lon":43.26,"tags":["all","anatolia_persia"]},{"name":"Ipsus","lat":38.95,"lon":30.99,"tags":["all","anatolia_persia"]},{"name":"Babylon","lat":32.54,"lon":44.42,"tags":["all","anatolia_persia"]},{"name":"Susa","lat":32.19,"lon":48.26,"tags":["all","anatolia_persia"]},{"name":"Persepolis","lat":29.93,"lon":52.89,"tags":["all","anatolia_persia"]},{"name":"Sardis","lat":38.48,"lon":28.04,"tags":["all","anatolia_persia"]},{"name":"Antioch","lat":36.2,"lon":36.16,"tags":["all","anatolia_persia"]},{"name":"Pergamon","lat":39.13,"lon":27.18,"tags":["all","anatolia_persia"]},{"name":"Priene","lat":37.66,"lon":27.3,"tags":["all","anatolia_persia"]},{"name":"Seleucis on the Tigris","lat":33.1,"lon":44.58,"tags":["all","anatolia_persia"]},{"name":"Ai Khanoum","lat":37.165,"lon":69.409,"tags":["all","anatolia_persia"]},{"name":"Tyre","lat":33.27,"lon":35.2,"tags":["all","anatolia_persia","west_med"]},{"name":"Cunaxa","lat":33.25,"lon":44.25,"tags":["all","anatolia_persia"]},{"name":"Halicarnassus","lat":37.037,"lon":27.424,"tags":["all","anatolia_persia"]},{"name":"Indus River","lat":27.5,"lon":68.7,"tags":["all","anatolia_persia"]},{"name":"Alexandria","lat":31.2,"lon":29.92,"tags":["all","west_med"]},{"name":"Siwa","lat":29.2,"lon":25.52,"tags":["all","west_med"]},{"name":"Carthage","lat":36.85,"lon":10.33,"tags":["all","west_med"]},{"name":"Syracuse","lat":37.075,"lon":15.286,"tags":["all","west_med"]},{"name":"Akragas","lat":37.308,"lon":13.576,"tags":["all","west_med"]},{"name":"Gela","lat":37.07,"lon":14.24,"tags":["all","west_med"]},{"name":"Himera","lat":37.99,"lon":13.82,"tags":["all","west_med"]},{"name":"Selinus","lat":37.583,"lon":12.829,"tags":["all","west_med"]},{"name":"Segesta","lat":37.94,"lon":12.83,"tags":["all","west_med"]},{"name":"Motya","lat":37.87,"lon":12.47,"tags":["all","west_med"]},{"name":"Rome","lat":41.893,"lon":12.483,"tags":["all","west_med"]},{"name":"Pithekoussai","lat":40.74,"lon":13.95,"tags":["all","west_med"]}];
+
+// SVG paths for land (preserved from original)
+
+// ═══════════════════════════════════════
+// HISTORICAL NOTES — shown after check/reveal
+// ═══════════════════════════════════════
+const PLACE_INFO = {
+"Thebes": {date:"c. 1400 BC – 335 BC",event:"Boeotian powerhouse. Led by Epaminondas, crushed Sparta at Leuctra (371 BC) and briefly dominated Greece. Sacred Band = elite 150 paired fighters. Alexander razed it in 335 BC as a warning.",tip:"Thebes is inland, NW of Athens — look for it near Leuctra and Plataea in Boeotia."},
+"Amphipolis": {date:"437 BC (founded)",event:"Athenian colony on the Strymon River in Thrace. Its loss to Brasidas (424 BC) was a turning point of the Peloponnesian War. Thucydides was exiled for failing to defend it.",tip:"Far NE Greece near the coast — think 'Amphipolis = up north in Macedonia.'"},
+"Olynthos": {date:"Destroyed 348 BC",event:"Head of the Chalcidian League. Philip II besieged and destroyed it despite Athens' Olynthiac orations by Demosthenes urging its defense.",tip:"Chalcidice peninsula, between Pella and Mount Athos."},
+"Pella": {date:"c. 400–168 BC",event:"Capital of Macedon from Archelaus onward. Birthplace of Alexander the Great (356 BC). Had famous pebble mosaics.",tip:"Inland Macedonia, west of Thessaloniki — the royal seat before Alexander went east."},
+"Vergina": {date:"c. 1000–300 BC",event:"Ancient Aigai, original capital of Macedon. Royal tombs discovered 1977 — likely Philip II's burial with gold larnax and star of Macedon.",tip:"Near Pella, a bit SW — remember: Vergina = tombs = Philip II's golden chest."},
+"Chalcidice": {date:"8th c.–4th c. BC",event:"Three-fingered peninsula (Kassandra, Sithonia, Athos). Heavily colonized by southern Greek cities. Philip II absorbed it into Macedon.",tip:"The trident-shaped peninsula sticking into the Aegean south of Thessaloniki."},
+"Mount Athos": {date:"Antiquity onward",event:"Easternmost finger of Chalcidice. Xerxes dug a canal across it (480 BC) to avoid the storms that wrecked his father's fleet. Later became a center of Orthodox monasticism.",tip:"Tip of the third finger of Chalcidice — Xerxes' canal is the ancient exam fact."},
+"Epirus": {date:"c. 470–167 BC",event:"NW Greek region. Home of the oracle at Dodona (Zeus). Pyrrhus of Epirus (319–272 BC) won 'Pyrrhic victories' against Rome.",tip:"Upper-left corner of Greece, west coast — mountainous, faces the Adriatic."},
+"Macedon": {date:"c. 808–168 BC",event:"Northern Greek kingdom. Under Philip II unified Greece; under Alexander III conquered the Persian Empire. Fell to Rome at Pydna (168 BC).",tip:"The broad region in N. Greece — Pella, Vergina, and Amphipolis are all inside it."},
+"Thessaly": {date:"Archaic–Classical",event:"Fertile central Greek plain — best cavalry in Greece. Controlled Thermopylae's southern approach. Jason of Pherae briefly unified it (370s BC).",tip:"Big flat region south of Macedon, north of Boeotia — the breadbasket of Greece."},
+"Pherae": {date:"4th c. BC",event:"Thessalian city where the tyrant Jason of Pherae built a powerful state in the 370s BC. His assassination prevented him from dominating Greece before Philip II did.",tip:"In Thessaly — think 'Pherae = Jason = almost-Philip.'"},
+"Leuctra": {date:"371 BC",event:"Battle where Theban general Epaminondas shattered Spartan military myth. His oblique order (deep left wing) killed Spartan king Cleombrotus I. Ended Spartan hegemony for good.",tip:"In Boeotia near Thebes — the battle that broke Sparta's reputation."},
+"Athens": {date:"c. 3000 BC onward",event:"Birthplace of democracy (Cleisthenes, 508 BC), center of philosophy (Socrates, Plato, Aristotle), drama, and the Delian League/Athenian Empire. Defeated Persia at Marathon and Salamis. Lost the Peloponnesian War to Sparta (404 BC).",tip:"East coast of Attica with its port at Piraeus — the cultural capital of the classical world."},
+"Euboaea": {date:"Archaic–Classical",event:"Long island hugging the east coast of central Greece. Major cities Chalcis and Eretria were early colonizers and rivals. Euboean alphabet became basis for Latin script.",tip:"The big sausage-shaped island right next to mainland Greece, east of Boeotia."},
+"Eretria": {date:"c. 800–490 BC",event:"Major Euboean city and early colonizer. Helped Ionian Revolt (499 BC) and was destroyed by Persians in retaliation (490 BC) just before Marathon.",tip:"On Euboea's SW coast, facing Attica — burned by Darius as a warm-up for Marathon."},
+"Lefkandi": {date:"c. 1000–825 BC",event:"Key Dark Age site on Euboea. The 'Heroon' (c. 950 BC) — a massive apsidal building with warrior burial and sacrificed horses — shows surprising wealth during Greece's 'dark' period.",tip:"Between Chalcis and Eretria on Euboea — the site that proved the Dark Age wasn't totally dark."},
+"Chalcis": {date:"8th c. BC onward",event:"Euboean city and prolific colonizer — gave its name to Chalcidice. Fought the Lelantine War against neighboring Eretria (c. 710–650 BC), one of Greece's earliest recorded conflicts.",tip:"Northern end of Euboea at the narrow strait — 'Chalcis' → 'Chalcidice' (colonies named after it)."},
+"Plataea": {date:"479 BC",event:"Site of the decisive Greek land victory over Persia. Pausanias led combined Greek forces that destroyed Mardonius' army. Ended the Persian invasion for good.",tip:"In Boeotia, between Thebes and Athens — the battle that paired with Salamis to end the Persian Wars."},
+"Marathon": {date:"490 BC",event:"Athenians (with Plataean allies) defeated Darius I's invasion force. Miltiades commanded. Pheidippides' run gave us the modern marathon. First proof Greeks could beat Persia in open battle.",tip:"NE coast of Attica, facing the sea — the Persians landed on the beach here."},
+"Salamis": {date:"480 BC",event:"Decisive naval battle where Themistocles' Athenian fleet destroyed Xerxes' navy in narrow straits. Xerxes watched from a throne onshore. Turned the tide of the Persian invasion.",tip:"Island in the Saronic Gulf, right off Athens/Piraeus — narrow straits = Greek advantage."},
+"Thermopylae": {date:"480 BC",event:"'Hot Gates' — narrow coastal pass where Leonidas and 300 Spartans (plus allies) held Xerxes' army for three days. Betrayed by Ephialtes via a mountain path. Iconic last stand.",tip:"The narrow pass between mountains and sea, N of Boeotia — 'Thermo' = hot springs there."},
+"Artemision": {date:"480 BC",event:"Naval battle fought simultaneously with Thermopylae, off the north tip of Euboea. Inconclusive but bought time. Greek fleet withdrew south to Salamis after Thermopylae fell.",tip:"Northern tip of Euboea — think: 'Artemision + Thermopylae = same week, sea + land.'"},
+"Sphacteria": {date:"425 BC",event:"Island off Pylos where Athenians trapped and captured 120 Spartan hoplites — a massive shock. Proved Spartans would surrender rather than die. Huge morale blow to Sparta.",tip:"Tiny island right next to Pylos, SW Peloponnese — 'Sphacteria = Spartans surrendered.'"},
+"Pylos": {date:"425 BC / Bronze Age",event:"Athenian Demosthenes fortified this bay in the Peloponnesian War, leading to the Sphacteria disaster for Sparta. Also site of Nestor's Mycenaean palace (Bronze Age).",tip:"SW corner of the Peloponnese — Messenian coast. Two eras: Nestor's palace + Peloponnesian War."},
+"Messenia": {date:"8th–4th c. BC",event:"Region in SW Peloponnese enslaved by Sparta as helots. Two major Messenian Wars. Epaminondas liberated it after Leuctra (369 BC) and founded Messene as its capital.",tip:"SW Peloponnese — 'Messenia = helots = Sparta's bread supply.'"},
+"Megara": {date:"8th–5th c. BC",event:"City between Athens and Corinth. Founded Megara Hyblaea (Sicily) and Byzantium. The Megarian Decree (432 BC) — Athens' trade embargo — was a trigger for the Peloponnesian War.",tip:"On the isthmus between Attica and the Peloponnese — squeezed between Athens and Corinth."},
+"Corcyra": {date:"c. 734 BC (colonized)",event:"Modern Corfu. Corinthian colony that rebelled. The Corcyra-Corinth conflict (435–433 BC) dragged Athens in and directly triggered the Peloponnesian War (Thucydides Book I).",tip:"Island off NW Greece — 'Corcyra = Corfu = the war's spark.'"},
+"Epidamnus": {date:"c. 627 BC (founded)",event:"Corinthian colony on the Adriatic (modern Durrës, Albania). Civil strife here in 435 BC set off the chain: Corcyra intervened → Corinth objected → Athens involved → Peloponnesian War.",tip:"On the Adriatic coast, modern Albania — 'Epidamnus = domino that started the big war.'"},
+"Sparta": {date:"c. 900–192 BC",event:"Military oligarchy in Laconia. Two kings, ephors, Gerousia. Helot-based economy. Won the Peloponnesian War (404 BC) but hegemony collapsed after Leuctra (371 BC). Never recovered.",tip:"Inland Peloponnese in the Eurotas valley, south of Argos — no walls, the Spartans were the walls."},
+"Troy": {date:"c. 3000–1180 BC",event:"Site of Homer's Iliad (Trojan War, c. 1180 BC traditional). Schliemann excavated it in 1870s. Multiple layers of settlement. Controls the Hellespont/Dardanelles strait.",tip:"NW Anatolia at the entrance to the Dardanelles — 'Troy = where Asia meets Europe's shipping lane.'"},
+"Mycale": {date:"479 BC",event:"Promontory on the Anatolian coast opposite Samos. Greek naval victory over Persia on the same day as Plataea (tradition). Ended Persian naval threat in the Aegean.",tip:"Across the strait from Samos — 'Mycale + Plataea = double whammy, same day, one at sea one on land.'"},
+"Samos": {date:"6th c.–5th c. BC",event:"Major Ionian island. Under tyrant Polycrates (c. 538–522 BC) — massive building projects including a tunnel (Tunnel of Eupalinos). Birthplace of Pythagoras. Key Delian League member.",tip:"Large island off the Anatolian coast near Miletus — 'Samos = Polycrates = Pythagoras.'"},
+"Naxos": {date:"Archaic–Classical",event:"Largest Cycladic island. First Greek state to revolt against Persia unsuccessfully (502 BC), prompting the Ionian Revolt. Center of marble quarrying and early monumental sculpture.",tip:"Biggest island in the Cyclades chain, center of the Aegean."},
+"Rhodes": {date:"408 BC (synoecism)",event:"Island at SE Aegean. Three cities merged into one in 408 BC. Famous for the Colossus (c. 280 BC), one of the Seven Wonders. Major naval power and trade hub.",tip:"Far SE corner of the Aegean, close to Anatolia — 'Rhodes = Colossus = naval crossroads.'"},
+"Crete": {date:"c. 3000–1450 BC",event:"Minoan civilization — earliest European palatial culture. Thalassocracy (sea empire). Linear A script (undeciphered). Collapsed c. 1450 BC, possibly linked to Thera eruption.",tip:"Largest Greek island, far south — 'Crete = Minoans = before Mycenaeans.'"},
+"Knossos": {date:"c. 1950–1350 BC",event:"Chief Minoan palace. Excavated by Arthur Evans (1900). Throne room, frescoes, labyrinth myth (Minotaur). Linear B tablets show Mycenaean takeover c. 1450 BC.",tip:"North-central Crete — 'Knossos = labyrinth = Arthur Evans.'"},
+"Delphi": {date:"8th c.–4th c. BC",event:"Panhellenic sanctuary of Apollo. Home of the Pythia (oracle). 'Navel of the world' (omphalos). Site of Pythian Games. City-states consulted it before wars, colonization, everything.",tip:"On the slopes of Mount Parnassus, central Greece — 'Delphi = oracle = center of the Greek world.'"},
+"Olympia": {date:"776 BC (traditional first games)",event:"Sanctuary of Zeus in the western Peloponnese. Site of the Olympic Games every four years. Phidias' Statue of Zeus = one of the Seven Wonders.",tip:"Western Peloponnese, inland — NOT on Mount Olympus (that's in Thessaly). Common mistake!"},
+"Argos": {date:"c. 2000 BC onward",event:"One of Greece's oldest continuously inhabited cities. Rival of Sparta in the Peloponnese. Destroyed Mycenae (468 BC). Often neutral or opposed Spartan hegemony.",tip:"NE Peloponnese, the Argive plain — near Mycenae. 'Argos = Sparta's local rival.'"},
+"Mytilene": {date:"6th–4th c. BC",event:"Chief city of Lesbos island. Revolted from the Delian League (428 BC). Athens debated destroying it — the Mytilenean Debate (Thucydides) is a key text on justice and empire.",tip:"On the island of Lesbos, NE Aegean near Anatolia — 'Mytilene = the famous debate about mercy.'"},
+"Mylos (Milos)": {date:"416 BC",event:"Cycladic island. Athens attacked neutral Melos in 416 BC. The Melian Dialogue (Thucydides) — 'the strong do what they can, the weak suffer what they must' — is THE text on power politics.",tip:"SW Cyclades — 'Melos = Melian Dialogue = Athenian imperialism at its harshest.'"},
+"Delos": {date:"c. 700 BC onward",event:"Sacred island, mythical birthplace of Apollo and Artemis. Treasury of the Delian League stored here (478 BC) until Pericles moved it to Athens. Major trade hub in Hellenistic era.",tip:"Tiny island in the center of the Cyclades — 'Delos = Delian League = Apollo's birthplace.'"},
+"Potidaea": {date:"432 BC",event:"Corinthian colony on Chalcidice that revolted from Athens. Its siege (432 BC) was one of the immediate causes of the Peloponnesian War. Socrates fought there.",tip:"Neck of the westernmost Chalcidice finger — 'Potidaea = Corinth's colony = war trigger.'"},
+"Mantineia": {date:"418 BC / 362 BC",event:"Two famous battles here in the Peloponnese. In 418 BC Sparta reasserted dominance. In 362 BC Epaminondas won but died, ending Theban hegemony — both sides claimed victory, nobody won.",tip:"Inland Arcadia, Peloponnese — 'Mantineia 362 = Epaminondas dies = everyone loses.'"},
+"Charonea (Chaeronea)": {date:"338 BC",event:"Philip II of Macedon defeated Athens and Thebes here, ending Greek city-state independence. 18-year-old Alexander led the cavalry charge that broke the Sacred Band. Created the League of Corinth.",tip:"In Boeotia, W of Thebes — 'Chaeronea = Philip wins = Greek freedom ends.'"},
+"Messene": {date:"369 BC (founded)",event:"City founded by Epaminondas after liberating Messenia from Sparta. Massive fortification walls (still standing). Symbol of Theban intervention and Spartan decline.",tip:"SW Peloponnese — 'Messene ≠ Messenia (city vs. region). Founded after Leuctra freed the helots.'"},
+"Mycenae": {date:"c. 1600–1100 BC",event:"Center of Mycenaean civilization. Lion Gate, Shaft Graves (gold death masks), tholos tombs. Agamemnon's legendary kingdom. Schliemann excavated the 'Mask of Agamemnon' (1876).",tip:"NE Peloponnese hilltop, near Argos — 'Mycenae = Lion Gate = gold masks = Bronze Age power.'"},
+"Corinth": {date:"c. 800–146 BC",event:"Wealthy city on the isthmus — controlled both the Saronic and Corinthian gulfs. Major colonizer (Syracuse, Corcyra). Rival of Athens. Romans destroyed it 146 BC. Rebuilt by Caesar.",tip:"On the narrow isthmus connecting Peloponnese to central Greece — geography = wealth."},
+"Arginusae": {date:"406 BC",event:"Naval battle where Athens won a costly victory over Sparta near Lesbos. But Athenians executed six winning generals for failing to rescue drowning sailors — a political scandal that weakened Athens before its final defeat.",tip:"Small islands near Lesbos — 'Arginusae = Athens wins the battle but kills its own generals.'"},
+"Aegospotami": {date:"405 BC",event:"Lysander's Spartan fleet destroyed the Athenian navy on the Hellespont. Athens lost 170 ships. This ended the Peloponnesian War — Athens starved and surrendered within months.",tip:"On the Hellespont (Dardanelles) in Thrace — 'Aegospotami = goat rivers = Athens' fleet dies = war over.'"},
+"Miletus": {date:"c. 600–494 BC",event:"Leading Ionian city in Anatolia. Birthplace of philosophy (Thales, Anaximander, Anaximenes). Started the Ionian Revolt (499 BC) against Persia. Persians sacked it in 494 BC.",tip:"SW Anatolian coast — 'Miletus = where philosophy began = Ionian Revolt's epicenter.'"},
+"Issus": {date:"333 BC",event:"Alexander's second major battle against Persia. Defeated Darius III in a narrow coastal plain near modern Iskenderun, Turkey. Darius fled, leaving his family behind. Famous mosaic from Pompeii depicts this battle.",tip:"SE corner of Anatolia, near the Syrian border — 'Issus = narrow space = Alexander's second win.'"},
+"Granacus River": {date:"334 BC",event:"Alexander's first battle in Asia. Cavalry charge across the river against Persian satraps. Nearly killed in personal combat. Won control of western Anatolia.",tip:"NW Anatolia near Troy — 'Granicus = first battle = Alexander almost dies crossing a river.'"},
+"Gaugemela": {date:"331 BC",event:"Alexander's decisive victory over Darius III in Mesopotamia (near modern Mosul, Iraq). Outnumbered but outmaneuvered Persia's massive army. Ended the Achaemenid Empire.",tip:"Deep in Mesopotamia, near the Tigris — 'Gaugamela = checkmate = Persian Empire falls.'"},
+"Ipsus": {date:"301 BC",event:"Battle of the Diadochi (Alexander's successors). Antigonus I killed. Divided Alexander's empire into Ptolemaic, Seleucid, and Antigonid kingdoms. Settled the post-Alexander power struggle.",tip:"Central Anatolia (Phrygia) — 'Ipsus = the battle that split Alexander's empire into three.'"},
+"Babylon": {date:"c. 2300 BC – 323 BC",event:"Ancient Mesopotamian capital. Alexander made it his imperial capital and died here (323 BC, age 32). Hanging Gardens (one of the Seven Wonders, if they existed). Center of astronomy and mathematics.",tip:"On the Euphrates in modern Iraq — 'Babylon = where Alexander died = Hanging Gardens.'"},
+"Susa": {date:"c. 4000 BC onward",event:"Ancient Elamite capital, later Achaemenid winter capital. Alexander held the mass wedding here (324 BC), marrying 10,000 soldiers to Persian women. Stored vast Persian treasury.",tip:"SW Iran — 'Susa = Achaemenid winter palace = mass weddings = treasury.'"},
+"Persepolis": {date:"c. 515–330 BC",event:"Ceremonial capital of the Achaemenid Empire. Built by Darius I and Xerxes. Alexander burned it (330 BC) — revenge for Xerxes' burning of Athens. Incredible relief carvings of tribute-bearers.",tip:"Southern Iran (Fars) — 'Persepolis = Persia's showpiece = Alexander burned it.'"},
+"Sardis": {date:"c. 680–334 BC",event:"Capital of Lydia under Croesus (richest man in the world). First coins minted here. Fell to Cyrus the Great (547 BC). Ionian Greeks burned it (498 BC) — this provoked the Persian Wars.",tip:"Western Anatolia inland — 'Sardis = Croesus = first coins = the fire that started the Persian Wars.'"},
+"Antioch": {date:"300 BC (founded)",event:"Founded by Seleucus I, named for his father Antiochus. Became the Seleucid capital and one of the largest cities of the Hellenistic and Roman world. Major center of early Christianity.",tip:"On the Orontes River in modern Turkey near the Syrian border — 'Antioch = Seleucid capital.'"},
+"Pergamon": {date:"c. 281–133 BC",event:"Attalid kingdom capital in NW Anatolia. Famous library (rivaled Alexandria). Invented parchment (pergamena). Great Altar of Zeus. Bequeathed to Rome by Attalus III.",tip:"NW Anatolian coast, inland — 'Pergamon = parchment = great library = gave itself to Rome.'"},
+"Priene": {date:"4th c. BC",event:"Small Ionian city, but a textbook example of Hippodamian grid planning. Alexander dedicated its temple of Athena. Well-preserved Hellenistic town plan.",tip:"Near Miletus on the Anatolian coast — 'Priene = perfect grid city = urban planning showcase.'"},
+"Seleucis on the Tigris": {date:"c. 305 BC (founded)",event:"Seleucid capital in Mesopotamia built by Seleucus I. Major Hellenistic metropolis, possibly 600,000 people. Replaced Babylon as the region's urban center. Later eclipsed by Ctesiphon.",tip:"On the Tigris in Iraq, near Babylon — 'Seleucia = Seleucus's Babylon replacement.'"},
+"Ai Khanoum": {date:"c. 300–145 BC",event:"Easternmost known Greek city, in modern Afghanistan at the junction of the Oxus and Kokcha rivers. Had a gymnasium, theater, and Delphic maxims inscribed at its entrance. Proof of deep Hellenistic reach into Central Asia.",tip:"Far NE corner of the map, Afghanistan — 'Ai Khanoum = Greek city in Afghanistan = how far Hellenism spread.'"},
+"Tyre": {date:"c. 2750 BC onward",event:"Major Phoenician port city (modern Lebanon). Alexander besieged the island city for 7 months (332 BC), building a causeway to reach it. Founded Carthage. Center of purple dye trade.",tip:"Lebanese coast — 'Tyre = island siege = Alexander's causeway = mother of Carthage.'"},
+"Cunaxa": {date:"401 BC",event:"Battle where Cyrus the Younger tried to overthrow his brother Artaxerxes II. Cyrus died. His 10,000 Greek mercenaries had to march home — Xenophon's Anabasis ('The March of the 10,000').",tip:"Near Babylon in Iraq — 'Cunaxa = Xenophon = the 10,000's long walk home.'"},
+"Halicarnassus": {date:"5th–4th c. BC",event:"Carian city in SW Anatolia. Home of Herodotus ('Father of History'). The Mausoleum (tomb of Mausolus, c. 350 BC) was one of the Seven Wonders. Alexander besieged it in 334 BC.",tip:"SW Anatolian coast (modern Bodrum) — 'Halicarnassus = Herodotus + Mausoleum.'"},
+"Indus River": {date:"326 BC",event:"Eastern limit of Alexander's conquests. His army mutinied at the Hyphasis (Beas) tributary and refused to go further. Alexander turned back — the edge of the Greek world.",tip:"Far eastern edge of the map, modern Pakistan — 'Indus = where Alexander's army said no more.'"},
+"Alexandria": {date:"331 BC (founded)",event:"Founded by Alexander in Egypt. Became the intellectual capital of the Hellenistic world — Great Library, Lighthouse (Pharos, Seven Wonders), Mouseion. Ptolemaic capital. Euclid, Eratosthenes, Archimedes worked here.",tip:"Egyptian coast at the Nile Delta — 'Alexandria = library = lighthouse = Ptolemies.'"},
+"Siwa": {date:"331 BC",event:"Oasis in the western Egyptian desert. Alexander trekked 300 miles through the desert to consult the Oracle of Amun here. The oracle reportedly called him son of Zeus — Alexander took that very seriously.",tip:"Deep in the Libyan desert, west of the Nile — 'Siwa = Alexander's desert pilgrimage = son of Zeus.'"},
+"Carthage": {date:"c. 814–146 BC",event:"Phoenician (Tyrian) colony in modern Tunisia. Major Mediterranean naval power. Fought three Punic Wars against Rome. Hannibal. Rome destroyed it utterly in 146 BC. Fought Greeks over Sicily for centuries.",tip:"North African coast, modern Tunis — 'Carthage = Phoenician Rome = Hannibal's home base.'"},
+"Syracuse": {date:"733 BC (founded)",event:"Corinthian colony. Became the largest and richest Greek city in the west. Defeated Athens' catastrophic Sicilian Expedition (415–413 BC). Home of Archimedes. Tyrants: Dionysius I, Hiero II.",tip:"SE corner of Sicily — 'Syracuse = Athens' worst defeat = Archimedes = western Greek superpower.'"},
+"Akragas": {date:"c. 580 BC (founded)",event:"Greek colony in southern Sicily (modern Agrigento). Became fabulously wealthy. Defeated Carthage at Himera (480 BC) alongside Syracuse. Famous Temple of Olympian Zeus. Tyrant Theron.",tip:"South coast of Sicily — 'Akragas = Agrigento = Valley of the Temples = Sicilian wealth.'"},
+"Gela": {date:"c. 688 BC (founded)",event:"Rhodian-Cretan colony on Sicily's south coast. Founded Akragas. Aeschylus (the tragedian) died here. Tyrant Hippocrates expanded its power in the early 5th century.",tip:"South coast of Sicily between Akragas and Syracuse — 'Gela = mother of Akragas = where Aeschylus died.'"},
+"Himera": {date:"480 BC",event:"Site of the great battle where Gelon of Syracuse and Theron of Akragas defeated Carthage — traditionally on the same day as Salamis. Ended the first major Carthaginian attempt on Greek Sicily.",tip:"North coast of Sicily — 'Himera 480 = Salamis of the west = Greeks beat Carthage.'"},
+"Selinus": {date:"c. 628–409 BC",event:"Westernmost major Greek colony on Sicily. Spectacular temples (still standing). Conflict with Segesta triggered Athens' Sicilian Expedition. Carthage destroyed it in 409 BC.",tip:"SW coast of Sicily — 'Selinus = temples = the Segesta rivalry that pulled Athens into disaster.'"},
+"Segesta": {date:"5th c. BC",event:"Elymian (non-Greek) city in NW Sicily. Its war with Greek Selinus led it to beg Athens for help, directly causing the Sicilian Expedition (415 BC) — one of history's great strategic blunders.",tip:"NW Sicily, inland — 'Segesta = the plea that doomed Athens' Sicilian Expedition.'"},
+"Motya": {date:"c. 800–397 BC",event:"Phoenician island colony off western Sicily. Carthage's main base in Sicily. Dionysius I of Syracuse destroyed it in 397 BC — innovative siege with a causeway (foreshadowing Alexander at Tyre).",tip:"Tiny island off Sicily's NW tip — 'Motya = Carthage's Sicily base = destroyed by Syracuse.'"},
+"Rome": {date:"753 BC (traditional founding)",event:"Eventually conquered the entire Mediterranean. During the Greek period, it was growing from a Latin city-state. Defeated Pyrrhus of Epirus (275 BC), then Carthage, then the Hellenistic kingdoms.",tip:"Central Italian peninsula on the Tiber — 'Rome = the power that eventually swallowed everyone.'"},
+"Pithekoussai": {date:"c. 770 BC",event:"On the island of Ischia in the Bay of Naples. One of the earliest Greek settlements in the west — trading post before a full colony. 'Nestor's Cup' inscription (c. 735 BC) found here — earliest known literary quotation in Greek.",tip:"Island in the Bay of Naples — 'Pithekoussai = Greeks' first western foothold = Nestor's Cup.'"}
+};
+
+// Init SVG layers
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const DIFF = { easy:{markers:5,bank:8}, medium:{markers:10,bank:20}, hard:{markers:15,bank:30} };
+
+// Zoom presets: [x, y, width, height] in SVG coordinate space
+const ZOOM_PRESETS = {
+	full:         [0, 0, 1200, 700],
+	greece:       [310, 60, 300, 310],
+	peloponnese:  [360, 130, 180, 220],
+	sicily:       [140, 100, 250, 260],
+	persia:       [480, 50, 720, 500],
+};
+let currentViewBox = [0, 0, 1200, 700];
+let zoomAnimId = null;
+
+// Returns a scale factor for SVG element sizes based on current zoom
+// At full view (1200 wide) = 1.0, zoomed to Greece (300 wide) ≈ 0.25
+function zs(baseSize) { return baseSize * (currentViewBox[2] / 1200); }
+
+const state = {
+	activeMode: "quiz", // quiz | locate | study
+	region: "all",
+	difficulty: "medium",
+	pool: [],
+	// Quiz
+	quiz: null,
+	selectedMarkerId: null,
+	revealed: false,
+	// Locate
+	locateQueue: [],
+	locateIndex: 0,
+	locateWaiting: true, // waiting for click
+	locateCurrentFeedback: null,
+	// Study
+	studyFilter: "",
+	studySelectedName: null,
+	// Session tracking
+	session: { attempts:0, correct:0, streak:0, bestStreak:0 },
+	// Per-place tracking: { placeName: { attempts, correct } }
+	placeStats: {},
+	// Mistakes queue for "review mistakes"
+	mistakes: new Set()
+};
+
+// ═══════════════════════════════════════
+// DOM REFS
+// ═══════════════════════════════════════
+const $ = id => document.getElementById(id);
+const els = {
+	regionSelect: $("regionSelect"),
+	newRoundBtn: $("newRoundBtn"),
+	reviewMistakesBtn: $("reviewMistakesBtn"),
+	checkBtn: $("checkBtn"),
+	revealBtn: $("revealBtn"),
+	resetBtn: $("resetBtn"),
+	assignments: $("assignments"),
+	wordBank: $("wordBank"),
+	quizProgress: $("quizProgress"),
+	results: $("results"),
+	callout: $("callout"),
+	calloutStrong: $("calloutStrong"),
+	calloutText: $("calloutText"),
+	markerLayer: $("markerLayer"),
+	studyLayer: $("studyLayer"),
+	locateLayer: $("locateLayer"),
+	tooltip: $("tooltip"),
+	mapClickzone: $("mapClickzone"),
+	mapLegend: $("mapLegend"),
+	sidebarTitle: $("sidebarTitle"),
+	sidebarIntro: $("sidebarIntro"),
+	// Views
+	quizView: $("quizView"),
+	locateView: $("locateView"),
+	studyView: $("studyView"),
+	// Locate
+	locateName: $("locateName"),
+	locateProgress: $("locateProgress"),
+	locateFeedbackArea: $("locateFeedbackArea"),
+	locateQueue: $("locateQueue"),
+	locateSkipBtn: $("locateSkipBtn"),
+	locateNextBtn: $("locateNextBtn"),
+	locateResults: $("locateResults"),
+	// Study
+	studySearch: $("studySearch"),
+	studyList: $("studyList"),
+	// Stats
+	statAttempts: $("statAttempts"),
+	statAccuracy: $("statAccuracy"),
+	statStreak: $("statStreak"),
+	statMastered: $("statMastered"),
+};
+
+// ═══════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════
+function project(lon, lat) {
+	return {
+		x: ((lon - MAP.minLon) / (MAP.maxLon - MAP.minLon)) * MAP.width,
+		y: MAP.height - ((lat - MAP.minLat) / (MAP.maxLat - MAP.minLat)) * MAP.height
+	};
+}
+function unproject(px, py) {
+	return {
+		lon: (px / MAP.width) * (MAP.maxLon - MAP.minLon) + MAP.minLon,
+		lat: ((MAP.height - py) / MAP.height) * (MAP.maxLat - MAP.minLat) + MAP.minLat
+	};
+}
+function haversineKm(lat1, lon1, lat2, lon2) {
+	const R = 6371;
+	const dLat = (lat2 - lat1) * Math.PI / 180;
+	const dLon = (lon2 - lon1) * Math.PI / 180;
+	const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+	return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+function shuffle(arr) {
+	const a = [...arr];
+	for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+	return a;
+}
+function sample(arr, n) { return shuffle(arr).slice(0, n); }
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+function esc(t) { return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+function recordAttempt(placeName, correct) {
+	state.session.attempts++;
+	if (correct) { state.session.correct++; state.session.streak++; }
+	else { state.session.bestStreak = Math.max(state.session.bestStreak, state.session.streak); state.session.streak = 0; state.mistakes.add(placeName); }
+	if (!state.placeStats[placeName]) state.placeStats[placeName] = {attempts:0,correct:0};
+	state.placeStats[placeName].attempts++;
+	if (correct) state.placeStats[placeName].correct++;
+	updateSessionStats();
+}
+
+function updateSessionStats() {
+	els.statAttempts.textContent = state.session.attempts;
+	const acc = state.session.attempts > 0 ? Math.round(state.session.correct / state.session.attempts * 100) + "%" : "—";
+	els.statAccuracy.textContent = acc;
+	els.statStreak.textContent = state.session.streak;
+	const mastered = Object.entries(state.placeStats).filter(([,s]) => s.correct >= 3 && s.correct/s.attempts >= 0.75).length;
+	els.statMastered.textContent = mastered;
+	els.reviewMistakesBtn.disabled = state.mistakes.size === 0;
+}
+
+function getPool(region) {
+	return PLACES.filter(p => p.tags.includes(region || state.region));
+}
+
+// ═══════════════════════════════════════
+// MODE SWITCHING
+// ═══════════════════════════════════════
+document.querySelectorAll(".mode-tab").forEach(tab => {
+	tab.addEventListener("click", () => {
+		document.querySelectorAll(".mode-tab").forEach(t => t.classList.remove("active"));
+		tab.classList.add("active");
+		switchMode(tab.dataset.mode);
+	});
+});
+
+function switchMode(mode) {
+	state.activeMode = mode;
+	els.quizView.classList.add("hidden");
+	els.locateView.classList.add("hidden");
+	els.studyView.classList.add("hidden");
+	els.mapClickzone.classList.remove("active");
+	clearLayers();
+
+	if (mode === "quiz") {
+		els.quizView.classList.remove("hidden");
+		els.sidebarTitle.textContent = "Quiz";
+		els.sidebarIntro.textContent = "Match each numbered marker to a place from the word bank.";
+		els.mapLegend.classList.remove("hidden");
+		if (!state.quiz) createQuiz();
+		renderAll();
+	} else if (mode === "locate") {
+		els.locateView.classList.remove("hidden");
+		els.sidebarTitle.textContent = "Locate";
+		els.sidebarIntro.textContent = "See a place name, click where it is on the map. The closer you are, the better your score.";
+		els.mapLegend.classList.add("hidden");
+		els.mapClickzone.classList.add("active");
+		startLocateRound();
+	} else if (mode === "study") {
+		els.studyView.classList.remove("hidden");
+		els.sidebarTitle.textContent = "Study";
+		els.sidebarIntro.textContent = "Browse all places. Click any name to highlight it on the map.";
+		els.mapLegend.classList.add("hidden");
+		renderStudy();
+	}
+	updateCallout();
+}
+
+function clearLayers() {
+	els.markerLayer.innerHTML = "";
+	els.studyLayer.innerHTML = "";
+	els.locateLayer.innerHTML = "";
+}
+
+// ═══════════════════════════════════════
+// QUIZ MODE
+// ═══════════════════════════════════════
+function createQuiz() {
+	state.pool = getPool();
+	const diff = DIFF[state.difficulty];
+	const nMarkers = Math.min(diff.markers, state.pool.length);
+	const nBank = Math.min(diff.bank, state.pool.length);
+	const answers = sample(state.pool, nMarkers);
+	let distractorPool = state.pool.filter(p => !answers.includes(p));
+	if (distractorPool.length < nBank - nMarkers) distractorPool = PLACES.filter(p => !answers.includes(p));
+	const distractors = sample(distractorPool, nBank - nMarkers);
+	const wordBank = shuffle([...answers, ...distractors]);
+
+	const markers = answers.map((place, i) => {
+		const pt = project(place.lon, place.lat);
+		return { id:i+1, name:place.name, lon:place.lon, lat:place.lat, x:pt.x, y:pt.y, displayX:pt.x, displayY:pt.y, assigned:null, correct:null };
+	});
+	resolveCollisions(markers);
+
+	state.quiz = { answers, distractors, wordBank, markers };
+	state.selectedMarkerId = markers[0]?.id ?? null;
+	state.revealed = false;
+}
+
+function resolveCollisions(markers, minDist) {
+	if (!minDist) minDist = 34;
+	for (let pass = 0; pass < 220; pass++) {
+		for (let i = 0; i < markers.length; i++) {
+			const a = markers[i];
+			for (let j = i+1; j < markers.length; j++) {
+				const b = markers[j];
+				let dx = b.displayX - a.displayX, dy = b.displayY - a.displayY;
+				let dist = Math.hypot(dx,dy) || 0.001;
+				if (dist < minDist) {
+					const push = (minDist-dist)/2; dx/=dist; dy/=dist;
+					a.displayX -= dx*push; a.displayY -= dy*push;
+					b.displayX += dx*push; b.displayY += dy*push;
+				}
+			}
+			a.displayX += (a.x - a.displayX)*0.028;
+			a.displayY += (a.y - a.displayY)*0.028;
+			a.displayX = clamp(a.displayX, 18, MAP.width-18);
+			a.displayY = clamp(a.displayY, 18, MAP.height-18);
+		}
+	}
+}
+
+function reResolveForZoom() {
+	if (!state.quiz) return;
+	// Reset display positions to actual, then re-resolve at current zoom scale
+	for (const m of state.quiz.markers) {
+		m.displayX = m.x;
+		m.displayY = m.y;
+	}
+	resolveCollisions(state.quiz.markers, zs(34));
+	renderMarkers();
+}
+
+function renderQuiz() {
+	if (!state.quiz) return;
+	const diff = DIFF[state.difficulty];
+	const assigned = state.quiz.markers.filter(m => m.assigned).length;
+	els.quizProgress.style.width = (assigned / state.quiz.markers.length * 100) + "%";
+
+	// Switch to 1-column when info is visible (cards get tall)
+	const showInfo = state.quiz.markers.some(m => m.correct !== null) || state.revealed;
+	els.assignments.style.gridTemplateColumns = showInfo ? "1fr" : "repeat(2, 1fr)";
+
+	els.assignments.innerHTML = state.quiz.markers.map(m => {
+		const cls = ["assignment"];
+		if (m.id === state.selectedMarkerId) cls.push("selected");
+		if (m.correct === true) cls.push("good");
+		if (m.correct === false) cls.push("bad");
+		let sub = m.correct === true ? "✓ Correct" : m.correct === false ? `✗ Correct answer: ${m.name}` : m.assigned ? "Assigned" : "";
+		if (!m.assigned && !m.correct && state.revealed) sub = `→ ${m.name}`;
+		const icon = m.correct === true ? " ✓" : m.correct === false ? " ✗" : "";
+
+		// Historical info — show for the correct place after checking or revealing
+		let infoHtml = "";
+		if (m.correct !== null || state.revealed) {
+			const info = PLACE_INFO[m.name];
+			if (info) {
+				infoHtml = `<div class="place-info">
+					<div style="font-weight:700;font-size:0.88rem;margin-bottom:3px">${esc(m.name)}</div>
+					<div class="pi-date">${esc(info.date)}</div>
+					<div class="pi-event">${esc(info.event)}</div>
+					<div class="pi-tip">📍 ${esc(info.tip)}</div>
+				</div>`;
+			}
+		}
+
+		return `<button class="${cls.join(" ")}" data-mc="${m.id}">
+			<div class="num">#${m.id}${icon}</div>
+			<div class="answer">${m.assigned ? esc(m.assigned) : '<span style="color:var(--muted)">—</span>'}</div>
+			${sub ? `<div class="sub">${esc(sub)}</div>` : ""}
+			${infoHtml}
+		</button>`;
+	}).join("");
+
+	els.assignments.querySelectorAll("[data-mc]").forEach(btn => {
+		btn.addEventListener("click", () => { state.selectedMarkerId = +btn.dataset.mc; renderQuiz(); renderMarkers(); updateCallout(); });
+	});
+
+	const usedNames = new Set(state.quiz.markers.filter(m=>m.assigned).map(m=>m.assigned));
+	const sel = state.quiz.markers.find(m => m.id === state.selectedMarkerId);
+
+	els.wordBank.innerHTML = state.quiz.wordBank.map(p => {
+		const isUsed = usedNames.has(p.name) && sel?.assigned !== p.name;
+		const isActive = sel?.assigned === p.name;
+		return `<button class="bank-item${isUsed?" used":""}${isActive?" active":""}" data-bp="${esc(p.name)}" ${isUsed?"disabled":""}>${esc(p.name)}</button>`;
+	}).join("");
+
+	els.wordBank.querySelectorAll("[data-bp]").forEach(btn => {
+		btn.addEventListener("click", () => assignPlace(btn.dataset.bp));
+	});
+}
+
+function assignPlace(name) {
+	if (!state.quiz || state.selectedMarkerId == null) return;
+	const marker = state.quiz.markers.find(m => m.id === state.selectedMarkerId);
+	if (!marker) return;
+	state.quiz.markers.forEach(m => { if (m.id !== marker.id && m.assigned === name) m.assigned = null; });
+	marker.assigned = name; marker.correct = null;
+	const next = state.quiz.markers.find(m => !m.assigned && m.id !== marker.id);
+	if (next) state.selectedMarkerId = next.id;
+	renderQuiz(); renderMarkers(); updateCallout();
+}
+
+function checkAnswers() {
+	if (!state.quiz) return;
+	let correct = 0;
+	state.quiz.markers.forEach(m => {
+		m.correct = m.assigned === m.name;
+		if (m.correct) correct++;
+		if (m.assigned) recordAttempt(m.name, m.correct);
+	});
+	els.results.innerHTML = `<strong>Score: ${correct} / ${state.quiz.markers.length}</strong><br>${correct === state.quiz.markers.length ? "Perfect round. That's genuinely impressive." : "Wrong answers are highlighted — study those, then try again."}`;
+	renderQuiz(); renderMarkers(); updateCallout(correct);
+}
+
+function revealAnswers() {
+	if (!state.quiz) return;
+	state.quiz.markers.forEach(m => { m.correct = m.assigned === m.name; });
+	state.revealed = true;
+	renderQuiz(); renderMarkers();
+	els.results.innerHTML = `<strong>Answers revealed.</strong><br>Correct names now shown on both the map and the cards.`;
+	updateCallout();
+}
+
+function resetQuizAnswers() {
+	if (!state.quiz) return;
+	state.quiz.markers.forEach(m => { m.assigned = null; m.correct = null; });
+	state.revealed = false;
+	state.selectedMarkerId = state.quiz.markers[0]?.id ?? null;
+	els.results.innerHTML = "";
+	renderAll();
+}
+
+function renderMarkers() {
+	els.markerLayer.innerHTML = "";
+	if (state.activeMode !== "quiz" || !state.quiz) return;
+
+	state.quiz.markers.forEach(m => {
+		const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+		g.style.cursor = "pointer";
+		const status = m.correct === true ? "var(--good)" : m.correct === false ? "var(--bad)" : m.id === state.selectedMarkerId ? "var(--selected)" : "var(--accent)";
+
+		if (Math.hypot(m.displayX-m.x, m.displayY-m.y) > zs(4)) {
+			const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+			Object.entries({x1:m.x,y1:m.y,x2:m.displayX,y2:m.displayY,stroke:"rgba(31,41,55,0.35)","stroke-width":zs(1.2),"stroke-dasharray":`${zs(4)} ${zs(4)}`}).forEach(([k,v])=>line.setAttribute(k,v));
+			g.appendChild(line);
+		}
+		const anchor = document.createElementNS("http://www.w3.org/2000/svg","circle");
+		Object.entries({cx:m.x,cy:m.y,r:zs(3),fill:status,opacity:0.6}).forEach(([k,v])=>anchor.setAttribute(k,v));
+		g.appendChild(anchor);
+
+		const c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+		Object.entries({cx:m.displayX,cy:m.displayY,r:zs(13),fill:status,stroke:"white","stroke-width":zs(2.5)}).forEach(([k,v])=>c.setAttribute(k,v));
+		g.appendChild(c);
+
+		// Selected marker: bright pulsing outer ring
+		if (m.id === state.selectedMarkerId && m.correct == null) {
+			const sel = document.createElementNS("http://www.w3.org/2000/svg","circle");
+			Object.entries({cx:m.displayX,cy:m.displayY,r:zs(19),fill:"none",stroke:"var(--selected)","stroke-width":zs(2.5),opacity:0.5}).forEach(([k,v])=>sel.setAttribute(k,v));
+			g.appendChild(sel);
+		}
+
+		// Shape cue: dashed outer ring on incorrect
+		if (m.correct === false) {
+			const ring = document.createElementNS("http://www.w3.org/2000/svg","circle");
+			Object.entries({cx:m.displayX,cy:m.displayY,r:zs(17),fill:"none",stroke:"var(--bad)","stroke-width":zs(2),"stroke-dasharray":`${zs(3)} ${zs(3)}`}).forEach(([k,v])=>ring.setAttribute(k,v));
+			g.appendChild(ring);
+		}
+		// Shape cue: solid outer ring on correct
+		if (m.correct === true) {
+			const ring = document.createElementNS("http://www.w3.org/2000/svg","circle");
+			Object.entries({cx:m.displayX,cy:m.displayY,r:zs(17),fill:"none",stroke:"var(--good)","stroke-width":zs(2)}).forEach(([k,v])=>ring.setAttribute(k,v));
+			g.appendChild(ring);
+		}
+
+		// Always show the marker number inside the circle
+		const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+		Object.entries({x:m.displayX,y:m.displayY+zs(4.5),"text-anchor":"middle","font-size":zs(12),"font-weight":700,fill:"white"}).forEach(([k,v])=>t.setAttribute(k,v));
+		t.textContent = m.id;
+		g.appendChild(t);
+
+		// After check or reveal: show correct place name + ✓/✗ badge next to marker
+		if (m.correct !== null || state.revealed) {
+			const badge = m.correct === true ? " ✓" : m.correct === false ? " ✗" : "";
+			const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+			Object.entries({x:m.displayX+zs(18),y:m.displayY+zs(4),"font-size":zs(12),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+			lbl.textContent = m.name + badge;
+			g.appendChild(lbl);
+		}
+
+		g.addEventListener("click", () => { state.selectedMarkerId = m.id; renderQuiz(); renderMarkers(); updateCallout(); });
+		g.addEventListener("mouseenter", e => {
+			let tip = `#${m.id}`;
+			if (m.assigned) tip += ` — your answer: ${m.assigned}`;
+			if (m.correct !== null) tip += m.correct ? " ✓" : ` ✗ (correct: ${m.name})`;
+			showTooltip(e, tip);
+		});
+		g.addEventListener("mouseleave", hideTooltip);
+		els.markerLayer.appendChild(g);
+	});
+}
+
+// ═══════════════════════════════════════
+// LOCATE MODE (NEW!)
+// ═══════════════════════════════════════
+function startLocateRound(customPool) {
+	const pool = customPool || getPool();
+	const diff = DIFF[state.difficulty];
+	state.locateQueue = sample(pool, Math.min(diff.markers, pool.length));
+	state.locateIndex = 0;
+	state.locateWaiting = true;
+	state.locateCurrentFeedback = null;
+	els.locateFeedbackArea.innerHTML = "";
+	els.locateResults.innerHTML = "";
+	els.locateNextBtn.disabled = true;
+	els.locateSkipBtn.disabled = false;
+	showLocatePrompt();
+}
+
+function showLocatePrompt() {
+	if (state.locateIndex >= state.locateQueue.length) {
+		finishLocateRound();
+		return;
+	}
+	const place = state.locateQueue[state.locateIndex];
+	els.locateName.textContent = place.name;
+	els.locateProgress.style.width = (state.locateIndex / state.locateQueue.length * 100) + "%";
+	els.locateQueue.textContent = `${state.locateIndex + 1} of ${state.locateQueue.length}`;
+	state.locateWaiting = true;
+	els.locateNextBtn.disabled = true;
+	els.locateSkipBtn.disabled = false;
+	els.locateFeedbackArea.innerHTML = "";
+	els.locateLayer.innerHTML = "";
+	updateCallout();
+}
+
+function handleMapClick(e) {
+	if (state.activeMode !== "locate" || !state.locateWaiting) return;
+	const svg = $("mapSvg");
+	const rect = svg.getBoundingClientRect();
+	// Map screen coords to SVG coords using current viewBox
+	const vb = currentViewBox;
+	const px = vb[0] + ((e.clientX - rect.left) / rect.width) * vb[2];
+	const py = vb[1] + ((e.clientY - rect.top) / rect.height) * vb[3];
+	const clicked = unproject(px, py);
+
+	const place = state.locateQueue[state.locateIndex];
+	const dist = haversineKm(place.lat, place.lon, clicked.lat, clicked.lon);
+	const target = project(place.lon, place.lat);
+
+	state.locateWaiting = false;
+	els.locateNextBtn.disabled = false;
+	els.locateSkipBtn.disabled = true;
+
+	// Determine quality
+	let quality, msg, cls;
+	if (dist < 50) { quality = "perfect"; msg = "✓ Spot on!"; cls = "good"; }
+	else if (dist < 150) { quality = "great"; msg = "✓ Very close!"; cls = "good"; }
+	else if (dist < 350) { quality = "ok"; msg = "~ Getting warm"; cls = "close"; }
+	else { quality = "miss"; msg = "✗ Not quite — study this one"; cls = "bad"; }
+
+	const isCorrect = dist < 350;
+	recordAttempt(place.name, isCorrect);
+
+	let locateInfoHtml = "";
+	const locateInfo = PLACE_INFO[place.name];
+	if (locateInfo) {
+		locateInfoHtml = `<div class="place-info" style="margin:8px 16px 0;text-align:left">
+			<div class="pi-date">${esc(locateInfo.date)}</div>
+			<div class="pi-event">${esc(locateInfo.event)}</div>
+			<div class="pi-tip">📍 ${esc(locateInfo.tip)}</div>
+		</div>`;
+	}
+
+	els.locateFeedbackArea.innerHTML = `<div class="locate-feedback ${cls}">
+		<div class="dist">${Math.round(dist)} km</div>
+		<div class="msg">${msg}</div>
+	</div>${locateInfoHtml}`;
+
+	// Draw on map: click point, correct point, line between
+	const layer = els.locateLayer;
+	layer.innerHTML = "";
+
+	// Pulse at correct location
+	const pulse = document.createElementNS("http://www.w3.org/2000/svg","circle");
+	Object.entries({cx:target.x,cy:target.y,r:zs(8),fill:"none",stroke:isCorrect?"var(--good)":"var(--bad)","stroke-width":zs(2)}).forEach(([k,v])=>pulse.setAttribute(k,v));
+	pulse.innerHTML = `<animate attributeName="r" from="${zs(8)}" to="${zs(40)}" dur="0.8s" fill="freeze"/><animate attributeName="opacity" from="1" to="0" dur="0.8s" fill="freeze"/>`;
+	layer.appendChild(pulse);
+
+	// Line from click to correct
+	const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+	Object.entries({x1:px,y1:py,x2:target.x,y2:target.y,stroke:"rgba(0,0,0,0.3)","stroke-width":zs(1.5),"stroke-dasharray":`${zs(6)} ${zs(4)}`}).forEach(([k,v])=>line.setAttribute(k,v));
+	layer.appendChild(line);
+
+	// Click dot
+	const clickDot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+	Object.entries({cx:px,cy:py,r:zs(5),fill:"var(--selected)",stroke:"white","stroke-width":zs(2)}).forEach(([k,v])=>clickDot.setAttribute(k,v));
+	layer.appendChild(clickDot);
+
+	// Correct dot + label
+	const correctDot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+	Object.entries({cx:target.x,cy:target.y,r:zs(6),fill:isCorrect?"var(--good)":"var(--bad)",stroke:"white","stroke-width":zs(2)}).forEach(([k,v])=>correctDot.setAttribute(k,v));
+	layer.appendChild(correctDot);
+
+	const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+	Object.entries({x:target.x+zs(12),y:target.y-zs(10),"font-size":zs(13),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+	lbl.textContent = place.name;
+	layer.appendChild(lbl);
+
+	updateCallout();
+}
+
+function locateNext() {
+	state.locateIndex++;
+	showLocatePrompt();
+}
+
+function locateSkip() {
+	const place = state.locateQueue[state.locateIndex];
+	if (place) {
+		recordAttempt(place.name, false);
+		// Show where it was
+		const target = project(place.lon, place.lat);
+		els.locateLayer.innerHTML = "";
+		const dot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+		Object.entries({cx:target.x,cy:target.y,r:zs(6),fill:"var(--warn)",stroke:"white","stroke-width":zs(2)}).forEach(([k,v])=>dot.setAttribute(k,v));
+		els.locateLayer.appendChild(dot);
+		const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+		Object.entries({x:target.x+zs(12),y:target.y-zs(10),"font-size":zs(13),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+		lbl.textContent = place.name;
+		els.locateLayer.appendChild(lbl);
+		let skipInfoHtml = "";
+		const skipInfo = PLACE_INFO[place.name];
+		if (skipInfo) {
+			skipInfoHtml = `<div class="place-info" style="margin:8px 16px 0;text-align:left">
+				<div class="pi-date">${esc(skipInfo.date)}</div>
+				<div class="pi-event">${esc(skipInfo.event)}</div>
+				<div class="pi-tip">📍 ${esc(skipInfo.tip)}</div>
+			</div>`;
+		}
+		els.locateFeedbackArea.innerHTML = `<div class="locate-feedback close"><div class="msg">Skipped — here's where it is</div></div>${skipInfoHtml}`;
+	}
+	state.locateWaiting = false;
+	els.locateNextBtn.disabled = false;
+	els.locateSkipBtn.disabled = true;
+}
+
+function finishLocateRound() {
+	els.locateName.textContent = "Done!";
+	els.locateProgress.style.width = "100%";
+	els.locateQueue.textContent = "";
+	els.locateResults.innerHTML = `<strong>Round complete.</strong><br>Hit New round for another, or try Review mistakes to drill the ones you missed.`;
+	els.locateNextBtn.disabled = true;
+	els.locateSkipBtn.disabled = true;
+	updateCallout();
+}
+
+els.mapClickzone.addEventListener("click", handleMapClick);
+els.locateSkipBtn.addEventListener("click", locateSkip);
+els.locateNextBtn.addEventListener("click", locateNext);
+
+// ═══════════════════════════════════════
+// STUDY MODE
+// ═══════════════════════════════════════
+function renderStudy() {
+	const pool = getPool().sort((a,b) => a.name.localeCompare(b.name));
+	const q = state.studyFilter.trim().toLowerCase();
+	const filtered = q ? pool.filter(p => p.name.toLowerCase().includes(q)) : pool;
+
+	els.studyList.innerHTML = filtered.map(p => {
+		const stats = state.placeStats[p.name];
+		let badge = "";
+		if (stats) {
+			const pct = Math.round(stats.correct/stats.attempts*100);
+			badge = `<span style="float:right;font-size:0.75rem;color:${pct >= 75 ? 'var(--good)' : pct >= 40 ? 'var(--warn)' : 'var(--bad)'}">${pct}%</span>`;
+		}
+		return `<button class="study-item${state.studySelectedName===p.name?" active":""}" data-sp="${esc(p.name)}">${esc(p.name)}${badge}</button>`;
+	}).join("") || `<div style="color:var(--muted);font-size:0.88rem;padding:8px">No places match.</div>`;
+
+	els.studyList.querySelectorAll("[data-sp]").forEach(btn => {
+		btn.addEventListener("click", () => {
+			state.studySelectedName = btn.dataset.sp;
+			renderStudy();
+			renderStudyDots();
+		});
+	});
+
+	// Show info for selected place
+	const infoPanel = document.getElementById("studyInfoPanel");
+	if (state.studySelectedName && PLACE_INFO[state.studySelectedName]) {
+		const info = PLACE_INFO[state.studySelectedName];
+		infoPanel.innerHTML = `<div class="place-info" style="border-color:var(--accent);background:rgba(155,94,42,0.03)">
+			<div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">${esc(state.studySelectedName)}</div>
+			<div class="pi-date">${esc(info.date)}</div>
+			<div class="pi-event">${esc(info.event)}</div>
+			<div class="pi-tip">📍 ${esc(info.tip)}</div>
+		</div>`;
+	} else {
+		infoPanel.innerHTML = "";
+	}
+
+	renderStudyDots();
+	updateCallout();
+}
+
+function renderStudyDots() {
+	els.studyLayer.innerHTML = "";
+	if (state.activeMode !== "study") return;
+	const pool = getPool().sort((a,b) => a.name.localeCompare(b.name));
+	const q = state.studyFilter.trim().toLowerCase();
+	const filtered = q ? pool.filter(p => p.name.toLowerCase().includes(q)) : pool;
+
+	filtered.forEach(p => {
+		const pt = project(p.lon, p.lat);
+		const sel = state.studySelectedName === p.name;
+		const g = document.createElementNS("http://www.w3.org/2000/svg","g");
+		g.style.cursor = "pointer";
+
+		const dot = document.createElementNS("http://www.w3.org/2000/svg","circle");
+		Object.entries({cx:pt.x,cy:pt.y,r:sel?zs(7):zs(4),fill:sel?"var(--accent)":"rgba(155,94,42,0.8)",stroke:"white","stroke-width":sel?zs(2.2):zs(1.2)}).forEach(([k,v])=>dot.setAttribute(k,v));
+		g.appendChild(dot);
+
+		if (sel) {
+			const lbl = document.createElementNS("http://www.w3.org/2000/svg","text");
+			Object.entries({x:pt.x+zs(12),y:pt.y-zs(10),"font-size":zs(14),"font-weight":700,fill:"var(--ink)"}).forEach(([k,v])=>lbl.setAttribute(k,v));
+			lbl.textContent = p.name;
+			g.appendChild(lbl);
+		}
+
+		g.addEventListener("mouseenter", e => showTooltip(e, p.name));
+		g.addEventListener("mouseleave", hideTooltip);
+		g.addEventListener("click", () => { state.studySelectedName = p.name; renderStudy(); });
+		els.studyLayer.appendChild(g);
+	});
+}
+
+els.studySearch.addEventListener("input", () => { state.studyFilter = els.studySearch.value; renderStudy(); });
+
+// ═══════════════════════════════════════
+// CALLOUT
+// ═══════════════════════════════════════
+function updateCallout(score = null) {
+	const c = els.callout;
+	c.className = "callout";
+
+	if (state.activeMode === "locate") {
+		if (state.locateIndex >= state.locateQueue.length && state.locateQueue.length > 0) {
+			els.calloutStrong.textContent = "Round finished";
+			els.calloutText.textContent = `Session accuracy: ${state.session.attempts > 0 ? Math.round(state.session.correct/state.session.attempts*100) : 0}%`;
+		} else if (!state.locateWaiting && state.locateQueue.length > 0) {
+			els.calloutStrong.textContent = "Press Enter or click Next";
+			els.calloutText.textContent = "Review the answer on the map, then move on.";
+		} else {
+			els.calloutStrong.textContent = "Click on the map";
+			els.calloutText.textContent = "Find the highlighted place as precisely as you can.";
+		}
+		return;
+	}
+
+	if (state.activeMode === "study") {
+		els.calloutStrong.textContent = "Study mode";
+		els.calloutText.textContent = state.studySelectedName ? `Showing: ${state.studySelectedName}` : "Click any place to see it on the map. Accuracy shown if you've been quizzed.";
+		return;
+	}
+
+	// Quiz mode
+	if (score !== null) {
+		c.className = score === state.quiz.markers.length ? "callout good-callout" : "callout bad-callout";
+		els.calloutStrong.textContent = `${score} / ${state.quiz.markers.length}`;
+		els.calloutText.textContent = score === state.quiz.markers.length ? "Perfect. Genuinely impressive." : "Wrong answers are highlighted. Study those, then try again.";
+		return;
+	}
+	if (state.revealed) {
+		els.calloutStrong.textContent = "Answers revealed";
+		els.calloutText.textContent = "Labels shown on map. Hit New round for another set.";
+		return;
+	}
+	const sel = state.quiz?.markers.find(m => m.id === state.selectedMarkerId);
+	if (sel) {
+		els.calloutStrong.textContent = `Marker #${sel.id}`;
+		els.calloutText.textContent = sel.assigned ? `Current: ${sel.assigned}` : "Choose from the word bank below.";
+	} else {
+		els.calloutStrong.textContent = "Pick a marker";
+		els.calloutText.textContent = "Click a numbered circle on the map.";
+	}
+}
+
+// ═══════════════════════════════════════
+// TOOLTIP
+// ═══════════════════════════════════════
+function showTooltip(e, text) {
+	const box = $("mapSvg").getBoundingClientRect();
+	let cx = e.clientX ?? 0, cy = e.clientY ?? 0;
+	if (!cx && e.target) { const r = e.target.getBoundingClientRect(); cx = r.left+r.width/2; cy = r.top+r.height/2; }
+	els.tooltip.textContent = text;
+	els.tooltip.style.left = `${cx - box.left}px`;
+	els.tooltip.style.top = `${cy - box.top}px`;
+	els.tooltip.style.opacity = "1";
+}
+function hideTooltip() { els.tooltip.style.opacity = "0"; }
+
+// ═══════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════
+function renderAll() {
+	if (state.activeMode === "quiz") { renderQuiz(); renderMarkers(); }
+	else if (state.activeMode === "locate") { /* handled by startLocateRound */ }
+	else if (state.activeMode === "study") { renderStudy(); }
+	updateCallout();
+	updateSessionStats();
+}
+
+// ═══════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════
+els.regionSelect.addEventListener("change", () => {
+	state.region = els.regionSelect.value;
+	state.pool = getPool();
+	if (state.activeMode === "quiz") { createQuiz(); renderAll(); }
+	else if (state.activeMode === "locate") startLocateRound();
+	else renderStudy();
+});
+
+document.querySelectorAll(".diff-pill").forEach(pill => {
+	pill.addEventListener("click", () => {
+		document.querySelectorAll(".diff-pill").forEach(p => p.classList.remove("active"));
+		pill.classList.add("active");
+		state.difficulty = pill.dataset.diff;
+	});
+});
+
+els.newRoundBtn.addEventListener("click", () => {
+	if (state.activeMode === "quiz") { createQuiz(); els.results.innerHTML = ""; renderAll(); }
+	else if (state.activeMode === "locate") startLocateRound();
+	else renderStudy();
+});
+
+els.reviewMistakesBtn.addEventListener("click", () => {
+	const mistakePlaces = PLACES.filter(p => state.mistakes.has(p.name));
+	if (mistakePlaces.length === 0) return;
+	if (state.activeMode === "locate") {
+		startLocateRound(mistakePlaces);
+	} else {
+		// Switch to locate mode for review
+		document.querySelectorAll(".mode-tab").forEach(t => t.classList.remove("active"));
+		document.querySelector('[data-mode="locate"]').classList.add("active");
+		switchMode("locate");
+		startLocateRound(mistakePlaces);
+	}
+});
+
+els.checkBtn.addEventListener("click", checkAnswers);
+els.revealBtn.addEventListener("click", revealAnswers);
+els.resetBtn.addEventListener("click", resetQuizAnswers);
+
+// Keyboard shortcuts
+document.addEventListener("keydown", e => {
+	if (state.activeMode === "locate") {
+		if (e.key === "Enter" && !els.locateNextBtn.disabled) { e.preventDefault(); locateNext(); }
+		if (e.key === " " && !els.locateSkipBtn.disabled) { e.preventDefault(); locateSkip(); }
+	}
+});
+
+// ═══════════════════════════════════════
+// ZOOM
+// ═══════════════════════════════════════
+function animateViewBox(target, duration = 400) {
+	const svg = $("mapSvg");
+	const start = [...currentViewBox];
+	const startTime = performance.now();
+	if (zoomAnimId) cancelAnimationFrame(zoomAnimId);
+	function step(now) {
+		const t = Math.min((now - startTime) / duration, 1);
+		const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // easeInOut
+		const vb = start.map((s, i) => s + (target[i] - s) * ease);
+		svg.setAttribute("viewBox", vb.map(v => v.toFixed(1)).join(" "));
+		currentViewBox = vb;
+		if (t < 1) zoomAnimId = requestAnimationFrame(step);
+		else {
+			currentViewBox = [...target];
+			zoomAnimId = null;
+			// Re-render overlays at final zoom scale
+			if (state.activeMode === "quiz") reResolveForZoom();
+			else if (state.activeMode === "study") renderStudyDots();
+		}
+	}
+	zoomAnimId = requestAnimationFrame(step);
+}
+
+document.querySelectorAll(".zoom-btn").forEach(btn => {
+	btn.addEventListener("click", () => {
+		document.querySelectorAll(".zoom-btn").forEach(b => b.classList.remove("active"));
+		btn.classList.add("active");
+		const preset = ZOOM_PRESETS[btn.dataset.zoom];
+		if (preset) animateViewBox(preset);
+	});
+});
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+createQuiz();
+renderAll();
+</script>
+</body>
+</html>
