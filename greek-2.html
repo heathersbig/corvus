@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Greek History Final — Study App</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+	--bg: #0c0f14;
+	--surface: #12161e;
+	--surface-2: #191f2a;
+	--surface-3: #1e2535;
+	--border: #252e3f;
+	--border-focus: #3d506e;
+	--text: #e2e8f4;
+	--text-2: #a0b0c8;
+	--text-3: #6b7d96;
+	--accent: #c9a55a;
+	--accent-dim: rgba(201,165,90,0.12);
+	--accent-mid: rgba(201,165,90,0.25);
+	--green: #6fcf97;
+	--green-bg: rgba(111,207,151,0.1);
+	--green-border: rgba(111,207,151,0.35);
+	--red: #eb7878;
+	--red-bg: rgba(235,120,120,0.08);
+	--red-border: rgba(235,120,120,0.35);
+	--orange: #e8a84c;
+	--orange-bg: rgba(232,168,76,0.1);
+	--blue: #6ba3eb;
+	--radius: 12px;
+	--radius-lg: 18px;
+	--shadow: 0 8px 32px rgba(0,0,0,0.4);
+	--font-display: 'Cormorant Garamond', Georgia, serif;
+	--font-body: 'DM Sans', system-ui, sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+	font-family:var(--font-body);
+	background:var(--bg);
+	color:var(--text);
+	line-height:1.5;
+	min-height:100vh;
+}
+body::before{
+	content:'';position:fixed;inset:0;
+	background:
+		radial-gradient(ellipse 60% 40% at 15% 10%, rgba(201,165,90,0.06), transparent),
+		radial-gradient(ellipse 50% 50% at 85% 20%, rgba(107,163,235,0.04), transparent);
+	pointer-events:none;z-index:0;
+}
+
+/* ─── Layout ────────────────────────────────── */
+.shell{max-width:1200px;margin:0 auto;padding:20px;position:relative;z-index:1;}
+.hero{
+	padding:32px 28px 28px;
+	border-bottom:1px solid var(--border);
+	margin-bottom:20px;
+}
+.hero-badge{
+	display:inline-block;
+	font-family:var(--font-display);font-weight:600;font-size:.85rem;
+	letter-spacing:.08em;text-transform:uppercase;
+	color:var(--accent);
+	border:1px solid var(--accent-mid);
+	border-radius:999px;padding:5px 14px;
+	margin-bottom:14px;
+}
+.hero h1{
+	font-family:var(--font-display);
+	font-size:clamp(1.8rem,3.5vw,2.6rem);
+	font-weight:700;line-height:1.15;
+	margin-bottom:8px;
+}
+.hero h1 em{font-style:italic;color:var(--accent);}
+.hero p{color:var(--text-2);max-width:65ch;font-size:.95rem;}
+
+/* ─── Controls Bar ──────────────────────────── */
+.controls{
+	display:flex;flex-wrap:wrap;gap:10px;
+	margin-bottom:16px;
+	align-items:center;
+}
+.controls input[type="text"]{
+	flex:1 1 220px;min-width:180px;
+	background:var(--surface);
+	border:1px solid var(--border);border-radius:var(--radius);
+	color:var(--text);font:inherit;font-size:.9rem;
+	padding:10px 14px;outline:none;
+	transition:border-color .2s;
+}
+.controls input[type="text"]:focus{border-color:var(--accent);}
+.controls input[type="text"]::placeholder{color:var(--text-3);}
+.controls select{
+	flex:0 1 auto;
+	background:var(--surface);
+	border:1px solid var(--border);border-radius:var(--radius);
+	color:var(--text);font:inherit;font-size:.88rem;
+	padding:10px 12px;outline:none;cursor:pointer;
+	appearance:none;
+	background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7d96' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+	background-repeat:no-repeat;background-position:right 12px center;
+	padding-right:30px;
+}
+
+/* ─── Mode Tabs ─────────────────────────────── */
+.tabs{
+	display:flex;flex-wrap:wrap;gap:6px;
+	margin-bottom:18px;
+	border-bottom:1px solid var(--border);
+	padding-bottom:14px;
+}
+.tab{
+	font:inherit;font-size:.88rem;font-weight:500;
+	padding:8px 16px;border-radius:var(--radius);
+	border:1px solid transparent;
+	background:transparent;color:var(--text-3);
+	cursor:pointer;transition:all .15s;
+}
+.tab:hover{color:var(--text-2);background:var(--surface);}
+.tab.active{
+	color:var(--accent);
+	background:var(--accent-dim);
+	border-color:var(--accent-mid);
+}
+
+/* ─── Grid ──────────────────────────────────── */
+.layout{
+	display:grid;
+	grid-template-columns:1fr 300px;
+	gap:18px;
+	align-items:start;
+}
+@media(max-width:960px){.layout{grid-template-columns:1fr;}}
+
+/* ─── Panels & Cards ────────────────────────── */
+.panel{
+	background:var(--surface);
+	border:1px solid var(--border);
+	border-radius:var(--radius-lg);
+	padding:22px;
+}
+.panel h2{
+	font-family:var(--font-display);font-size:1.5rem;font-weight:700;
+	margin-bottom:4px;
+}
+.panel .subtitle{color:var(--text-2);font-size:.9rem;margin-bottom:16px;}
+.card{
+	background:var(--surface-2);
+	border:1px solid var(--border);
+	border-radius:var(--radius);
+	padding:14px 16px;
+}
+.card + .card{margin-top:10px;}
+.card h3{font-size:1rem;font-weight:600;margin-bottom:6px;}
+.chip{
+	display:inline-flex;align-items:center;
+	font-size:.78rem;font-weight:500;
+	padding:4px 10px;border-radius:999px;
+	background:var(--surface-3);
+	border:1px solid var(--border);
+	color:var(--text-2);
+}
+.chip.gold{color:var(--accent);border-color:var(--accent-mid);background:var(--accent-dim);}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.muted{color:var(--text-2);}
+.dim{color:var(--text-3);}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.gap-sm{display:grid;gap:8px;}
+.gap-md{display:grid;gap:10px;}
+
+/* ─── Buttons ───────────────────────────────── */
+.btn{
+	font:inherit;font-size:.88rem;font-weight:500;
+	padding:9px 16px;border-radius:var(--radius);
+	border:1px solid var(--border);
+	background:var(--surface-2);color:var(--text);
+	cursor:pointer;transition:all .15s;
+	display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{border-color:var(--border-focus);transform:translateY(-1px);}
+.btn.primary{
+	background:linear-gradient(180deg,rgba(201,165,90,0.2),rgba(201,165,90,0.1));
+	border-color:var(--accent-mid);
+	color:var(--accent);
+}
+.btn.primary:hover{background:linear-gradient(180deg,rgba(201,165,90,0.28),rgba(201,165,90,0.15));}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px;}
+.btn:disabled{opacity:.4;cursor:default;transform:none;}
+
+/* ─── KPIs ──────────────────────────────────── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0;}
+.kpi{
+	background:var(--surface-2);border:1px solid var(--border);
+	border-radius:var(--radius);padding:12px 14px;text-align:center;
+}
+.kpi .n{font-family:var(--font-display);font-size:1.6rem;font-weight:700;color:var(--accent);}
+.kpi .l{font-size:.8rem;color:var(--text-3);margin-top:2px;}
+
+/* ─── Flashcard ─────────────────────────────── */
+.flashcard-face{
+	min-height:200px;
+	display:flex;flex-direction:column;justify-content:center;
+	text-align:center;padding:20px;
+}
+.flash-term{
+	font-family:var(--font-display);
+	font-size:clamp(1.8rem,3vw,2.5rem);font-weight:700;
+	margin-bottom:10px;
+}
+.flash-prompt{color:var(--text-3);font-size:.9rem;}
+.flash-answer{
+	border-top:1px solid var(--border);
+	padding-top:16px;margin-top:16px;
+	text-align:left;
+}
+.confidence-row{
+	display:flex;gap:8px;justify-content:center;margin-top:14px;
+}
+.conf-btn{
+	font:inherit;font-size:.82rem;font-weight:600;
+	padding:8px 18px;border-radius:var(--radius);
+	border:1px solid var(--border);
+	cursor:pointer;transition:all .15s;
+}
+.conf-btn.miss{background:var(--red-bg);border-color:var(--red-border);color:var(--red);}
+.conf-btn.fuzzy{background:var(--orange-bg);border-color:rgba(232,168,76,0.3);color:var(--orange);}
+.conf-btn.got{background:var(--green-bg);border-color:var(--green-border);color:var(--green);}
+.conf-btn:hover{transform:translateY(-1px);}
+
+/* ─── Timeline ──────────────────────────────── */
+.tl-item{
+	padding:12px 16px;
+	border-radius:var(--radius);
+	background:var(--surface-2);
+	border:1px solid var(--border);
+	cursor:grab;
+	transition:border-color .2s, background .2s, opacity .15s;
+	user-select:none;
+}
+.tl-item:active{cursor:grabbing;}
+.tl-item.dragging{opacity:.35;}
+.tl-item.correct{border-color:var(--green-border);background:var(--green-bg);}
+.tl-item.wrong{border-color:var(--red-border);background:var(--red-bg);}
+.tl-item .tl-date{color:var(--green);font-weight:600;font-size:.85rem;margin-top:4px;}
+.tl-list{display:grid;gap:8px;margin:14px 0;}
+
+/* ─── Date Recall ───────────────────────────── */
+.recall-card{text-align:center;padding:28px 20px;}
+.recall-term{
+	font-family:var(--font-display);
+	font-size:clamp(1.6rem,2.8vw,2.2rem);font-weight:700;
+	margin-bottom:6px;
+}
+.recall-input{
+	font-family:var(--font-display);
+	font-size:1.8rem;font-weight:700;
+	text-align:center;
+	width:200px;
+	background:var(--surface-3);
+	border:2px solid var(--border);border-radius:var(--radius);
+	color:var(--text);padding:10px;outline:none;
+	transition:border-color .2s;
+}
+.recall-input:focus{border-color:var(--accent);}
+.recall-result{margin-top:14px;font-size:1rem;font-weight:600;}
+.recall-result.correct{color:var(--green);}
+.recall-result.close{color:var(--orange);}
+.recall-result.wrong{color:var(--red);}
+
+/* ─── Quiz ──────────────────────────────────── */
+.quiz-q{font-size:1.05rem;line-height:1.5;margin-bottom:14px;}
+.quiz-opts{display:grid;gap:8px;}
+.opt-btn{
+	text-align:left;
+	font:inherit;font-size:.92rem;
+	padding:12px 14px;border-radius:var(--radius);
+	border:1px solid var(--border);
+	background:var(--surface-2);color:var(--text);
+	cursor:pointer;transition:all .15s;
+}
+.opt-btn:hover:not(:disabled){border-color:var(--border-focus);background:var(--surface-3);}
+.opt-btn.correct{border-color:var(--green-border)!important;background:var(--green-bg)!important;}
+.opt-btn.wrong{border-color:var(--red-border)!important;background:var(--red-bg)!important;}
+
+/* ─── People ────────────────────────────────── */
+.people-grid{display:grid;grid-template-columns:240px 1fr;gap:14px;}
+@media(max-width:700px){.people-grid{grid-template-columns:1fr;}}
+.people-list{display:grid;gap:6px;max-height:70vh;overflow-y:auto;align-content:start;}
+.person-btn{
+	text-align:left;font:inherit;font-size:.88rem;
+	padding:10px 12px;border-radius:var(--radius);
+	border:1px solid var(--border);
+	background:var(--surface-2);color:var(--text);
+	cursor:pointer;transition:all .12s;
+}
+.person-btn:hover{border-color:var(--border-focus);}
+.person-btn.active{border-color:var(--accent-mid);background:var(--accent-dim);color:var(--accent);}
+
+/* ─── Sidebar ───────────────────────────────── */
+.sidebar .panel{font-size:.88rem;}
+.sidebar .panel + .panel{margin-top:12px;}
+.sidebar h3{
+	font-family:var(--font-display);font-size:1.1rem;font-weight:700;
+	margin-bottom:8px;
+}
+.progress-bar{
+	height:6px;border-radius:3px;
+	background:var(--surface-3);
+	overflow:hidden;margin-top:6px;
+}
+.progress-bar .fill{height:100%;border-radius:3px;background:var(--accent);transition:width .3s;}
+
+.hidden{display:none!important;}
+.kbd{
+	display:inline-block;font-size:.72rem;font-weight:600;
+	padding:2px 6px;border-radius:4px;
+	background:var(--surface-3);border:1px solid var(--border);
+	color:var(--text-3);margin-left:4px;vertical-align:middle;
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+	<header class="hero">
+		<div class="hero-badge">Greek History Final</div>
+		<h1>Know your dates, people, and <em>why it matters</em></h1>
+		<p>Seven study modes built from your course outline. Filter by period, type, or topic — then drill until the chronology sticks.</p>
+	</header>
+
+	<div class="controls" id="controls">
+		<input type="text" id="searchInput" placeholder="Search anything — Marathon, Solon, helots…"/>
+		<select id="periodFilter"></select>
+		<select id="kindFilter"></select>
+		<select id="scopeFilter"></select>
+	</div>
+
+	<div class="tabs" id="tabs"></div>
+
+	<div class="layout">
+		<main id="main" class="panel"></main>
+		<aside class="sidebar" id="sidebar"></aside>
+	</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+const DATA = [{"id":"period-neolithic","title":"Neolithic","kind":"period","period":"Major Periods","date":"7000–3000 BCE","sortKey":-7000,"summary":"Begins in Greece around 7000 BCE and runs until the Bronze Age.","importance":"Earliest phase in this outline; useful as the starting point for the whole course chronology.","people":[],"places":["Greece"],"tags":["period"]},{"id":"period-bronze","title":"Bronze Age","kind":"period","period":"Major Periods","date":"3000–1200 BCE","sortKey":-3000,"summary":"Palatial and early Mycenaean developments, writing systems, and eventual collapse.","importance":"Core setup for Minoan/Mycenaean Greece and the later Greek world.","people":[],"places":["Knossos","Lerna","Mycenae"],"tags":["period"]},{"id":"period-iron","title":"Iron Age / Dark Age","kind":"period","period":"Major Periods","date":"1200–800 BCE","sortKey":-1200,"summary":"Post-Bronze-Age recovery period associated here with Lefkandi and the alphabetic transition.","importance":"Bridge between Bronze Age collapse and Archaic Greece.","people":[],"places":["Lefkandi"],"tags":["period"]},{"id":"period-archaic","title":"Archaic Period","kind":"period","period":"Archaic","date":"776–508 BCE","sortKey":-776,"summary":"Olympia, alphabet adoption, Spartan expansion, and Athenian political reform.","importance":"Sets up Panhellenism, Sparta's social order, and the beginnings of democracy at Athens.","people":["Solon","Lycurgus","Peisistratus","Hippias","Cleisthenes"],"places":["Olympia","Sparta","Messenia","Athens"],"tags":["period"]},{"id":"period-persian","title":"Persian War","kind":"period","period":"Persian War","date":"499–449 BCE","sortKey":-499,"summary":"Ionian Revolt through the Peace of Callias.","importance":"Defines the Greek-Persian conflict and several foundational battles in Greek memory.","people":["Darius","Mardonius","Xerxes","Themistocles","Gelon"],"places":["Marathon","Thermopylae","Artemisium","Salamis","Himera","Mycale"],"tags":["period"]},{"id":"period-pelop","title":"Peloponnesian War","kind":"period","period":"Peloponnesian War","date":"431–404 BCE","sortKey":-431,"summary":"Athens and Sparta fight from the invasion of Attica to Aegospotami.","importance":"Major pivot in Greek interstate politics and Athenian decline.","people":["Pericles","Brasidas","Thucydides","Alcibiades","Lysander","Conon"],"places":["Attica","Athens","Amphipolis","Mantinea","Sicily","Arginusae","Aegospotami"],"tags":["period"]},{"id":"period-corinthian","title":"Corinthian War / Theban Ascendancy","kind":"period","period":"Fourth Century","date":"395–362 BCE","sortKey":-395,"summary":"Anti-Spartan coalitions, King's Peace, Leuctra, and Mantinea.","importance":"Tracks Sparta's weakening and Thebes' brief rise.","people":["Artaxerxes II","Epaminondas"],"places":["Boeotia","Leuctra","Mantinea"],"tags":["period"]},{"id":"period-macedon","title":"Macedonian History","kind":"period","period":"Macedonian History","date":"360–336 BCE","sortKey":-360,"summary":"Philip II consolidates Macedon, defeats Greek powers, and creates the League of Corinth.","importance":"Explains how Macedon takes over the Greek mainland before Alexander.","people":["Perdiccas","Philip II","Timoleon","Dionysius II","Alexander III","Isocrates"],"places":["Macedon","Olynthus","Syracuse","Chaeronea","Thebes"],"tags":["period"]},{"id":"period-alexander","title":"Alexander's Conquest of Persia","kind":"period","period":"Alexander","date":"334–323 BCE","sortKey":-334,"summary":"From Granicus to Gaugamela and Alexander's death.","importance":"Maps the creation of Alexander's empire and the transition to the Hellenistic world.","people":["Alexander III","Darius III","Parmenion"],"places":["Granicus","Issus","Alexandria","Siwa","Gaugamela"],"tags":["period"]},{"id":"period-hellenistic","title":"Hellenistic History","kind":"period","period":"Hellenistic","date":"322–277 BCE","sortKey":-322,"summary":"Successor struggles, division of Alexander's empire, and new dynasties.","importance":"Introduces the Diadochi and the political geography of the post-Alexander world.","people":["Ptolemy","Antipater","Craterus","Perdiccas","Antigonus I","Lysimachus","Eumenes","Seleucus","Polyperchon","Cassander","Philip III","Olympias","Pyrrhus","Antigonus II Gonatas"],"places":["Egypt","Macedon","Asia Minor","Thrace","Babylonia","Ipsus","Italy","Lysimacheia"],"tags":["period"]},{"id":"house-tiles","title":"House of the Tiles at Lerna","kind":"event","period":"Bronze Age","date":"c. 2500 BCE","sortKey":-2500,"summary":"Early monumental structure at Lerna listed in the Bronze Age section.","importance":"Useful anchor for early Bronze Age complexity in Greece.","people":[],"places":["Lerna"],"tags":["architecture","bronze age"]},{"id":"knossos-palatial","title":"Palatial period begins at Knossos","kind":"event","period":"Bronze Age","date":"2000 BCE","sortKey":-2000,"summary":"The outline marks 2000 BCE as the start of the palatial period in Knossos.","importance":"Start point for Minoan palatial civilization in these notes.","people":[],"places":["Knossos"],"tags":["minoan","palace"]},{"id":"linear-a","title":"Linear A","kind":"term","period":"Bronze Age","date":"c. 1850 BCE","sortKey":-1850,"summary":"Writing system associated here with Bronze Age Crete.","importance":"Key Bronze Age identification term; precedes Linear B.","people":[],"places":["Crete"],"tags":["writing","id"]},{"id":"grave-circles","title":"Grave Circles A and B / rise of Mycenaean civilization","kind":"event","period":"Bronze Age","date":"c. 1750–1700 BCE","sortKey":-1750,"summary":"Creation of the Grave Circles marks emerging centralized Mycenaean power under a wanax.","importance":"Important for identifying the start of Mycenaean elite culture in the outline.","people":["Heinrich Schliemann","wanax"],"places":["Mycenae"],"tags":["mycenaean","burials","id"]},{"id":"linear-b","title":"Linear B","kind":"term","period":"Bronze Age","date":"c. 1500 BCE","sortKey":-1500,"summary":"Writing system listed after Linear A and before the collapse of Knossos' palaces.","importance":"Major Bronze Age ID term; marks Mycenaean administrative literacy.","people":[],"places":["Knossos","Mycenae"],"tags":["writing","id"]},{"id":"knossos-collapse","title":"Collapse of the palaces at Knossos","kind":"event","period":"Bronze Age","date":"1450 BCE","sortKey":-1450,"summary":"Palaces at Knossos collapse; Linear B tablets are found in the destruction horizon.","importance":"Important chronological marker in the decline of palatial Crete.","people":[],"places":["Knossos"],"tags":["collapse","minoan"]},{"id":"bronze-collapse","title":"Collapse of the Bronze Age","kind":"event","period":"Bronze Age","date":"1200 BCE","sortKey":-1200,"summary":"The outline marks 1200 BCE as the Bronze Age collapse.","importance":"Critical transition point into the Dark Age.","people":[],"places":["Eastern Mediterranean"],"tags":["collapse","transition"]},{"id":"lefkandi","title":"Lefkandi","kind":"event","period":"Iron Age / Dark Age","date":"1000–950 BCE","sortKey":-1000,"summary":"Key site singled out in the Dark Age section.","importance":"Classic recovery-era ID for the post-palatial Greek world.","people":[],"places":["Lefkandi","Euboea"],"tags":["site","id"]},{"id":"phoenician-alphabet","title":"Invention/adoption of the Phoenician alphabet","kind":"event","period":"Iron Age / Archaic","date":"800 BCE","sortKey":-800,"summary":"The notes mark 800 BCE for the Phoenician alphabet.","importance":"Huge literacy and cultural transition; connects to the later Greek alphabet.","people":[],"places":["Greece","Phoenicia"],"tags":["alphabet","id"]},{"id":"olympics","title":"First Olympic Games at Olympia","kind":"event","period":"Archaic","date":"776 BCE","sortKey":-776,"summary":"First Olympic games at Olympia; the notes flag panhellenism.","importance":"Common exam anchor for Panhellenism and Archaic chronology.","people":[],"places":["Olympia"],"tags":["panhellenism","festival"]},{"id":"greek-alphabet","title":"Creation of the Greek alphabet","kind":"event","period":"Archaic","date":"c. 770–750 BCE","sortKey":-770,"summary":"Created by a Euboean based on the Phoenician consonantal alphabet.","importance":"Frequently tested as a cultural turning point in archaic Greece.","people":[],"places":["Euboea"],"tags":["alphabet","archaic"]},{"id":"first-messenian","title":"First Messenian War","kind":"event","period":"Archaic","date":"740–720 BCE","sortKey":-740,"summary":"Sparta invades Messenia and enslaves the Helots.","importance":"Foundational for Spartan power and the helot system.","people":[],"places":["Sparta","Messenia"],"tags":["sparta","helots","war"]},{"id":"second-messenian","title":"Second Messenian War","kind":"event","period":"Archaic","date":"c. 650–620 BCE","sortKey":-650,"summary":"Associated with Tyrtaeus' war poetry; later Spartan lawgiving is tied to the aftermath.","importance":"Important for Spartan militarization, Tyrtaeus, Lycurgus, and the Great Rhetra.","people":["Tyrtaeus","Lycurgus"],"places":["Sparta","Messenia"],"tags":["sparta","war"]},{"id":"solon-reforms","title":"Solon's reforms","kind":"event","period":"Archaic","date":"594 BCE","sortKey":-594,"summary":"Abolishes debt bondage, revises law, creates four economic classes, and establishes the Council of 400.","importance":"Big Athenian constitutional ID; memorize both reforms and class structure.","people":["Solon","Draco"],"places":["Athens"],"tags":["athens","reform","constitution"]},{"id":"peisistratus","title":"Tyranny of Peisistratus","kind":"event","period":"Archaic","date":"561–527 BCE","sortKey":-561,"summary":"Peisistratus rules Athens as tyrant.","importance":"Key step between aristocratic conflict and later democratic reform.","people":["Peisistratus"],"places":["Athens"],"tags":["athens","tyranny"]},{"id":"hippias-expelled","title":"Hippias expelled from Athens","kind":"event","period":"Archaic","date":"510 BCE","sortKey":-510,"summary":"Hippias is expelled by Cleomenes I and flees to Persia, ending the Athenian tyranny.","importance":"Immediate prelude to Cleisthenes and Athenian democracy.","people":["Hippias","Cleomenes I"],"places":["Athens","Persia"],"tags":["athens","tyranny"]},{"id":"cleisthenes-reforms","title":"Cleisthenes' reforms and rise of democracy","kind":"event","period":"Archaic","date":"508 BCE","sortKey":-508,"summary":"Cleisthenes returns with popular support; trittyes and the Council of 500 are established after resistance to Spartan-backed oligarchy.","importance":"Prime democracy ID for Athens.","people":["Cleisthenes","Isagoras"],"places":["Athens"],"tags":["athens","democracy","constitution"]},{"id":"ionian-revolt","title":"Ionian Revolt","kind":"event","period":"Persian War","date":"499–493 BCE","sortKey":-499,"summary":"Opening phase of the Persian War section.","importance":"Standard starting point for the Greco-Persian Wars.","people":[],"places":["Ionia"],"tags":["persian wars"]},{"id":"mardonius-expedition","title":"Mardonius' failed expedition","kind":"event","period":"Persian War","date":"492 BCE","sortKey":-492,"summary":"Darius sends Mardonius against Athens and Eretria, but the force is destroyed by storm off Athos.","importance":"Important setup for Marathon and the danger of Mount Athos.","people":["Darius","Mardonius"],"places":["Athos","Athens","Eretria"],"tags":["persian wars","expedition"]},{"id":"marathon","title":"Battle of Marathon","kind":"event","period":"Persian War","date":"490 BCE","sortKey":-490,"summary":"Major Greek victory against Persia.","importance":"Absolute must-know date and battle.","people":[],"places":["Marathon"],"tags":["battle","persian wars"]},{"id":"480-campaign","title":"Thermopylae / Artemisium / Salamis / burning of Athens","kind":"event","period":"Persian War","date":"480 BCE","sortKey":-480,"summary":"Persians win at Thermopylae; Greeks win naval actions at Artemisium and especially Salamis after Themistocles tricks Xerxes; Athens is evacuated and burned.","importance":"Cluster year. Know the whole package, not just one battle.","people":["Xerxes","Themistocles"],"places":["Thermopylae","Artemisium","Salamis","Athens"],"tags":["battle","persian wars","cluster"]},{"id":"himera","title":"Battle of Himera (First Sicilian War)","kind":"event","period":"Persian War","date":"480 BCE","sortKey":-480,"summary":"Gelon defeats the Carthaginians at Himera after Selinus allies with them; Hamilcar is killed.","importance":"Important western Mediterranean parallel to the Persian War year.","people":["Gelon","Hamilcar","Diodorus"],"places":["Himera","Selinus","Carthage"],"tags":["sicily","battle"]},{"id":"479-battles","title":"Plataea and Mycale","kind":"event","period":"Persian War","date":"479 BCE","sortKey":-479,"summary":"Battle of Plataea and battle of Mycale conclude the major Persian invasions.","importance":"Another paired date worth memorizing together.","people":["Mardonius"],"places":["Plataea","Mycale","Samos"],"tags":["battle","persian wars"]},{"id":"callias","title":"Peace of Callias","kind":"term","period":"Persian War","date":"449 BCE","sortKey":-449,"summary":"Treaty marking the end of the Greco-Persian Wars in the notes.","importance":"Know it as the endpoint of the Persian War sequence.","people":[],"places":[],"tags":["treaty","id"]},{"id":"pelop-outbreak","title":"Outbreak of the Peloponnesian War","kind":"event","period":"Peloponnesian War","date":"431 BCE","sortKey":-431,"summary":"Spartan invasion of Attica begins the war.","importance":"Starting date for the Peloponnesian War.","people":[],"places":["Attica"],"tags":["war"]},{"id":"athens-plague","title":"Plague in Athens","kind":"event","period":"Peloponnesian War","date":"430–426 BCE","sortKey":-430,"summary":"Athens is devastated by plague; Pericles dies in 429 BCE.","importance":"Tie the plague directly to Pericles' death and Athens' weakening.","people":["Pericles"],"places":["Athens"],"tags":["athens","plague"]},{"id":"amphipolis","title":"Brasidas takes Amphipolis","kind":"event","period":"Peloponnesian War","date":"424 BCE","sortKey":-424,"summary":"Brasidas captures Amphipolis with helots and mercenaries; Thucydides fails to recover it and is banished.","importance":"Important because it links Brasidas, Thucydides, and Spartan reach.","people":["Brasidas","Thucydides"],"places":["Amphipolis"],"tags":["sparta","athens","campaign"]},{"id":"nicias","title":"Peace of Nicias","kind":"term","period":"Peloponnesian War","date":"421 BCE","sortKey":-421,"summary":"Ends the first half of the Peloponnesian War.","importance":"Memorize as a midpoint pause rather than a true ending.","people":["Nicias"],"places":[],"tags":["treaty","id"]},{"id":"mantinea1","title":"First Battle of Mantinea","kind":"event","period":"Peloponnesian War","date":"418 BCE","sortKey":-418,"summary":"Alcibiades pushes anti-Spartan alliances; Sparta wins a major hoplite victory over Athens, Argos, and allies.","importance":"Marks the failure of the Peace of Nicias to settle anything.","people":["Alcibiades"],"places":["Mantinea","Argos"],"tags":["battle","peloponnesian war"]},{"id":"sicilian-expedition","title":"Sicilian Expedition","kind":"event","period":"Peloponnesian War","date":"415–413 BCE","sortKey":-415,"summary":"Massive Athenian disaster in Sicily.","importance":"One of the biggest why-did-Athens-lose questions on the exam.","people":[],"places":["Sicily"],"tags":["athens","expedition"]},{"id":"ionian-war","title":"Ionian War","kind":"event","period":"Peloponnesian War","date":"412–404 BCE","sortKey":-412,"summary":"Final phase of the Peloponnesian War.","importance":"Useful umbrella term for the closing years of the conflict.","people":[],"places":["Ionia"],"tags":["war","phase"]},{"id":"arginusae","title":"Battle of Arginusae","kind":"event","period":"Peloponnesian War","date":"406 BCE","sortKey":-406,"summary":"Athenian victory before the final collapse.","importance":"Last major Athenian success before Aegospotami.","people":[],"places":["Arginusae"],"tags":["battle"]},{"id":"aegospotami","title":"Battle of Aegospotami","kind":"event","period":"Peloponnesian War","date":"405 BCE","sortKey":-405,"summary":"Lysander defeats Conon and destroys the Athenian fleet; afterward the Thirty are installed at Athens.","importance":"Decisive endgame battle of the Peloponnesian War.","people":["Lysander","Conon"],"places":["Aegospotami","Athens"],"tags":["battle","sparta","athens"]},{"id":"corinthian-war","title":"Corinthian War","kind":"event","period":"Fourth Century","date":"395–387 BCE","sortKey":-395,"summary":"Persia backs Athens, Thebes, and Corinth-Argos against Sparta after Sparta's Asiatic policy.","importance":"Know this as Persia helping anti-Spartan Greeks after the Peloponnesian War.","people":[],"places":["Athens","Thebes","Corinth","Argos","Asia Minor"],"tags":["war"]},{"id":"kings-peace","title":"Peace of Antalcidas / King's Peace","kind":"term","period":"Fourth Century","date":"387 BCE","sortKey":-387,"summary":"Ends the Corinthian War under Artaxerxes II.","importance":"Frequently tested treaty ID and a symbol of Persian influence.","people":["Artaxerxes II","Antalcidas"],"places":[],"tags":["treaty","id"]},{"id":"common-peace","title":"Common Peace","kind":"term","period":"Fourth Century","date":"375 BCE","sortKey":-375,"summary":"Athenians help push through a Common Peace reaffirming the King's Peace and dissolving the Boeotian League again.","importance":"Shows how diplomacy keeps reshuffling interstate power in the fourth century.","people":[],"places":["Boeotia"],"tags":["treaty","id"]},{"id":"leuctra","title":"Battle of Leuctra","kind":"event","period":"Fourth Century","date":"371 BCE","sortKey":-371,"summary":"After congress tensions over Boeotia, Thebes defeats Sparta at Leuctra; Epaminondas and the Sacred Band are key.","importance":"Sparta's aura of invincibility breaks here. Must know.","people":["Epaminondas","Sacred Band"],"places":["Leuctra","Boeotia"],"tags":["battle","thebes","sparta"]},{"id":"mantinea2","title":"Second Battle of Mantinea","kind":"event","period":"Fourth Century","date":"362 BCE","sortKey":-362,"summary":"Epaminondas is killed; Thebes wins tactically but loses its chance at durable hegemony, while Sparta never regains Messenia.","importance":"Great example of a pyrrhic-ish victory before Pyrrhus even shows up.","people":["Epaminondas"],"places":["Mantinea","Messenia","Laconia"],"tags":["battle","thebes"]},{"id":"perdiccas-philip","title":"Perdiccas killed; Philip II takes power","kind":"event","period":"Macedonian History","date":"360–359 BCE","sortKey":-360,"summary":"Perdiccas dies fighting Illyrians and Philip II becomes king of Macedon.","importance":"Start of Macedon's rise under Philip.","people":["Perdiccas","Philip II"],"places":["Macedon","Illyria"],"tags":["macedon"]},{"id":"olynthus","title":"Philip sacks Olynthus","kind":"event","period":"Macedonian History","date":"348 BCE","sortKey":-348,"summary":"Philip destroys Olynthus; the site later preserves a classical grid plan especially well.","importance":"Good map-plus-history ID for Philip's expansion.","people":["Philip II"],"places":["Olynthus"],"tags":["macedon","city"]},{"id":"timoleon","title":"Timoleon in Syracuse","kind":"event","period":"Macedonian History","date":"344–338 BCE","sortKey":-344,"summary":"Timoleon of Corinth is sent to Syracuse, retakes Sicily from Carthage, and supports Greeks against tyrants and Carthaginians.","importance":"Western Greek world matters too; this is that reminder.","people":["Timoleon","Dionysius II"],"places":["Syracuse","Sicily","Carthage"],"tags":["sicily","corinth"]},{"id":"chaeronea","title":"Battle of Chaeronea","kind":"event","period":"Macedonian History","date":"338 BCE","sortKey":-338,"summary":"Philip II defeats the major Greek mainland powers; Alexander's Companion cavalry destroys the Sacred Band of Thebes.","importance":"One of the most important dates in the course. Greek freedom? basically over.","people":["Philip II","Alexander III","Sacred Band"],"places":["Chaeronea","Thebes"],"tags":["battle","macedon"]},{"id":"league-corinth","title":"League of Corinth","kind":"term","period":"Macedonian History","date":"337 BCE","sortKey":-337,"summary":"Philip forms a pan-Greek league for the invasion of Persia; Sparta is excluded.","importance":"Institutional key to the Macedonian takeover of Greece.","people":["Philip II","Isocrates"],"places":["Corinth"],"tags":["league","id"]},{"id":"philip-assassinated","title":"Philip II assassinated; Alexander III succeeds","kind":"event","period":"Macedonian History","date":"336 BCE","sortKey":-336,"summary":"Philip II is assassinated and Alexander III becomes king.","importance":"Essential succession date.","people":["Philip II","Alexander III"],"places":["Macedonia"],"tags":["succession"]},{"id":"alexander-revolts","title":"Alexander suppresses revolts in Thrace and Thebes","kind":"event","period":"Macedonian History","date":"336–335 BCE","sortKey":-336,"summary":"Alexander crushes revolts; Thebes is sacked and destroyed except for Pindar's house.","importance":"Shows how brutally Alexander secures Greece before Persia.","people":["Alexander III","Pindar"],"places":["Thrace","Thebes"],"tags":["revolt","macedon"]},{"id":"granicus","title":"Battle of the Granicus River","kind":"event","period":"Alexander","date":"334 BCE","sortKey":-334,"summary":"Alexander defeats Persian satraps and takes half of Asia Minor.","importance":"Opening major battle of Alexander's Persian campaign.","people":["Alexander III"],"places":["Granicus River","Asia Minor"],"tags":["battle","alexander"]},{"id":"issus","title":"Battle of Issus","kind":"event","period":"Alexander","date":"333 BCE","sortKey":-333,"summary":"Alexander defeats Darius III, captures Darius' family, and controls southern Asia Minor.","importance":"Know it as the second huge battle after Granicus.","people":["Alexander III","Darius III","Parmenion"],"places":["Issus","Asia Minor"],"tags":["battle","alexander"]},{"id":"alexandria-siwa","title":"Alexandria founded; Siwa visited","kind":"event","period":"Alexander","date":"331 BCE","sortKey":-331,"summary":"Alexander founds Alexandria in Egypt, visits the Oracle of Ammon at Siwa, and declares his godhood.","importance":"Combines city-founding, Egypt, and divine kingship imagery.","people":["Alexander III"],"places":["Alexandria","Egypt","Siwa"],"tags":["alexander","egypt"]},{"id":"gaugamela","title":"Battle of Gaugamela","kind":"event","period":"Alexander","date":"331 BCE","sortKey":-331,"summary":"Alexander defeats Persia decisively and pursues Darius.","importance":"The decisive conquest battle. Burn it into your head.","people":["Alexander III","Darius III"],"places":["Gaugamela","Persia"],"tags":["battle","alexander"]},{"id":"alexander-dies","title":"Death of Alexander III","kind":"event","period":"Alexander","date":"323 BCE","sortKey":-323,"summary":"Alexander dies, opening the Successor era.","importance":"Everything gets messier immediately after this.","people":["Alexander III"],"places":["Babylon?"],"tags":["death","alexander"]},{"id":"successors-322","title":"Initial division after Alexander","kind":"event","period":"Hellenistic","date":"322 BCE","sortKey":-322,"summary":"Ptolemy gets Egypt; Antipater, Craterus, and Perdiccas hold regencies; Antigonus gets Asia Minor; Lysimachus Thrace; Eumenes Cappadocia and Paphlagonia.","importance":"Big Diadochi distribution ID.","people":["Ptolemy","Antipater","Craterus","Perdiccas","Antigonus I","Lysimachus","Eumenes"],"places":["Egypt","Macedon","Asia Minor","Thrace","Cappadocia","Paphlagonia"],"tags":["hellenistic","diadochi"]},{"id":"perdiccas-egypt","title":"Perdiccas invades Egypt; Seleucus gets Babylonia","kind":"event","period":"Hellenistic","date":"321–320 BCE","sortKey":-321,"summary":"Perdiccas invades Egypt, a failed coup follows, Antigonus is named defender of the kings, and Seleucus receives Babylonia.","importance":"Good test of whether you can keep the early Successors straight.","people":["Perdiccas","Craterus","Antigonus I","Eumenes","Seleucus"],"places":["Egypt","Babylonia"],"tags":["hellenistic","diadochi"]},{"id":"antipater-dies","title":"Antipater dies; Cassander revolts","kind":"event","period":"Hellenistic","date":"319 BCE","sortKey":-319,"summary":"Antipater names Polyperchon instead of Cassander; Cassander revolts and ensuing conspiracies lead to deaths including Philip III and Olympias.","importance":"Another key succession snarl in Macedon.","people":["Antipater","Polyperchon","Cassander","Philip III","Olympias"],"places":["Macedon"],"tags":["hellenistic","succession"]},{"id":"cassander-rules","title":"Cassander ousts Polyperchon","kind":"event","period":"Hellenistic","date":"316 BCE","sortKey":-316,"summary":"Cassander rules Macedonia and executes Olympias.","importance":"Important consolidation moment for Cassander.","people":["Cassander","Polyperchon","Olympias"],"places":["Macedonia"],"tags":["hellenistic","macedon"]},{"id":"ipsus","title":"Battle of Ipsus","kind":"event","period":"Hellenistic","date":"301 BCE","sortKey":-301,"summary":"Antigonus I the One-Eye is defeated and the empire is split into four kingdoms.","importance":"Must-know Diadochi battle and distribution point.","people":["Antigonus I"],"places":["Ipsus"],"tags":["battle","hellenistic"]},{"id":"pyrrhus","title":"Pyrrhus in Italy","kind":"event","period":"Hellenistic","date":"280–275 BCE","sortKey":-280,"summary":"Pyrrhus of Epirus fights Rome in Italy with elephants; early success, strategic failure.","importance":"Source of the later idea of a \u201cPyrrhic victory,\u201d even if the notes don\u2019t use that phrase.","people":["Pyrrhus"],"places":["Epirus","Taras","Tarentum","Italy","Rome"],"tags":["war","hellenistic"]},{"id":"lysimacheia","title":"Battle of Lysimacheia","kind":"event","period":"Hellenistic","date":"277 BCE","sortKey":-277,"summary":"Antigonus II Gonatas defeats the Gauls and founds the Antigonid dynasty in Macedon.","importance":"Good endpoint marker for this outline\u2019s Hellenistic section.","people":["Antigonus II Gonatas","Demetrius"],"places":["Lysimacheia","Macedon"],"tags":["battle","dynasty","hellenistic"]},{"id":"person-schol","title":"Heinrich Schliemann","kind":"person","period":"Bronze Age","date":"1876 discovery note","sortKey":1876,"summary":"Excavator credited in the outline with discovering Grave Circles A and B in 1876.","importance":"Connect him to Mycenae and the Grave Circles.","people":["Heinrich Schliemann"],"places":["Mycenae"],"tags":["person","archaeology"]},{"id":"person-tyrtaeus","title":"Tyrtaeus","kind":"person","period":"Archaic","date":"7th century BCE context","sortKey":-650,"summary":"War poet linked to the Second Messenian War and Spartan identity.","importance":"If his name appears, think Sparta, war poetry, Messenia.","people":["Tyrtaeus"],"places":["Sparta","Messenia"],"tags":["person","sparta"]},{"id":"person-lycurgus","title":"Lycurgus","kind":"person","period":"Archaic","date":"after Second Messenian War (traditional)","sortKey":-620,"summary":"Traditional Spartan lawgiver associated here with the Great Rhetra and land redistribution.","importance":"Classic Spartan constitution ID.","people":["Lycurgus"],"places":["Sparta"],"tags":["person","lawgiver"]},{"id":"person-solon","title":"Solon","kind":"person","period":"Archaic","date":"594 BCE","sortKey":-594,"summary":"Athenian reformer who abolishes debt bondage, reorganizes classes, and establishes the Council of 400.","importance":"One of the most important Athenian statesmen to memorize.","people":["Solon"],"places":["Athens"],"tags":["person","athens"]},{"id":"person-peis","title":"Peisistratus","kind":"person","period":"Archaic","date":"561–527 BCE","sortKey":-561,"summary":"Tyrant of Athens before Hippias' expulsion.","importance":"Tie him to tyranny, not democracy.","people":["Peisistratus"],"places":["Athens"],"tags":["person","athens"]},{"id":"person-hippias","title":"Hippias","kind":"person","period":"Archaic","date":"510 BCE expulsion","sortKey":-510,"summary":"Athenian tyrant expelled by Cleomenes I and driven toward Persia.","importance":"Last tyrant before Cleisthenes' reforms.","people":["Hippias"],"places":["Athens","Persia"],"tags":["person","athens"]},{"id":"person-cleisthenes","title":"Cleisthenes","kind":"person","period":"Archaic","date":"508 BCE","sortKey":-508,"summary":"Reformer associated with the rise of democracy, trittyes, and the Council of 500.","importance":"Memorize as the democracy guy in this outline.","people":["Cleisthenes"],"places":["Athens"],"tags":["person","athens"]},{"id":"person-darius","title":"Darius","kind":"person","period":"Persian War","date":"492–490 BCE context","sortKey":-492,"summary":"Persian king who sends Mardonius and is tied to the early phase of the Persian War.","importance":"Early Persian War king; don't confuse with Xerxes.","people":["Darius"],"places":["Persia"],"tags":["person","persia"]},{"id":"person-mardonius","title":"Mardonius","kind":"person","period":"Persian War","date":"492 and 479 BCE","sortKey":-492,"summary":"Persian general in Darius' failed expedition and associated with Plataea in the notes.","importance":"Good name to connect to Athos and Plataea.","people":["Mardonius"],"places":["Athos","Plataea"],"tags":["person","persia"]},{"id":"person-xerxes","title":"Xerxes","kind":"person","period":"Persian War","date":"480 BCE","sortKey":-480,"summary":"Persian king tied to Thermopylae, the burning of Athens, and Salamis.","importance":"Think 480 BCE immediately.","people":["Xerxes"],"places":["Thermopylae","Athens","Salamis"],"tags":["person","persia"]},{"id":"person-themistocles","title":"Themistocles","kind":"person","period":"Persian War","date":"480 BCE","sortKey":-480,"summary":"Athenian strategist who tricks Xerxes into fighting at Salamis.","importance":"One of the most testable individual roles in the Persian War.","people":["Themistocles"],"places":["Salamis","Athens"],"tags":["person","athens"]},{"id":"person-gelon","title":"Gelon","kind":"person","period":"Persian War","date":"480 BCE","sortKey":-480,"summary":"Victorious Sicilian Greek leader at Himera.","importance":"If Sicily shows up in the Persian War year, Gelon is usually nearby.","people":["Gelon"],"places":["Himera","Syracuse"],"tags":["person","sicily"]},{"id":"person-pericles","title":"Pericles","kind":"person","period":"Peloponnesian War","date":"429 BCE death","sortKey":-429,"summary":"Dies during the plague in Athens.","importance":"Connect him to Athens' leadership and early wartime crisis.","people":["Pericles"],"places":["Athens"],"tags":["person","athens"]},{"id":"person-brasidas","title":"Brasidas","kind":"person","period":"Peloponnesian War","date":"424 BCE","sortKey":-424,"summary":"Spartan commander who takes Amphipolis.","importance":"A very testable Spartan field commander.","people":["Brasidas"],"places":["Amphipolis"],"tags":["person","sparta"]},{"id":"person-thuc","title":"Thucydides","kind":"person","period":"Peloponnesian War","date":"424 BCE banishment context","sortKey":-424,"summary":"Sent to recover Amphipolis, fails, and is banished.","importance":"Pair him with Amphipolis, not just as an author floating in space.","people":["Thucydides"],"places":["Amphipolis"],"tags":["person","historian"]},{"id":"person-alc","title":"Alcibiades","kind":"person","period":"Peloponnesian War","date":"418 BCE context","sortKey":-418,"summary":"Opposes the Peace of Nicias and pushes alliances against Sparta before Mantinea.","importance":"Classic chaotic Athenian statesman-general energy.","people":["Alcibiades"],"places":["Mantinea","Athens"],"tags":["person","athens"]},{"id":"person-lys","title":"Lysander","kind":"person","period":"Peloponnesian War","date":"405 BCE","sortKey":-405,"summary":"Spartan victor at Aegospotami and supporter of the Thirty at Athens.","importance":"One of the most important endgame Peloponnesian War figures.","people":["Lysander"],"places":["Aegospotami","Athens"],"tags":["person","sparta"]},{"id":"person-conon","title":"Conon","kind":"person","period":"Peloponnesian War","date":"405 BCE","sortKey":-405,"summary":"Athenian commander defeated by Lysander at Aegospotami.","importance":"Remember him mainly as Lysander's opposite number here.","people":["Conon"],"places":["Aegospotami"],"tags":["person","athens"]},{"id":"person-artaxerxes","title":"Artaxerxes II","kind":"person","period":"Fourth Century","date":"387 BCE","sortKey":-387,"summary":"Persian king tied to the King's Peace.","importance":"If you see King's Peace, think Persian leverage and Artaxerxes II.","people":["Artaxerxes II"],"places":["Persia"],"tags":["person","persia"]},{"id":"person-epam","title":"Epaminondas","kind":"person","period":"Fourth Century","date":"371 and 362 BCE","sortKey":-371,"summary":"Theban general central to Leuctra and killed at Mantinea.","importance":"Primary face of Theban hegemony in the notes.","people":["Epaminondas"],"places":["Leuctra","Mantinea","Thebes"],"tags":["person","thebes"]},{"id":"person-philip","title":"Philip II","kind":"person","period":"Macedonian History","date":"360–336 BCE","sortKey":-360,"summary":"King of Macedon who destroys Olynthus, wins at Chaeronea, and creates the League of Corinth.","importance":"Massively important. Learn his whole arc.","people":["Philip II"],"places":["Macedon","Olynthus","Chaeronea","Corinth"],"tags":["person","macedon"]},{"id":"person-timoleon","title":"Timoleon","kind":"person","period":"Macedonian History","date":"344–338 BCE","sortKey":-344,"summary":"Corinthian sent to Syracuse who retakes Sicily from Carthage.","importance":"Useful western Greek figure who can otherwise slip through the cracks.","people":["Timoleon"],"places":["Syracuse","Sicily"],"tags":["person","sicily"]},{"id":"person-alex","title":"Alexander III","kind":"person","period":"Alexander","date":"336–323 BCE","sortKey":-336,"summary":"Succeeds Philip, sacks Thebes, defeats Persia at Granicus/Issus/Gaugamela, founds Alexandria, visits Siwa, and dies in 323 BCE.","importance":"Obviously enormous. This man is half the exam's emotional support conqueror.","people":["Alexander III"],"places":["Thebes","Granicus","Issus","Alexandria","Siwa","Gaugamela"],"tags":["person","macedon","persia"]},{"id":"person-darius3","title":"Darius III","kind":"person","period":"Alexander","date":"333–331 BCE","sortKey":-333,"summary":"Persian king defeated by Alexander at Issus and Gaugamela.","importance":"Think Alexander's major royal opponent.","people":["Darius III"],"places":["Issus","Gaugamela","Persia"],"tags":["person","persia"]},{"id":"person-ptolemy","title":"Ptolemy","kind":"person","period":"Hellenistic","date":"322 BCE","sortKey":-322,"summary":"Receives Egypt in the post-Alexander settlement.","importance":"Foundational Hellenistic dynasty starter.","people":["Ptolemy"],"places":["Egypt"],"tags":["person","hellenistic"]},{"id":"person-perdiccas","title":"Perdiccas","kind":"person","period":"Macedonian / Hellenistic","date":"360–359 and 322–320 BCE contexts","sortKey":-322,"summary":"As king: Perdiccas dies before Philip's rise; as Successor: Perdiccas becomes a regent and invades Egypt before failing.","importance":"Annoying because two contexts share the name. Worth keeping straight.","people":["Perdiccas"],"places":["Macedon","Egypt"],"tags":["person","hellenistic"]},{"id":"person-antigonus1","title":"Antigonus I the One-Eye","kind":"person","period":"Hellenistic","date":"322–301 BCE","sortKey":-322,"summary":"Receives Asia Minor, becomes defender of the kings, and is defeated at Ipsus.","importance":"Central Diadoch figure ending in 301 BCE.","people":["Antigonus I"],"places":["Asia Minor","Ipsus"],"tags":["person","hellenistic"]},{"id":"person-cassander","title":"Cassander","kind":"person","period":"Hellenistic","date":"319–316 BCE context","sortKey":-319,"summary":"Revolts after Antipater names Polyperchon, takes Macedon, and executes Olympias.","importance":"Essential for early Successor politics in Macedon.","people":["Cassander"],"places":["Macedon"],"tags":["person","hellenistic"]},{"id":"person-seleucus","title":"Seleucus","kind":"person","period":"Hellenistic","date":"321–320 BCE","sortKey":-321,"summary":"Receives Babylonia in the post-Perdiccas settlement.","importance":"Seed of the Seleucid sphere.","people":["Seleucus"],"places":["Babylonia"],"tags":["person","hellenistic"]},{"id":"person-pyrrhus","title":"Pyrrhus of Epirus","kind":"person","period":"Hellenistic","date":"280–275 BCE","sortKey":-280,"summary":"Fights Rome in Italy with elephants; tactically impressive, strategically unsustainable.","importance":"One of the most memorable Hellenistic figures.","people":["Pyrrhus"],"places":["Epirus","Italy","Rome"],"tags":["person","hellenistic"]},{"id":"person-antigonus2","title":"Antigonus II Gonatas","kind":"person","period":"Hellenistic","date":"277 BCE","sortKey":-277,"summary":"Defeats the Gauls at Lysimacheia and founds the Antigonid dynasty in Macedon.","importance":"Endpoint ruler in this outline.","people":["Antigonus II Gonatas"],"places":["Lysimacheia","Macedon"],"tags":["person","hellenistic"]},{"id":"term-wanax","title":"wanax","kind":"term","period":"Bronze Age","date":"Bronze Age","sortKey":-1700,"summary":"The centralized ruler or leader evoked by the Mycenaean Grave Circles entry.","importance":"Short, classic ID term tied to Mycenaean kingship.","people":[],"places":["Mycenae"],"tags":["id","institution"]},{"id":"term-great-rhetra","title":"Great Rhetra","kind":"term","period":"Archaic","date":"after Second Messenian War (traditional)","sortKey":-620,"summary":"Spartan constitutional arrangement associated with Lycurgus and 'equal' land redistribution.","importance":"Know it as a Spartan constitution/lawgiving ID.","people":["Lycurgus"],"places":["Sparta"],"tags":["id","sparta"]},{"id":"term-pentacosiomedimnoi","title":"Pentacosiomedimnoi","kind":"term","period":"Archaic","date":"594 BCE context","sortKey":-594,"summary":"Top Solonian property class: the \u201c500-measure men.\u201d","importance":"Very testable vocabulary from Solon's reforms.","people":["Solon"],"places":["Athens"],"tags":["id","athens","class"]},{"id":"term-hippeis","title":"hippeis","kind":"term","period":"Archaic","date":"594 BCE context","sortKey":-594,"summary":"Second property class in Solon's system.","importance":"Remember as one of the four Solonian economic classes.","people":["Solon"],"places":["Athens"],"tags":["id","athens","class"]},{"id":"term-zeugitai","title":"zeugitai","kind":"term","period":"Archaic","date":"594 BCE context","sortKey":-594,"summary":"Third property class in Solon's system.","importance":"Part of the four-class Solonian ladder.","people":["Solon"],"places":["Athens"],"tags":["id","athens","class"]},{"id":"term-thetes","title":"thetes","kind":"term","period":"Archaic","date":"594 BCE context","sortKey":-594,"summary":"Lowest property class in Solon's system.","importance":"Often easiest to forget; don't.","people":["Solon"],"places":["Athens"],"tags":["id","athens","class"]},{"id":"term-council-400","title":"Council of 400","kind":"term","period":"Archaic","date":"594 BCE","sortKey":-594,"summary":"Council established in Solon's reforms.","importance":"Institutional Athens ID.","people":["Solon"],"places":["Athens"],"tags":["id","athens","institution"]},{"id":"term-trittyes","title":"trittyes","kind":"term","period":"Archaic","date":"508 BCE","sortKey":-508,"summary":"Tribal subdivisions associated with Cleisthenes' reforms.","importance":"Signature Cleisthenic vocabulary.","people":["Cleisthenes"],"places":["Athens"],"tags":["id","athens","institution"]},{"id":"term-council-500","title":"Council of 500","kind":"term","period":"Archaic","date":"508 BCE","sortKey":-508,"summary":"Council created in Cleisthenes' reforms.","importance":"Main institutional marker for early democracy in these notes.","people":["Cleisthenes"],"places":["Athens"],"tags":["id","athens","institution"]},{"id":"term-thirty","title":"The Thirty","kind":"term","period":"Peloponnesian War","date":"405 BCE aftermath","sortKey":-405,"summary":"Oligarchic dictatorship installed in Athens after Aegospotami with Lysander's support.","importance":"Big postwar Athenian ID.","people":["Lysander"],"places":["Athens"],"tags":["id","athens","oligarchy"]},{"id":"term-sacred-band","title":"Sacred Band of Thebes","kind":"term","period":"Fourth Century","date":"371 / 338 BCE contexts","sortKey":-371,"summary":"Elite Theban unit linked to Leuctra and destroyed at Chaeronea.","importance":"Shows up in both Theban and Macedonian contexts.","people":["Epaminondas","Alexander III"],"places":["Thebes","Leuctra","Chaeronea"],"tags":["id","thebes","military"]},{"id":"term-companion","title":"Companion cavalry","kind":"term","period":"Macedonian History","date":"338 BCE context","sortKey":-338,"summary":"Alexander's cavalry arm that destroys the Sacred Band at Chaeronea in the notes.","importance":"Good Macedonian military ID.","people":["Alexander III"],"places":["Chaeronea"],"tags":["id","macedon","military"]},{"id":"term-antigonids","title":"Antigonids","kind":"term","period":"Hellenistic","date":"277 BCE","sortKey":-277,"summary":"Dynasty established in Macedon after Antigonus II Gonatas' victory at Lysimacheia.","importance":"Dynastic endpoint for the outline.","people":["Antigonus II Gonatas"],"places":["Macedon"],"tags":["id","dynasty"]}];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+	mode: 'overview',
+	search: '', period: 'all', kind: 'all', scope: 'all',
+	// flashcard
+	flashOrder: [], flashIdx: 0, flashRevealed: false,
+	// confidence tracking
+	confidence: {}, // id -> 'got'|'fuzzy'|'miss'
+	// timeline
+	tlRound: [], tlAnswer: [], tlChecked: false,
+	// date recall
+	recallPool: [], recallIdx: 0, recallAnswer: '', recallSubmitted: false, recallStats: {correct:0,close:0,wrong:0,total:0},
+	// id drill
+	idItemId: null, idRevealed: false,
+	// people
+	personId: null,
+	// quiz
+	quizRound: [], quizIdx: 0, quizScore: 0, quizAnswered: false,
+};
+
+const MODES = [
+	{id:'overview', label:'Overview', icon:'📋'},
+	{id:'flashcards', label:'Flashcards', icon:'🃏'},
+	{id:'recall', label:'Date Recall', icon:'🎯'},
+	{id:'timeline', label:'Timeline', icon:'⏳'},
+	{id:'ids', label:'ID Drill', icon:'🔍'},
+	{id:'people', label:'People', icon:'👤'},
+	{id:'quiz', label:'Quiz', icon:'✏️'},
+];
+
+const KIND_LABELS = {all:'Everything',period:'Periods',event:'Events',person:'People',term:'Terms / IDs'};
+const SCOPE_FN = {
+	all: ()=>true,
+	dates: i=>i.kind==='event'||i.kind==='period',
+	people: i=>i.kind==='person'||i.people?.length,
+	ids: i=>i.kind==='term',
+	battles: i=>i.tags?.includes('battle'),
+	treaties: i=>i.tags?.includes('treaty')||i.tags?.includes('league')||i.tags?.includes('institution'),
+};
+
+// ═══════════════════════════════════════════════════════
+// UTILITY
+// ═══════════════════════════════════════════════════════
+const $ = s => document.querySelector(s);
+const norm = v => String(v||'').toLowerCase().trim();
+const uniq = a => [...new Set(a)];
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function sample(a,n){return shuffle(a).slice(0,Math.min(n,a.length));}
+function getPeriods(){return uniq(DATA.map(i=>i.period).filter(Boolean)).sort((a,b)=>a.localeCompare(b));}
+
+function getFiltered(){
+	const s = norm(S.search);
+	return DATA.filter(item=>{
+		if(S.period!=='all' && item.period!==S.period) return false;
+		if(S.kind!=='all' && item.kind!==S.kind) return false;
+		if(!SCOPE_FN[S.scope](item)) return false;
+		if(!s) return true;
+		return norm([item.title,item.kind,item.period,item.date,item.summary,item.importance,...(item.people||[]),...(item.places||[]),...(item.tags||[])].join(' ')).includes(s);
+	});
+}
+function getTimelinePool(){return getFiltered().filter(i=>i.kind!=='person'&&typeof i.sortKey==='number');}
+function getPeoplePool(){return getFiltered().filter(i=>i.kind==='person');}
+
+// Parse a numeric year from the date string for recall comparison
+function extractYear(dateStr){
+	const m = dateStr.match(/(\d{3,4})/);
+	return m ? parseInt(m[1]) : null;
+}
+
+// ═══════════════════════════════════════════════════════
+// ELEMENTS
+// ═══════════════════════════════════════════════════════
+const mainEl = $('#main');
+const sidebarEl = $('#sidebar');
+const tabsEl = $('#tabs');
+const searchEl = $('#searchInput');
+const periodEl = $('#periodFilter');
+const kindEl = $('#kindFilter');
+const scopeEl = $('#scopeFilter');
+
+// ═══════════════════════════════════════════════════════
+// RENDER: TABS & FILTERS
+// ═══════════════════════════════════════════════════════
+function renderTabs(){
+	tabsEl.innerHTML = MODES.map(m=>
+		`<button class="tab ${S.mode===m.id?'active':''}" data-m="${m.id}">${m.icon} ${m.label}</button>`
+	).join('');
+	tabsEl.querySelectorAll('.tab').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
+}
+
+function renderFilters(){
+	periodEl.innerHTML = `<option value="all">All periods</option>`+getPeriods().map(p=>`<option value="${p}">${p}</option>`).join('');
+	periodEl.value = S.period;
+	kindEl.innerHTML = Object.entries(KIND_LABELS).map(([v,l])=>`<option value="${v}">${l}</option>`).join('');
+	kindEl.value = S.kind;
+	scopeEl.innerHTML = `<option value="all">All scopes</option><option value="dates">Dates & chronology</option><option value="people">People</option><option value="ids">Terms / IDs</option><option value="battles">Battles</option><option value="treaties">Treaties & institutions</option>`;
+	scopeEl.value = S.scope;
+	searchEl.value = S.search;
+}
+
+function onFilterChange(){
+	S.flashOrder=[];S.flashIdx=0;S.flashRevealed=false;
+	S.tlRound=[];S.tlChecked=false;
+	S.idItemId=null;S.idRevealed=false;
+	S.quizRound=[];S.quizIdx=0;S.quizScore=0;S.quizAnswered=false;
+	S.recallPool=[];S.recallIdx=0;S.recallSubmitted=false;
+	render();
+}
+periodEl.onchange=e=>{S.period=e.target.value;onFilterChange();};
+kindEl.onchange=e=>{S.kind=e.target.value;onFilterChange();};
+scopeEl.onchange=e=>{S.scope=e.target.value;onFilterChange();};
+searchEl.oninput=e=>{S.search=e.target.value;onFilterChange();};
+
+// ═══════════════════════════════════════════════════════
+// RENDER: SIDEBAR
+// ═══════════════════════════════════════════════════════
+function renderSidebar(){
+	const f = getFiltered();
+	const got = Object.values(S.confidence).filter(v=>v==='got').length;
+	const fuzzy = Object.values(S.confidence).filter(v=>v==='fuzzy').length;
+	const miss = Object.values(S.confidence).filter(v=>v==='miss').length;
+	const rated = got+fuzzy+miss;
+	const total = DATA.length;
+	const pct = total?Math.round(got/total*100):0;
+
+	sidebarEl.innerHTML = `
+		<div class="panel">
+			<h3>Confidence Tracker</h3>
+			<div style="font-size:.85rem;color:var(--text-2);margin-bottom:10px;">Rate items in Flashcards or Date Recall to track your progress.</div>
+			<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;text-align:center;margin-bottom:10px;">
+				<div class="card" style="padding:8px;"><div style="color:var(--green);font-weight:700;font-size:1.2rem;">${got}</div><div class="dim" style="font-size:.75rem;">Solid</div></div>
+				<div class="card" style="padding:8px;"><div style="color:var(--orange);font-weight:700;font-size:1.2rem;">${fuzzy}</div><div class="dim" style="font-size:.75rem;">Fuzzy</div></div>
+				<div class="card" style="padding:8px;"><div style="color:var(--red);font-weight:700;font-size:1.2rem;">${miss}</div><div class="dim" style="font-size:.75rem;">Missed</div></div>
+			</div>
+			<div style="font-size:.82rem;color:var(--text-3);">Mastery: ${pct}% (${got}/${total})</div>
+			<div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>
+			${rated>0?`<button class="btn" style="width:100%;margin-top:10px;font-size:.82rem;justify-content:center;" onclick="S.confidence={};render();">Reset tracking</button>`:''}
+		</div>
+		<div class="panel">
+			<h3>Current Filter</h3>
+			<div style="font-size:.85rem;">
+				<div><span class="dim">Period:</span> ${S.period==='all'?'All':S.period}</div>
+				<div><span class="dim">Type:</span> ${KIND_LABELS[S.kind]}</div>
+				<div><span class="dim">Matching:</span> ${f.length} items</div>
+			</div>
+		</div>
+		<div class="panel">
+			<h3>Cluster Years</h3>
+			<div style="font-size:.85rem;color:var(--text-2);">
+				These dates cluster multiple events — know them as packages, not isolated facts.
+			</div>
+			<div class="gap-sm" style="margin-top:8px;">
+				<div class="card" style="padding:8px 12px;"><span class="chip gold" style="margin-right:6px;">480</span> Thermopylae · Salamis · Himera</div>
+				<div class="card" style="padding:8px 12px;"><span class="chip gold" style="margin-right:6px;">479</span> Plataea · Mycale</div>
+				<div class="card" style="padding:8px 12px;"><span class="chip gold" style="margin-right:6px;">405</span> Aegospotami · The Thirty</div>
+				<div class="card" style="padding:8px 12px;"><span class="chip gold" style="margin-right:6px;">338</span> Chaeronea · League of Corinth</div>
+				<div class="card" style="padding:8px 12px;"><span class="chip gold" style="margin-right:6px;">331</span> Alexandria · Gaugamela</div>
+			</div>
+		</div>
+	`;
+}
+
+// ═══════════════════════════════════════════════════════
+// MODE SWITCHING
+// ═══════════════════════════════════════════════════════
+function setMode(id){
+	S.mode=id;
+	if(id==='flashcards'&&!S.flashOrder.length) refreshFlash();
+	if(id==='timeline') newTimeline();
+	if(id==='ids') newId();
+	if(id==='people'){const p=getPeoplePool();S.personId=p[0]?.id||null;}
+	if(id==='quiz') newQuiz();
+	if(id==='recall') newRecallRound();
+	render();
+}
+
+// ═══════════════════════════════════════════════════════
+// FLASHCARDS
+// ═══════════════════════════════════════════════════════
+function refreshFlash(){
+	S.flashOrder=shuffle(getFiltered().map(i=>i.id));
+	S.flashIdx=0;S.flashRevealed=false;
+}
+function getFlashItem(){
+	if(!S.flashOrder.length) refreshFlash();
+	return DATA.find(i=>i.id===S.flashOrder[S.flashIdx])||getFiltered()[0];
+}
+function nextFlash(d=1){
+	const t=S.flashOrder.length||getFiltered().length;
+	if(!t) return;
+	S.flashIdx=(S.flashIdx+d+t)%t;
+	S.flashRevealed=false;
+	renderMain();
+}
+function rateFlash(level){
+	const item=getFlashItem();
+	if(item) S.confidence[item.id]=level;
+	nextFlash(1);
+	renderSidebar();
+}
+
+function renderFlashcards(){
+	const pool=getFiltered();
+	if(!pool.length){mainEl.innerHTML=`<h2>Flashcards</h2><div class="card">No items match filters.</div>`;return;}
+	if(!S.flashOrder.length||S.flashOrder.some(id=>!pool.find(i=>i.id===id))) refreshFlash();
+	const item=getFlashItem();
+	if(!item) return;
+	const conf=S.confidence[item.id];
+	const confDot=conf?({got:'🟢',fuzzy:'🟡',miss:'🔴'}[conf]):'';
+
+	mainEl.innerHTML=`
+		<h2>Flashcards</h2>
+		<p class="subtitle">Try to recall date, context, and significance before revealing. Then rate yourself honestly.</p>
+		<div class="card flashcard-face">
+			<div>
+				<div class="meta">
+					<span class="chip">${KIND_LABELS[item.kind]||item.kind}</span>
+					<span class="chip">${item.period}</span>
+					<span class="chip">${S.flashIdx+1} / ${S.flashOrder.length}</span>
+					${confDot?`<span style="font-size:.9rem">${confDot}</span>`:''}
+				</div>
+				<div class="flash-term">${item.title}</div>
+				<div class="flash-prompt">${S.flashRevealed?'':'What date? What happened? Why does it matter?'}</div>
+				${S.flashRevealed?`
+					<div class="flash-answer">
+						<div><strong>Date:</strong> ${item.date}</div>
+						<div style="margin-top:8px;"><strong>What:</strong> ${item.summary}</div>
+						<div style="margin-top:8px;"><strong>Why:</strong> ${item.importance}</div>
+						${item.people?.length?`<div style="margin-top:8px;"><strong>People:</strong> ${item.people.join(', ')}</div>`:''}
+						${item.places?.length?`<div style="margin-top:8px;"><strong>Places:</strong> ${item.places.join(', ')}</div>`:''}
+					</div>
+					<div class="confidence-row">
+						<button class="conf-btn miss" onclick="rateFlash('miss')">Missed it</button>
+						<button class="conf-btn fuzzy" onclick="rateFlash('fuzzy')">Fuzzy</button>
+						<button class="conf-btn got" onclick="rateFlash('got')">Got it</button>
+					</div>
+				`:''}
+			</div>
+		</div>
+		<div class="btn-row" style="margin-top:12px;">
+			<button class="btn primary" onclick="S.flashRevealed=!S.flashRevealed;renderMain();">${S.flashRevealed?'Hide':'Reveal'} <span class="kbd">Space</span></button>
+			<button class="btn" onclick="nextFlash(-1)">← Prev <span class="kbd">←</span></button>
+			<button class="btn" onclick="nextFlash(1)">Next → <span class="kbd">→</span></button>
+			<button class="btn" onclick="refreshFlash();renderMain();">Reshuffle</button>
+		</div>
+	`;
+}
+
+// ═══════════════════════════════════════════════════════
+// DATE RECALL (NEW MODE - Type the year)
+// ═══════════════════════════════════════════════════════
+function newRecallRound(){
+	const pool=getFiltered().filter(i=>i.kind!=='period'&&extractYear(i.date)!==null);
+	S.recallPool=shuffle(pool.map(i=>i.id));
+	S.recallIdx=0;S.recallAnswer='';S.recallSubmitted=false;
+	S.recallStats={correct:0,close:0,wrong:0,total:0};
+}
+function getRecallItem(){return DATA.find(i=>i.id===S.recallPool[S.recallIdx])||null;}
+function submitRecall(){
+	if(S.recallSubmitted) return;
+	S.recallSubmitted=true;
+	S.recallStats.total++;
+	const item=getRecallItem();
+	const correct=extractYear(item.date);
+	const guess=parseInt(S.recallAnswer);
+	if(isNaN(guess)){/* nothing */}
+	else if(guess===correct) { S.recallStats.correct++; S.confidence[item.id]='got'; }
+	else if(Math.abs(guess-correct)<=25) { S.recallStats.close++; if(!S.confidence[item.id]||S.confidence[item.id]==='miss') S.confidence[item.id]='fuzzy'; }
+	else { S.recallStats.wrong++; S.confidence[item.id]='miss'; }
+	renderMain();renderSidebar();
+}
+function nextRecall(){
+	if(S.recallIdx<S.recallPool.length-1){S.recallIdx++;S.recallAnswer='';S.recallSubmitted=false;renderMain();}
+	else renderRecallEnd();
+}
+function renderRecallEnd(){
+	mainEl.innerHTML=`
+		<h2>Date Recall — Results</h2>
+		<div class="card" style="text-align:center;padding:28px;">
+			<div style="font-family:var(--font-display);font-size:2.2rem;font-weight:700;margin-bottom:8px;">${S.recallStats.correct} exact</div>
+			<div class="muted">${S.recallStats.close} within 25 years · ${S.recallStats.wrong} off · ${S.recallStats.total} attempted</div>
+			<div class="btn-row" style="justify-content:center;margin-top:16px;">
+				<button class="btn primary" onclick="newRecallRound();renderMain();">New round</button>
+				<button class="btn" onclick="setMode('overview')">Back to overview</button>
+			</div>
+		</div>
+	`;
+}
+
+function renderRecall(){
+	if(!S.recallPool.length) newRecallRound();
+	if(!S.recallPool.length){mainEl.innerHTML=`<h2>Date Recall</h2><div class="card">Not enough items with numeric dates in the current filter.</div>`;return;}
+	const item=getRecallItem();
+	if(!item){renderRecallEnd();return;}
+	const correct=extractYear(item.date);
+	const guess=parseInt(S.recallAnswer);
+	let resultHTML='';
+	if(S.recallSubmitted){
+		const diff=isNaN(guess)?9999:Math.abs(guess-correct);
+		let cls='wrong',msg=`The answer is <strong>${item.date}</strong>.`;
+		if(diff===0){cls='correct';msg=`Exactly right — <strong>${item.date}</strong>.`;}
+		else if(diff<=25){cls='close';msg=`Close! You said ${guess}, it's <strong>${item.date}</strong> (off by ${diff}).`;}
+		else{msg=`You said ${isNaN(guess)?'nothing':guess}. The answer is <strong>${item.date}</strong>.`;}
+		resultHTML=`
+			<div class="recall-result ${cls}">${msg}</div>
+			<div style="margin-top:10px;font-size:.9rem;color:var(--text-2);">${item.importance}</div>
+			<button class="btn primary" style="margin-top:14px;" onclick="nextRecall()">Next →</button>
+		`;
+	}
+
+	mainEl.innerHTML=`
+		<h2>Date Recall</h2>
+		<p class="subtitle">Type the year (BCE number only). Exact = solid, within 25 years = fuzzy, further = miss. This is where you find out what you actually know.</p>
+		<div class="card recall-card">
+			<div class="meta" style="justify-content:center;">
+				<span class="chip">${KIND_LABELS[item.kind]||item.kind}</span>
+				<span class="chip">${item.period}</span>
+				<span class="chip">${S.recallIdx+1} / ${S.recallPool.length}</span>
+			</div>
+			<div class="recall-term">${item.title}</div>
+			<div class="muted" style="margin-bottom:16px;font-size:.9rem;">${item.summary}</div>
+			<div>
+				<input type="text" class="recall-input" id="recallInput" placeholder="Year" ${S.recallSubmitted?'disabled':''} value="${S.recallAnswer}" autocomplete="off"/>
+				<div style="font-size:.78rem;color:var(--text-3);margin-top:6px;">Enter the year as a number (e.g. 490 for 490 BCE)</div>
+			</div>
+			${!S.recallSubmitted?`<button class="btn primary" style="margin-top:14px;" onclick="submitRecall()">Check <span class="kbd">Enter</span></button>`:''}
+			${resultHTML}
+		</div>
+		<div class="btn-row" style="margin-top:10px;">
+			<button class="btn" onclick="S.recallSubmitted=true;renderMain();">Skip / reveal</button>
+			<button class="btn" onclick="newRecallRound();renderMain();">New round</button>
+		</div>
+	`;
+	const inp=$('#recallInput');
+	if(inp&&!S.recallSubmitted){
+		inp.focus();
+		inp.oninput=e=>{S.recallAnswer=e.target.value;};
+		inp.onkeydown=e=>{if(e.key==='Enter')submitRecall();};
+	}
+}
+
+// ═══════════════════════════════════════════════════════
+// TIMELINE (FIXED: no dates shown)
+// ═══════════════════════════════════════════════════════
+function newTimeline(){
+	const pool=getTimelinePool();
+	const picked=sample(pool,Math.min(7,pool.length));
+	S.tlAnswer=[...picked].sort((a,b)=>a.sortKey-b.sortKey).map(i=>i.id);
+	S.tlRound=shuffle(picked).map(i=>i.id);
+	S.tlChecked=false;
+}
+function renderTimelineItems(){
+	const list=$('#tlList');if(!list)return;
+	list.innerHTML=S.tlRound.map(id=>{
+		const item=DATA.find(i=>i.id===id);
+		// After checking, show the date; before checking, hide it
+		const dateStr=S.tlChecked?`<div class="tl-date">${item.date}</div>`:'';
+		const cls=S.tlChecked?(S.tlAnswer.indexOf(id)===S.tlRound.indexOf(id)?'correct':'wrong'):'';
+		return `<div class="tl-item ${cls}" draggable="true" data-id="${id}">
+			<strong>${item.title}</strong>
+			<div class="dim" style="font-size:.85rem;margin-top:2px;">${item.period}</div>
+			${dateStr}
+		</div>`;
+	}).join('');
+
+	let dragId=null;
+	list.querySelectorAll('.tl-item').forEach(el=>{
+		el.addEventListener('dragstart',()=>{dragId=el.dataset.id;el.classList.add('dragging');});
+		el.addEventListener('dragend',()=>{el.classList.remove('dragging');});
+		el.addEventListener('dragover',e=>e.preventDefault());
+		el.addEventListener('drop',e=>{
+			e.preventDefault();
+			if(!dragId||S.tlChecked) return;
+			const arr=[...S.tlRound];
+			const fi=arr.indexOf(dragId),ti=arr.indexOf(el.dataset.id);
+			if(fi===-1||ti===-1||fi===ti) return;
+			const [m]=arr.splice(fi,1);arr.splice(ti,0,m);
+			S.tlRound=arr;
+			renderTimelineItems();
+		});
+	});
+
+	// Touch drag support
+	let touchDragId=null, touchClone=null;
+	list.querySelectorAll('.tl-item').forEach(el=>{
+		el.addEventListener('touchstart',e=>{
+			touchDragId=el.dataset.id;
+			el.classList.add('dragging');
+		},{passive:true});
+	});
+	list.addEventListener('touchmove',e=>{e.preventDefault();},{passive:false});
+	list.addEventListener('touchend',e=>{
+		if(!touchDragId||S.tlChecked) return;
+		const touch=e.changedTouches[0];
+		const target=document.elementFromPoint(touch.clientX,touch.clientY)?.closest('.tl-item');
+		if(target&&target.dataset.id!==touchDragId){
+			const arr=[...S.tlRound];
+			const fi=arr.indexOf(touchDragId),ti=arr.indexOf(target.dataset.id);
+			if(fi!==-1&&ti!==-1){const[m]=arr.splice(fi,1);arr.splice(ti,0,m);S.tlRound=arr;}
+		}
+		touchDragId=null;
+		list.querySelectorAll('.tl-item').forEach(x=>x.classList.remove('dragging'));
+		renderTimelineItems();
+	});
+}
+function checkTimeline(){
+	S.tlChecked=true;
+	renderTimelineItems();
+	const correct=S.tlRound.filter((id,i)=>S.tlAnswer[i]===id).length;
+	$('#tlStatus').innerHTML=`<span class="chip gold">${correct} / ${S.tlRound.length} correct</span>`;
+}
+function revealTimeline(){
+	S.tlRound=[...S.tlAnswer];S.tlChecked=true;
+	renderTimelineItems();
+	$('#tlStatus').innerHTML=`<span class="chip gold">Answer revealed</span>`;
+}
+
+function renderTimeline(){
+	const pool=getTimelinePool();
+	if(pool.length<3){mainEl.innerHTML=`<h2>Timeline Builder</h2><div class="card">Not enough items for a timeline round.</div>`;return;}
+	if(!S.tlRound.length) newTimeline();
+
+	mainEl.innerHTML=`
+		<h2>Timeline Builder</h2>
+		<p class="subtitle">Drag these events into chronological order — earliest at top, latest at bottom. No dates shown until you check.</p>
+		<div class="btn-row">
+			<button class="btn primary" onclick="newTimeline();renderMain();">New round</button>
+			<button class="btn" onclick="checkTimeline()">Check order</button>
+			<button class="btn" onclick="revealTimeline()">Reveal</button>
+		</div>
+		<div id="tlStatus" style="margin-top:10px;"></div>
+		<div id="tlList" class="tl-list"></div>
+	`;
+	renderTimelineItems();
+}
+
+// ═══════════════════════════════════════════════════════
+// ID DRILL
+// ═══════════════════════════════════════════════════════
+function newId(){
+	const pool=getFiltered().filter(i=>i.kind!=='period');
+	const p=sample(pool,1)[0];
+	S.idItemId=p?.id||null;S.idRevealed=false;
+}
+function renderIds(){
+	const pool=getFiltered().filter(i=>i.kind!=='period');
+	if(!pool.length){mainEl.innerHTML=`<h2>ID Drill</h2><div class="card">No items match filters.</div>`;return;}
+	if(!S.idItemId||!pool.find(i=>i.id===S.idItemId)) newId();
+	const item=DATA.find(i=>i.id===S.idItemId);
+	if(!item) return;
+	const prompts={
+		person:"Who is this person, what events are they tied to, and when?",
+		event:"What happened, when, and why is it significant?",
+		term:"Define the term and connect it to the right people, institutions, and dates."
+	};
+
+	mainEl.innerHTML=`
+		<h2>ID Drill</h2>
+		<p class="subtitle">Treat this like the short-ID section of the exam. Say your answer out loud, then reveal and compare.</p>
+		<div class="card" style="padding:24px;">
+			<div class="meta">
+				<span class="chip">${KIND_LABELS[item.kind]||item.kind}</span>
+				<span class="chip">${item.period}</span>
+			</div>
+			<div style="font-family:var(--font-display);font-size:2rem;font-weight:700;margin:8px 0 6px;">${item.title}</div>
+			<div class="dim" style="margin-bottom:14px;">${prompts[item.kind]||'Explain this item and its significance.'}</div>
+			${S.idRevealed?`
+				<div class="flash-answer">
+					<div><strong>Date:</strong> ${item.date}</div>
+					<div style="margin-top:8px;"><strong>What:</strong> ${item.summary}</div>
+					<div style="margin-top:8px;"><strong>Why:</strong> ${item.importance}</div>
+					${item.people?.length?`<div style="margin-top:8px;"><strong>People:</strong> ${item.people.join(', ')}</div>`:''}
+					${item.places?.length?`<div style="margin-top:8px;"><strong>Places:</strong> ${item.places.join(', ')}</div>`:''}
+				</div>
+			`:''}
+			<div class="btn-row" style="margin-top:16px;">
+				<button class="btn primary" onclick="S.idRevealed=!S.idRevealed;renderMain();">${S.idRevealed?'Hide':'Reveal'}</button>
+				<button class="btn" onclick="newId();renderMain();">Next random</button>
+			</div>
+		</div>
+	`;
+}
+
+// ═══════════════════════════════════════════════════════
+// PEOPLE INDEX
+// ═══════════════════════════════════════════════════════
+function renderPeople(){
+	const people=getPeoplePool();
+	if(!people.length){mainEl.innerHTML=`<h2>People</h2><div class="card">No people match filters.</div>`;return;}
+	if(!S.personId||!people.find(i=>i.id===S.personId)) S.personId=people[0].id;
+	const person=DATA.find(i=>i.id===S.personId);
+	const related=DATA.filter(i=>i.id!==S.personId&&((i.people||[]).includes(person.title)||i.title===person.title)).sort((a,b)=>a.sortKey-b.sortKey);
+
+	mainEl.innerHTML=`
+		<h2>People Index</h2>
+		<p class="subtitle">Select a person to see their profile and every related event or term.</p>
+		<div class="people-grid">
+			<div class="people-list" id="pList"></div>
+			<div>
+				<div class="card" style="padding:18px;">
+					<div style="font-family:var(--font-display);font-size:1.5rem;font-weight:700;margin-bottom:6px;">${person.title}</div>
+					<div class="meta">
+						<span class="chip">${person.period}</span>
+						<span class="chip">${person.date}</span>
+					</div>
+					<div style="margin-top:8px;"><strong>Who:</strong> ${person.summary}</div>
+					<div style="margin-top:8px;"><strong>Why:</strong> ${person.importance}</div>
+					${person.places?.length?`<div style="margin-top:8px;"><strong>Places:</strong> ${person.places.join(', ')}</div>`:''}
+				</div>
+				${related.length?`
+					<div style="margin-top:14px;">
+						<h3 style="font-family:var(--font-display);font-size:1.1rem;margin-bottom:8px;">Related (${related.length})</h3>
+						<div class="gap-sm">
+							${related.slice(0,12).map(i=>`
+								<div class="card">
+									<div class="meta"><span class="chip">${KIND_LABELS[i.kind]||i.kind}</span><span class="chip">${i.date}</span></div>
+									<strong>${i.title}</strong>
+									<div class="dim" style="margin-top:4px;font-size:.88rem;">${i.importance}</div>
+								</div>
+							`).join('')}
+						</div>
+					</div>
+				`:`<div class="card muted" style="margin-top:14px;">No related items in the current filter.</div>`}
+			</div>
+		</div>
+	`;
+	const pList=$('#pList');
+	pList.innerHTML=people.map(p=>`
+		<button class="person-btn ${p.id===S.personId?'active':''}" data-id="${p.id}">
+			<strong>${p.title}</strong>
+			<div class="dim" style="font-size:.8rem;">${p.period}</div>
+		</button>
+	`).join('');
+	pList.querySelectorAll('.person-btn').forEach(b=>b.onclick=()=>{S.personId=b.dataset.id;renderMain();});
+}
+
+// ═══════════════════════════════════════════════════════
+// QUIZ (IMPROVED: better question types)
+// ═══════════════════════════════════════════════════════
+function newQuiz(){
+	const pool=getFiltered();
+	const questions=[];
+	const datePool=pool.filter(i=>i.date&&i.kind!=='person');
+	const personPool=pool.filter(i=>(i.people||[]).length>0);
+	const allPeople=uniq(DATA.filter(i=>i.kind==='person').map(i=>i.title));
+
+	// Q type: which came first?
+	function makeOrderQ(){
+		const candidates=datePool.filter(i=>typeof i.sortKey==='number');
+		if(candidates.length<2) return null;
+		const [a,b]=sample(candidates,2);
+		if(a.sortKey===b.sortKey) return null;
+		const earlier=a.sortKey<b.sortKey?a:b;
+		return {
+			prompt:`Which came first?`,
+			correct:earlier.title,
+			options:shuffle([a.title,b.title]),
+			explain:`${earlier.title} (${earlier.date}) came before ${(earlier===a?b:a).title} (${(earlier===a?b:a).date}).`
+		};
+	}
+
+	// Q type: which period?
+	function makeSectionQ(item){
+		const opts=uniq([item.period,...sample(uniq(DATA.map(i=>i.period).filter(p=>p!==item.period)),3)]);
+		if(opts.length<2) return null;
+		return {
+			prompt:`Which period does <strong>${item.title}</strong> belong to?`,
+			correct:item.period,
+			options:shuffle(opts),
+			explain:item.summary
+		};
+	}
+
+	// Q type: who is associated?
+	function makePersonQ(item){
+		const name=sample(item.people,1)[0];
+		const dist=sample(allPeople.filter(n=>n!==name),3);
+		if(dist.length<2) return null;
+		return {
+			prompt:`Which person is directly associated with <strong>${item.title}</strong>?`,
+			correct:name,
+			options:shuffle([name,...dist]),
+			explain:item.summary
+		};
+	}
+
+	// Q type: what event matches this description?
+	function makeDescQ(){
+		const candidates=pool.filter(i=>i.kind!=='period'&&i.summary.length>20);
+		if(candidates.length<4) return null;
+		const item=sample(candidates,1)[0];
+		const dist=sample(candidates.filter(i=>i.id!==item.id),3).map(i=>i.title);
+		return {
+			prompt:`Which event/term matches this description? <em style="color:var(--text-2)">"${item.summary}"</em>`,
+			correct:item.title,
+			options:shuffle([item.title,...dist]),
+			explain:`${item.title} — ${item.date}`
+		};
+	}
+
+	// Q type: what place is associated?
+	function makePlaceQ(){
+		const candidates=pool.filter(i=>i.places?.length>0);
+		if(candidates.length<4) return null;
+		const item=sample(candidates,1)[0];
+		const place=sample(item.places,1)[0];
+		const allPlaces=uniq(DATA.flatMap(i=>i.places||[]));
+		const dist=sample(allPlaces.filter(p=>p!==place),3);
+		if(dist.length<2) return null;
+		return {
+			prompt:`Which place is associated with <strong>${item.title}</strong>?`,
+			correct:place,
+			options:shuffle([place,...dist]),
+			explain:`${item.title} (${item.date}) — ${item.summary}`
+		};
+	}
+
+	const gens=[];
+	if(datePool.length>=4) gens.push(makeOrderQ);
+	if(pool.length>=4) gens.push(makeSectionQ,makeDescQ);
+	if(personPool.length>=4&&allPeople.length>=4) gens.push(makePersonQ);
+	if(pool.filter(i=>i.places?.length).length>=4) gens.push(makePlaceQ);
+
+	const base=shuffle(pool).slice(0,10);
+	for(let i=0;i<Math.min(10,base.length);i++){
+		const gen=sample(gens,1)[0];
+		if(!gen) continue;
+		let q;
+		if(gen===makeOrderQ||gen===makeDescQ||gen===makePlaceQ) q=gen();
+		else q=gen(base[i]);
+		if(q&&q.options.length>=2) questions.push(q);
+	}
+	S.quizRound=questions;S.quizIdx=0;S.quizScore=0;S.quizAnswered=false;
+}
+
+function answerQuiz(val,btn){
+	if(S.quizAnswered) return;
+	S.quizAnswered=true;
+	const q=S.quizRound[S.quizIdx];
+	document.querySelectorAll('.opt-btn').forEach(b=>{
+		if(b.dataset.v===q.correct) b.classList.add('correct');
+		else if(b.dataset.v===val) b.classList.add('wrong');
+		b.disabled=true;
+	});
+	if(val===q.correct) S.quizScore++;
+	$('#qExplain').innerHTML=`<div class="card" style="margin-top:12px;"><strong>Answer:</strong> ${q.correct}<div class="muted" style="margin-top:6px;">${q.explain}</div></div>`;
+	$('#qNext').classList.remove('hidden');
+}
+
+function nextQuiz(){
+	if(S.quizIdx<S.quizRound.length-1){S.quizIdx++;S.quizAnswered=false;renderMain();}
+	else{
+		mainEl.innerHTML=`
+			<h2>Quiz Complete</h2>
+			<div class="card" style="text-align:center;padding:28px;">
+				<div style="font-family:var(--font-display);font-size:2.5rem;font-weight:700;color:var(--accent);">${S.quizScore} / ${S.quizRound.length}</div>
+				<div class="muted" style="margin-top:6px;">from the current filter</div>
+				<div class="btn-row" style="justify-content:center;margin-top:16px;">
+					<button class="btn primary" onclick="newQuiz();renderMain();">New quiz</button>
+					<button class="btn" onclick="setMode('overview')">Overview</button>
+				</div>
+			</div>
+		`;
+	}
+}
+
+function renderQuiz(){
+	if(!S.quizRound.length) newQuiz();
+	if(!S.quizRound.length){mainEl.innerHTML=`<h2>Quiz</h2><div class="card">Not enough material for a quiz.</div>`;return;}
+	const q=S.quizRound[S.quizIdx];
+	mainEl.innerHTML=`
+		<h2>Quiz</h2>
+		<p class="subtitle">Multiple choice — includes ordering, identification, and association questions.</p>
+		<div class="card" style="padding:20px;">
+			<div class="meta">
+				<span class="chip">Q${S.quizIdx+1} / ${S.quizRound.length}</span>
+				<span class="chip">Score: ${S.quizScore}</span>
+			</div>
+			<div class="quiz-q">${q.prompt}</div>
+			<div class="quiz-opts">
+				${q.options.map(o=>`<button class="opt-btn" data-v="${o.replace(/"/g,'&quot;')}">${o}</button>`).join('')}
+			</div>
+			<div id="qExplain"></div>
+			<button id="qNext" class="btn primary hidden" style="margin-top:12px;" onclick="nextQuiz()">Next →</button>
+		</div>
+	`;
+	document.querySelectorAll('.opt-btn').forEach(b=>b.onclick=()=>answerQuiz(b.dataset.v,b));
+}
+
+// ═══════════════════════════════════════════════════════
+// OVERVIEW
+// ═══════════════════════════════════════════════════════
+function renderOverview(){
+	const f=getFiltered();
+	const sorted=[...f].sort((a,b)=>a.sortKey-b.sortKey);
+	const events=f.filter(i=>i.kind==='event').length;
+	const people=f.filter(i=>i.kind==='person').length;
+	const terms=f.filter(i=>i.kind==='term').length;
+	const highYield=sorted.filter(i=>['battle','treaty','league','constitution','democracy'].some(t=>i.tags?.includes(t))).slice(0,8);
+
+	mainEl.innerHTML=`
+		<h2>Overview</h2>
+		<p class="subtitle">Bird's-eye view of the material in the current filter.</p>
+		<div class="kpis">
+			<div class="kpi"><div class="n">${f.length}</div><div class="l">Items</div></div>
+			<div class="kpi"><div class="n">${events}</div><div class="l">Events</div></div>
+			<div class="kpi"><div class="n">${people}</div><div class="l">People</div></div>
+			<div class="kpi"><div class="n">${terms}</div><div class="l">Terms</div></div>
+		</div>
+		${highYield.length?`
+			<h3 style="font-family:var(--font-display);margin-top:18px;margin-bottom:10px;">High-Yield Items</h3>
+			<div class="gap-sm">
+				${highYield.map(i=>`
+					<div class="card">
+						<div class="meta"><span class="chip">${KIND_LABELS[i.kind]||i.kind}</span><span class="chip">${i.date}</span><span class="chip">${i.period}</span></div>
+						<strong>${i.title}</strong>
+						<div class="muted" style="margin-top:4px;font-size:.9rem;">${i.importance}</div>
+					</div>
+				`).join('')}
+			</div>
+		`:''}
+		<h3 style="font-family:var(--font-display);margin-top:18px;margin-bottom:10px;">All Items (${Math.min(f.length,20)} of ${f.length})</h3>
+		<div class="gap-sm">
+			${sorted.slice(0,20).map(i=>`
+				<div class="card">
+					<div class="meta"><span class="chip">${KIND_LABELS[i.kind]||i.kind}</span><span class="chip">${i.date}</span><span class="chip">${i.period}</span></div>
+					<strong>${i.title}</strong>
+					<div class="muted" style="margin-top:4px;font-size:.88rem;">${i.summary}</div>
+				</div>
+			`).join('')}
+			${f.length>20?`<div class="card dim">Showing first 20. Use filters to narrow, or switch to another mode for the full set.</div>`:''}
+		</div>
+	`;
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN RENDER
+// ═══════════════════════════════════════════════════════
+function renderMain(){
+	const renderers={overview:renderOverview,flashcards:renderFlashcards,recall:renderRecall,timeline:renderTimeline,ids:renderIds,people:renderPeople,quiz:renderQuiz};
+	(renderers[S.mode]||renderOverview)();
+}
+function render(){
+	renderTabs();renderFilters();renderMain();renderSidebar();
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown',e=>{
+	if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA') return;
+	if(S.mode==='flashcards'){
+		if(e.key===' '||e.key==='Spacebar'){e.preventDefault();S.flashRevealed=!S.flashRevealed;renderMain();}
+		if(e.key==='ArrowRight') nextFlash(1);
+		if(e.key==='ArrowLeft') nextFlash(-1);
+		if(S.flashRevealed){
+			if(e.key==='1') rateFlash('miss');
+			if(e.key==='2') rateFlash('fuzzy');
+			if(e.key==='3') rateFlash('got');
+		}
+	}
+});
+
+render();
+</script>
+</body>
+</html>
